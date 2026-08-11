@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academia CiberSegura Suiche7B - Simulación y Entrenamiento en Ciberseguridad</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo-container" onclick="app.navigateTo('dashboard')">
+      <!-- Logotipo Oficial Suiche7B -->
+      <img src="img/logo-suiche7b.png" alt="Suiche7B Logo" class="brand-logo-header">
+      <span class="logo-badge">v2.0</span>
+    </div>
+
+    <!-- Navegación SPA -->
+    <nav id="main-nav" style="display: none;">
+      <a class="nav-link active" onclick="app.navigateTo('dashboard')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Panel Principal
+      </a>
+      <a class="nav-link" onclick="app.navigateTo('customizer')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Personalizador
+      </a>
+      <!-- Audio Toggle -->
+      <button id="audio-toggle-btn" class="btn btn-secondary" onclick="app.toggleAudio()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+        🔊 Sonido: ON
+      </button>
+    </nav>
+
+    <!-- Widget de Progreso del Usuario -->
+    <div id="user-widget" class="user-status-widget" style="display: none;">
+      <div class="user-level" id="widget-level">Novicio de Seguridad</div>
+      <div class="user-score">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--accent-cyan)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span id="widget-score">0</span> <span style="font-size:0.75rem; color:var(--text-muted)">PTS</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE LA APP -->
+  <main id="app-container">
+
+    <!-- VISTA 1: REGISTRO / BIENVENIDA -->
+    <section id="welcome-view" class="view-section active">
+      <div class="welcome-container">
+        <div class="welcome-logo">
+          <!-- Logotipo Oficial Vertical Suiche7B -->
+          <img src="img/Logo-Suiche-7B-vertical.jpg" alt="Suiche7B Logo" class="brand-logo-welcome">
+        </div>
+        <h1>Academia CiberSegura Suiche7B</h1>
+        <p>Bienvenido a la suite interactiva de simulación de ciberseguridad para el personal no técnico de <strong>Suiche7B</strong>. Supera los 5 módulos interactivos prácticos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
+        
+        <form id="register-form" onsubmit="app.handleRegistration(event)">
+          <div class="input-group">
+            <label for="user-name">Nombre y Apellido</label>
+            <input type="text" id="user-name" class="text-input" placeholder="Ej. Ana Pérez" required>
+          </div>
+          
+          <div class="input-group">
+            <label for="user-dept">Departamento / Área</label>
+            <select id="user-dept" class="select-input" required>
+              <option value="" disabled selected>Selecciona tu área...</option>
+              <option value="Administración">Administración</option>
+              <option value="Finanzas">Finanzas y Contabilidad</option>
+              <option value="Atención al Cliente">Atención al Cliente / Soporte</option>
+              <option value="Operaciones">Operaciones y Canales</option>
+              <option value="Recursos Humanos">Recursos Humanos</option>
+              <option value="Tecnología">Tecnología y Desarrollo</option>
+              <option value="Legal y Cumplimiento">Legal, Cumplimiento y Auditoría</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            Iniciar Entrenamiento
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- VISTA 2: PANEL PRINCIPAL (DASHBOARD) -->
+    <section id="dashboard-view" class="view-section">
+      <div class="hero-banner">
+        <div class="hero-content">
+          <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
+          <p>Tu misión hoy es salvaguardar los sistemas y la información de Suiche7B. Completa la suite de 5 módulos interactivos básicos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
+        </div>
+        <div id="cert-grant-container" style="display:none;">
+          <button class="btn btn-success" onclick="app.showCertificate()">
+            🏆 Reclamar Certificado
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Tarjetas de Juegos -->
+        <div>
+          <h3 class="modules-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Suite de Módulos Activos (100% Básico)
+          </h3>
+          
+          <div class="modules-grid">
+            <!-- Juego 1 -->
+            <div class="game-card" style="--accent-color: var(--primary-light)">
+              <div>
+                <div class="game-icon-wrapper">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
+                <h3>Phishing Detective</h3>
+                <p>Analiza correos simulados cotidianos de la oficina. Identifica pistas en remitentes, enlaces y adjuntos para reportar amenazas a tiempo.</p>
+              </div>
+              <div>
+                <div class="game-meta">
+                  <span class="game-difficulty" style="color: var(--accent-cyan)">
+                    <span class="difficulty-dot"></span> Básico
+                  </span>
+                  <span id="status-phishing" class="game-status-badge status-pending">Pendiente</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPhishingGame()">
+                  Iniciar Módulo
+                </button>
+              </div>
+            </div>
+
+            <!-- Juego 2 -->
+            <div class="game-card" style="--accent-color: var(--accent-green)">
+              <div>
+                <div class="game-icon-wrapper">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                </div>
+                <h3>Oficina Segura (Clean Desk)</h3>
+                <p>Aprende políticas de seguridad física. Clasifica hábitos en el puesto de trabajo como buenas prácticas o infracciones (Post-its con claves, laptops abiertas, etc.).</p>
+              </div>
+              <div>
+                <div class="game-meta">
+                  <span class="game-difficulty" style="color: var(--accent-green)">
+                    <span class="difficulty-dot"></span> Básico
+                  </span>
+                  <span id="status-pci" class="game-status-badge status-pending">Pendiente</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPciGame()">
+                  Iniciar Módulo
+                </button>
+              </div>
+            </div>
+
+            <!-- Juego 3 -->
+            <div class="game-card" style="--accent-color: var(--accent-red-light)">
+              <div>
+                <div class="game-icon-wrapper">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                </div>
+                <h3>Alerta de Vishing y SMS</h3>
+                <p>Simulador táctico de teléfono móvil. Enfrenta llamadas telefónicas (Vishing) y chats de soporte técnico falso (WhatsApp/SMS) interactivos.</p>
+              </div>
+              <div>
+                <div class="game-meta">
+                  <span class="game-difficulty" style="color: var(--accent-red-light)">
+                    <span class="difficulty-dot"></span> Básico
+                  </span>
+                  <span id="status-incident" class="game-status-badge status-pending">Pendiente</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startIncidentGame()">
+                  Iniciar Módulo
+                </button>
+              </div>
+            </div>
+
+            <!-- Juego 4 (¡NUEVO!) -->
+            <div class="game-card" style="--accent-color: var(--accent-cyan)">
+              <div>
+                <div class="game-icon-wrapper">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3>Simulador de Hacking</h3>
+                <p>Escribe una contraseña y ve en tiempo real la simulación visual (efecto Matrix) de cuántos segundos tardarían en descifrarla por fuerza bruta.</p>
+              </div>
+              <div>
+                <div class="game-meta">
+                  <span class="game-difficulty" style="color: var(--accent-cyan)">
+                    <span class="difficulty-dot"></span> Básico
+                  </span>
+                  <span id="status-password" class="game-status-badge status-pending">Pendiente</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPasswordGame()">
+                  Iniciar Módulo
+                </button>
+              </div>
+            </div>
+
+            <!-- Juego 5 (¡NUEVO!) -->
+            <div class="game-card" style="--accent-color: var(--accent-purple)">
+              <div>
+                <div class="game-icon-wrapper">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </div>
+                <h3>Trampas con USB y Dispositivos</h3>
+                <p>Aprende a reaccionar ante memorias USB caídas en la oficina y personas que solicitan conectar celulares o discos desconocidos a tu computadora corporativa.</p>
+              </div>
+              <div>
+                <div class="game-meta">
+                  <span class="game-difficulty" style="color: var(--accent-purple)">
+                    <span class="difficulty-dot"></span> Básico
+                  </span>
+                  <span id="status-usb" class="game-status-badge status-pending">Pendiente</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startUsbGame()">
+                  Iniciar Módulo
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sidebar (Estadísticas y Leaderboard) -->
+        <div class="dashboard-sidebar">
+          <div class="sidebar-panel">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Tus Analíticas
+            </h3>
+            <div class="stat-item">
+              <span class="stat-label">Puntaje Total:</span>
+              <span class="stat-val" id="stats-score" style="color:var(--accent-cyan)">0 PTS</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Módulos Completados:</span>
+              <span class="stat-val" id="stats-modules">0 / 5</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Porcentaje de Éxito:</span>
+              <span class="stat-val" id="stats-accuracy">0%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Nivel de Alerta:</span>
+              <span class="stat-val" id="stats-level-text" style="color:var(--primary-light)">Novicio</span>
+            </div>
+          </div>
+
+          <div class="sidebar-panel">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              Competencia Departamental
+            </h3>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.4;">Ranking promedio de respuestas correctas en la plataforma Suiche7B.</p>
+            <div class="leaderboard-list" id="leaderboard-container">
+              <!-- Cargado dinámicamente -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 3: JUEGO 1 - PHISHING DETECTIVE -->
+    <section id="phishing-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+            ← Volver al Panel
+          </button>
+        </div>
+        <div style="font-family:var(--font-mono); font-size:0.9rem; color:var(--primary-light);">
+          Caso <span id="phishing-case-index">1</span> de <span id="phishing-case-total">3</span>
+        </div>
+      </div>
+
+      <div class="game-layout">
+        <!-- Simulador de Cliente de Correo -->
+        <div class="phishing-screen">
+          <div class="email-client">
+            <div class="email-client-header">
+              <span class="dot-red"></span>
+              <span class="dot-yellow"></span>
+              <span class="dot-green"></span>
+              <span class="email-client-title">Bandeja de Entrada - Inspector de Correo</span>
+            </div>
+            
+            <div class="email-meta-info">
+              <div class="meta-row">
+                <span class="meta-label">De:</span>
+                <span class="meta-value" id="email-from"></span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Para:</span>
+                <span class="meta-value" id="email-to">colaborador@suiche7b.com.ve</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Asunto:</span>
+                <span class="meta-value" id="email-subject" style="font-weight:700;"></span>
+              </div>
+            </div>
+
+            <!-- Cuerpo del Correo / Mensaje -->
+            <div class="email-body" id="email-body-content">
+              <!-- Cargado dinámicamente con inspectables -->
+            </div>
+          </div>
+
+          <!-- Barra de Decisiones -->
+          <div class="decision-bar" id="phishing-actions">
+            <button class="btn btn-danger" onclick="games.phishing.makeDecision(false)">
+              🚨 Reportar como Phishing / Amenaza
+            </button>
+            <button class="btn btn-success" onclick="games.phishing.makeDecision(true)">
+              🛡️ Marcar como Seguro
+            </button>
+          </div>
+
+          <!-- Sección de Retroalimentación de la decisión -->
+          <div class="feedback-overlay" id="phishing-feedback">
+            <div class="feedback-header" id="phishing-feedback-status"></div>
+            <div class="feedback-text" id="phishing-feedback-desc"></div>
+            <div style="text-align:right;">
+              <button class="btn btn-primary" id="phishing-next-btn" onclick="games.phishing.nextCase()">
+                Siguiente Caso →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar de Pistas e Instrucciones -->
+        <div class="inspection-sidebar">
+          <div class="sidebar-panel" style="padding:1.2rem;">
+            <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem;">🔬 Lupa de Hacking Ético</h4>
+            <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">Haz clic sobre las palabras o enlaces <u>subrayados en azul</u> en el correo para analizarlos con tu lupa e identificar anomalías de seguridad.</p>
+          </div>
+
+          <!-- Tarjeta de Pista Activa -->
+          <div class="current-clue-card" id="clue-display-card">
+            <div class="clue-title" id="clue-title-text">Inspección de Enlace/Detalle</div>
+            <div class="clue-text" id="clue-desc-text">Haz clic en cualquier elemento subrayado del correo para revelar información técnica que los atacantes intentan esconder.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 4: JUEGO 2 - OFICINA SEGURA -->
+    <section id="pci-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+          ← Volver al Panel
+        </button>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-green);">Política de Escritorio Limpio (Clean Desk)</span>
+      </div>
+
+      <div class="sidebar-panel" style="margin-bottom:1.5rem;">
+        <h3 style="border-bottom:none; padding-bottom:0; margin-bottom:0.5rem; color:var(--accent-green);">
+          🧹 Auditoría Visual de la Oficina Segura
+        </h3>
+        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5;">
+          ¡La ciberseguridad empieza en el mundo físico! En los pasillos y escritorios de <strong>Suiche7B</strong>, debemos resguardar los datos sensibles. Clasifica cada hábito diario arrastrándolo a la bóveda correcta.
+        </p>
+      </div>
+
+      <div class="pci-grid">
+        <!-- Elementos a organizar -->
+        <div class="pci-source-panel">
+          <h4>📋 Acciones Diarias del Personal</h4>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.2rem;">Arrastra los elementos o usa los botones rápidos para clasificar su impacto en la seguridad.</p>
+          
+          <div class="pci-items-container" id="pci-items-list">
+            <!-- Cargados dinámicamente -->
+          </div>
+          
+          <div id="pci-completion-feedback" class="feedback-overlay">
+            <div class="feedback-header feedback-correct">🧹 Oficina Resguardada</div>
+            <div class="feedback-text" id="pci-completion-text"></div>
+            <button class="btn btn-primary" onclick="app.navigateTo('dashboard')" style="width:100%;">
+              Volver al Panel Principal
+            </button>
+          </div>
+        </div>
+
+        <!-- Bóvedas Destino -->
+        <div class="pci-vaults-container">
+          <!-- Bóveda 1: Buenas prácticas -->
+          <div class="pci-vault" id="vault-safe" ondragover="games.pci.allowDrop(event)" ondrop="games.pci.handleDrop(event, 'safe')">
+            <div class="pci-vault-title vault-safe">
+              🟢 BUENAS PRÁCTICAS (SEGURIDAD ACTIVA)
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Acciones correctas que protegen el entorno físico e intelectual de Suiche7B.</p>
+            <div class="vault-dropped-items" id="vault-safe-items">
+              <!-- Elementos soltados aquí -->
+            </div>
+          </div>
+
+          <!-- Bóveda 2: Riesgos físicos -->
+          <div class="pci-vault" id="vault-forbidden" ondragover="games.pci.allowDrop(event)" ondrop="games.pci.handleDrop(event, 'forbidden')">
+            <div class="pci-vault-title vault-forbidden">
+              🔴 RIESGOS DE SEGURIDAD (INFRACCIONES)
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Acciones descuidadas o malos hábitos que exponen a la empresa a fugas de datos.</p>
+            <div class="vault-dropped-items" id="vault-forbidden-items">
+              <!-- Elementos soltados aquí -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 5: JUEGO 3 - ALERTA DE VISHING Y SMS -->
+    <section id="incident-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+          ← Volver al Panel
+        </button>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-red-light);">Simulador Móvil Corporativo - Ingeniería Social</span>
+      </div>
+
+      <!-- Barra de Métricas del Incidente -->
+      <div class="incident-metrics-bar">
+        <div class="metric-card">
+          <div class="metric-title">Nivel de Atención</div>
+          <div class="metric-value-box">
+            <span id="metric-integrity-text" style="font-weight:700; color:var(--accent-green);">100%</span>
+            <div class="metric-indicator">
+              <div id="metric-integrity-fill" class="metric-fill" style="width:100%; background:var(--accent-green);"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-title">Confianza Corporativa</div>
+          <div class="metric-value-box">
+            <span id="metric-trust-text" style="font-weight:700; color:var(--primary-light);">100%</span>
+            <div class="metric-indicator">
+              <div id="metric-trust-fill" class="metric-fill" style="width:100%; background:var(--primary-light);"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title">Información Resguardada</div>
+          <div class="metric-value-box">
+            <span id="metric-uptime-text" style="font-weight:700; color:var(--accent-cyan);">100%</span>
+            <div class="metric-indicator">
+              <div id="metric-uptime-fill" class="metric-fill" style="width:100%; background:var(--accent-cyan);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consola de Respuesta / Chat Móvil -->
+      <div class="incident-terminal">
+        <div class="terminal-header">
+          <div class="terminal-title">
+            <span class="terminal-pulse"></span>
+            SHIELD::CONVERSACIÓN_SEGURA_MÓVIL
+          </div>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">MONITOREO ACTIVO</span>
+        </div>
+        
+        <!-- Logs de Consola -->
+        <div class="terminal-body" id="incident-terminal-logs">
+          <!-- Chat logs creados aquí -->
+        </div>
+
+        <!-- Narrativa y Opciones de Historia -->
+        <div class="incident-story-box">
+          <div class="story-text" id="incident-story-desc">
+            Cargando simulación móvil...
+          </div>
+          
+          <div class="story-options-container" id="incident-options-list">
+            <!-- Opciones cargadas dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 6: JUEGO 4 - FUERZA BRUTA (HACKING SIMULATOR) -->
+    <section id="password-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+          ← Volver al Panel
+        </button>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-cyan);">Hacking Simulator: Cracking en Vivo</span>
+      </div>
+
+      <div class="password-layout">
+        <!-- Consola de Cracking Virtual -->
+        <div class="cracking-panel">
+          <!-- Canvas de matriz de números -->
+          <canvas id="cracking-canvas"></canvas>
+
+          <div class="cracking-overlay-content">
+            <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.4rem;">
+              SIMULACIÓN::ATAQUE_POR_FUERZA_BRUTA
+            </div>
+
+            <!-- Velocímetro de Cracking -->
+            <div class="cracking-gauge-container">
+              <div class="cracking-speed-value" id="cracking-time-value">Instántaneo</div>
+              <div class="cracking-label-speed" id="cracking-time-label">Tiempo Estimado de Descifrado</div>
+            </div>
+
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:#a7f3d0; background:rgba(16,185,129,0.06); padding:0.6rem; border-radius:6px; border:1px solid rgba(16,185,129,0.15);" id="cracking-status-log">
+              [ESTADO]: Esperando credencial de prueba...
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Entrada de Usuario -->
+        <div class="password-input-meter-box">
+          <h3 style="color:var(--accent-cyan); font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+            🔑 Fortalece tu Contraseña
+          </h3>
+          <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">
+            Escribe contraseñas de prueba a continuación. El simulador de la izquierda mostrará qué tan vulnerable es tu contraseña frente a las supercomputadoras de un cibercriminal.
+          </p>
+
+          <div class="input-group" style="margin-top:0.5rem;">
+            <label for="test-password">Contraseña de Prueba (¡No escribas tu clave real!)</label>
+            <input type="text" id="test-password" class="text-input" placeholder="Escribe aquí tu clave..." style="font-family:var(--font-mono); font-size:1.1rem;" oninput="games.password.evaluatePassword(this.value)">
+          </div>
+
+          <!-- Medidor de fuerza en barras -->
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700; margin-bottom:0.3rem;">
+              <span style="color:var(--text-muted);">Complejidad de Clave:</span>
+              <span id="password-strength-text" style="color:var(--accent-red-light);">Muy Débil ❌</span>
+            </div>
+            <div class="password-strength-grid">
+              <div class="strength-indicator-bar" id="strength-bar-1"></div>
+              <div class="strength-indicator-bar" id="strength-bar-2"></div>
+              <div class="strength-indicator-bar" id="strength-bar-3"></div>
+              <div class="strength-indicator-bar" id="strength-bar-4"></div>
+            </div>
+          </div>
+
+          <!-- Lista de Reglas Seguras -->
+          <div class="password-rule-list">
+            <div class="rule-item" id="rule-length">
+              <span>❌</span> Al menos 10 caracteres
+            </div>
+            <div class="rule-item" id="rule-upper">
+              <span>❌</span> Letras Mayúsculas
+            </div>
+            <div class="rule-item" id="rule-number">
+              <span>❌</span> Números
+            </div>
+            <div class="rule-item" id="rule-symbol">
+              <span>❌</span> Símbolos ($@#%!*)
+            </div>
+          </div>
+
+          <div style="margin-top:0.8rem;">
+            <button id="password-finish-btn" class="btn btn-primary" style="width:100%;" disabled onclick="games.password.finishModule()">
+              Registrar Clave Segura
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 7: JUEGO 5 - TRAMPAS CON USB Y DISPOSITIVOS -->
+    <section id="usb-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+          ← Volver al Panel
+        </button>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-purple);">Seguridad de Dispositivos Externos y USB (Baiting)</span>
+      </div>
+
+      <div class="access-layout">
+        <!-- Panel de Control y Escenario -->
+        <div class="gate-console">
+          <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color:var(--accent-purple); font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+              🔌 Riesgos con Dispositivos USB en Oficina
+            </h3>
+            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--primary-light);" id="usb-case-counter">Caso 1 de 3</span>
+          </div>
+
+          <!-- Escenario Didáctico -->
+          <div>
+            <div style="display:flex; align-items:center; gap:0.6rem; font-weight:700;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Situación Práctica: <span id="usb-scenario-title" style="color:var(--primary-light);">Memoria USB Encontrada</span>
+            </div>
+            
+            <div class="character-speech-bubble">
+              <div class="speech-text" id="usb-scenario-desc">"Encuentras un pendrive en el pasillo..."</div>
+            </div>
+          </div>
+
+          <!-- Opciones de Decisión -->
+          <div style="display:flex; flex-direction:column; gap:0.8rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1.2rem;">
+            <div style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">¿CUÁL ES TU DECISIÓN DE SEGURIDAD?</div>
+            <div style="display:flex; flex-direction:column; gap:0.6rem;" id="usb-options-container">
+              <!-- Botones de decisión dinámicos -->
+            </div>
+          </div>
+
+          <!-- Feedback interactivo -->
+          <div class="feedback-overlay" id="usb-feedback" style="margin-top:1rem;">
+            <div class="feedback-header" id="usb-feedback-status"></div>
+            <div class="feedback-text" id="usb-feedback-desc"></div>
+            <div style="text-align:right; margin-top:1rem;">
+              <button class="btn btn-primary" id="usb-next-btn" onclick="games.usb.nextCase()">
+                Siguiente Caso →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Lateral Informativa -->
+        <div class="inspection-sidebar">
+          <div class="sidebar-panel" style="padding:1.2rem; text-align:center;">
+            <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.4rem; color:var(--accent-purple);">⚠️ Alerta de Seguridad (Baiting)</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Los ciberdelincuentes dejan memorias USB maliciosas con nombres tentadores (ej. <i>Nómina Suiche7B 2026.xlsx</i>) para infectar la red al conectarlas por curiosidad.</p>
+          </div>
+
+          <div class="physical-badge" id="usb-item-card" style="background: rgba(18, 24, 38, 0.95); border:1px solid var(--accent-purple); text-align:center; padding:1.5rem 1rem;">
+            <div style="font-size:2.8rem; margin-bottom:0.5rem;" id="usb-item-icon">💾</div>
+            <div style="font-weight:700; font-size:0.95rem; color:var(--primary-light);" id="usb-item-name">Pendrive 'Nómina 2026'</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;" id="usb-item-location">Hallado en: Pasillo de Ascensores</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 8: PANEL DE PERSONALIZACIÓN -->
+    <section id="customizer-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+          ← Volver al Panel
+        </button>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--primary-light);">Panel de Administración de Hacking Ético</span>
+      </div>
+
+      <div class="customizer-layout">
+        <!-- Menú de Selección -->
+        <div class="customizer-sidebar">
+          <div class="customizer-menu-item active" onclick="customizer.selectTab('phishing', this)">
+            <span>Phishing Detective</span>
+            <small style="color:var(--text-muted); font-size:0.7rem;">Casos de Correo</small>
+          </div>
+          <div class="customizer-menu-item" onclick="customizer.selectTab('pci', this)">
+            <span>Oficina Segura</span>
+            <small style="color:var(--text-muted); font-size:0.7rem;">Hábitos y Riesgos</small>
+          </div>
+          <div class="customizer-menu-item" onclick="customizer.selectTab('incident', this)">
+            <span>Llamadas & SMS</span>
+            <small style="color:var(--text-muted); font-size:0.7rem;">Diálogos de Vishing</small>
+          </div>
+          <div class="customizer-menu-item" onclick="customizer.selectTab('import-export', this)">
+            <span>💾 Importar/Exportar</span>
+            <small style="color:var(--text-muted); font-size:0.7rem;">Respaldos JSON</small>
+          </div>
+        </div>
+
+        <!-- Panel de Edición Principal -->
+        <div class="customizer-main-panel">
+          <div id="customizer-editor-content">
+            <!-- Formulario dinámico según selección -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL FLOTANTE DE CERTIFICADO DE CIBERSEGURIDAD -->
+  <div class="modal-overlay" id="certificate-modal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="app.hideCertificate()">×</button>
+      
+      <!-- Cuadro Imprimible del Diploma -->
+      <div class="certificate-frame">
+        <!-- Logotipo Oficial Suiche7B en Certificado -->
+        <div class="cert-logo-container">
+          <img src="img/logo-suiche7b.png" alt="Suiche7B Logo" class="cert-logo-img">
+        </div>
+        
+        <!-- Sello de Seguridad Físico Premium -->
+        <div class="cert-stamp-container">
+          <img src="img/logo_3d07ed538611b4f71645810870ca3f13_2x.png" alt="Official Seal" class="cert-stamp-img">
+        </div>
+
+        <div class="cert-header">Certificado de Finalización</div>
+        <h2 class="cert-title">ACADEMIA CIBERSEGURA SUICHE7B</h2>
+        
+        <div class="cert-recipient-intro">Otorgado con distinción en Ciberseguridad Financiera a:</div>
+        <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>
+        
+        <div class="cert-body-text">
+          Por haber completado con éxito la Suite Completa de simulaciones en la prevención de Phishing, seguridad física de oficina (Escritorio Limpio), concientización en Vishing/SMS, fortificación de claves y protección contra dispositivos USB desconocidos en la red de <strong>Suiche7B</strong>.
+        </div>
+
+        <div class="cert-signature-row">
+          <div class="signature-block">
+            <div class="sig-line"></div>
+            <div class="sig-name">Gerente de Seguridad de la Información</div>
+            <div class="sig-title">Leonardo Noguera</div>
+          </div>
+          <div class="signature-block">
+            <div class="sig-line"></div>
+            <div class="sig-name">Director de Tecnología</div>
+            <div class="sig-title">Javier Asis</div>
+          </div>
+        </div>
+
+        <div class="cert-code">
+          Código de Verificación Único: <span id="cert-val-code" style="font-family:var(--font-mono); font-weight:700; color:var(--primary-light);">S7B-X9823-SEC</span>
+        </div>
+      </div>
+
+      <!-- Acciones de Diploma -->
+      <div class="cert-actions">
+        <button class="btn btn-secondary" onclick="window.print()">
+          🖨️ Imprimir o Guardar PDF
+        </button>
+        <button class="btn btn-primary" onclick="app.hideCertificate()">
+          Cerrar Ventana
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SISTEMA DE DIÁLOGO PERSONALIZADO DE SEGURIDAD (MODAL DE ALERTA) -->
+  <div class="modal-overlay" id="custom-dialog-modal">
+    <div class="modal-content custom-dialog-content">
+      <div class="dialog-header">
+        <div class="dialog-icon-wrapper" id="dialog-icon-wrapper">
+          <span class="dialog-icon" id="dialog-icon">⚠️</span>
+        </div>
+        <h3 id="dialog-title">Notificación de Seguridad</h3>
+      </div>
+      <div class="dialog-body" id="dialog-message">
+        Mensaje de diálogo corporativo...
+      </div>
+      <div class="dialog-footer" id="dialog-actions">
+        <button class="btn btn-primary" id="dialog-ok-btn">Aceptar</button>
+        <button class="btn btn-secondary" id="dialog-cancel-btn" style="display:none;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS DE LÓGICA -->
+  <script src="games.js"></script>
+  <script src="customizer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
