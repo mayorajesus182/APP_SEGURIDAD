@@ -1,5 +1,5 @@
 /**
- * Academia CiberSegura Suiche7B - Games Data & Interaction Logic
+ * Academia CiberSegura Corporación Suiche 7B - Games Data & Interaction Logic
  * Contiene la lógica para Phishing Detective, Oficina Segura, Alerta de Vishing y SMS, Fuerza Bruta y Trampas con USB/Dispositivos.
  */
 
@@ -16,7 +16,7 @@ class PhishingGame {
         from: "soporte-ti@suiche7b-ve.com",
         subject: "🚨 URGENTE: Bloqueo de cuenta inminente por actualización de seguridad",
         body: `
-          Estimado Colaborador de Suiche7B,
+          Estimado Colaborador de Corporación Suiche 7B,
           <br><br>
           Hemos detectado múltiples intentos de inicio de sesión fallidos en su cuenta corporativa desde una ubicación sospechosa fuera de Venezuela. Para evitar la suspensión preventiva de su cuenta de correo y accesos administrativos, requerimos que verifique sus credenciales de inmediato.
           <br><br>
@@ -30,7 +30,7 @@ class PhishingGame {
           <br>
           <strong>Soporte Técnico Especializado</strong>
           <br>
-          <span class="inspectable" data-clue="sender_clue">Gerencia de Tecnología y Canales Suiche7B</span>
+          <span class="inspectable" data-clue="sender_clue">Dirección Tecnología</span>
         `,
         isSafe: false,
         clues: {
@@ -52,7 +52,7 @@ class PhishingGame {
         from: "facturacion@cantv-ve.net",
         subject: "Cobro Administrativo: Factura Pendiente Mayo 2026 - Conexión Principal",
         body: `
-          Estimado cliente de Suiche7B,
+          Estimado cliente de Corporación Suiche 7B,
           <br><br>
           Le informamos que presenta un saldo vencido en su factura telefónica y de enlace dedicado empresarial correspondiente al período de Mayo 2026. A fin de evitar el corte del servicio interbancario de telecomunicaciones, solicitamos procesar el pago a la brevedad.
           <br><br>
@@ -74,14 +74,14 @@ class PhishingGame {
             isHazard: true
           }
         },
-        explanation: "Este caso es un <strong>Phishing con Software Malicioso (Malware)</strong>. Suiche7B maneja conexiones sensibles con proveedores. Los atacantes lo saben y envían facturas falsas. Si abres el archivo '.zip' e instalas lo que contiene, infectarás tu computadora de la oficina con virus o ransomware que podría propagarse a la red."
+        explanation: "Este caso es un <strong>Phishing con Software Malicioso (Malware)</strong>. Corporación Suiche 7B maneja conexiones sensibles con proveedores. Los atacantes lo saben y envían facturas falsas. Si abres el archivo '.zip' e instalas lo que contiene, infectarás tu computadora de la oficina con virus o ransomware que podría propagarse a la red."
       },
       {
         id: 3,
         from: "talento@suiche7b.com.ve",
         subject: "Convocatoria: Simulacro Anual de Evacuación y Seguridad Física",
         body: `
-          Estimado Equipo de Suiche7B,
+          Estimado Equipo de Corporación Suiche 7B,
           <br><br>
           Como parte de nuestros planes preventivos y normativas de seguridad física industrial, el próximo martes 26 de mayo a las 10:00 AM realizaremos nuestro <strong>Simulacro Anual de Evacuación</strong> en la sede principal de Caracas.
           <br><br>
@@ -95,7 +95,7 @@ class PhishingGame {
           <br><br>
           Saludos,
           <br>
-          <strong>Gerencia de Talento Humano y Seguridad Física</strong>
+          <strong>Gerencia Capital Humano</strong>
         `,
         isSafe: true,
         clues: {
@@ -238,7 +238,7 @@ class PhishingGame {
       app.markModuleCompleted('phishing');
       app.showModalAlert({
         title: '🏆 Módulo Phishing Detective Completado',
-        message: '¡Excelente trabajo! Has analizado todos los correos del simulador con éxito. Has aprendido a identificar dominios suplantados, enlaces dudosos y archivos adjuntos peligrosos en la red de Suiche7B.',
+        message: '¡Excelente trabajo! Has analizado todos los correos del simulador con éxito. Has aprendido a identificar dominios suplantados, enlaces dudosos y archivos adjuntos peligrosos en la red de Corporación Suiche 7B.',
         type: 'success'
       }).then(() => {
         app.navigateTo('dashboard');
@@ -348,7 +348,7 @@ class PciGame {
       app.addPoints(0, false);
       app.showModalAlert({
         title: '⚠️ Alerta de Hábito Inadecuado',
-        message: `La acción <strong>"${item.name}"</strong> representa un riesgo potencial en el espacio físico de Suiche7B.<br><br>Los atacantes aprovechan descuidos en el puesto de trabajo (como post-its con claves o laptops desbloqueadas) para obtener acceso no autorizado.`,
+        message: `La acción <strong>"${item.name}"</strong> representa un riesgo potencial en el espacio físico de Corporación Suiche 7B.<br><br>Los atacantes aprovechan descuidos en el puesto de trabajo (como post-its con claves o laptops desbloqueadas) para obtener acceso no autorizado.`,
         type: 'danger'
       });
     }
@@ -373,7 +373,7 @@ class PciGame {
       Has clasificado todos los hábitos físicos de escritorio con éxito.
       <br><br>
       <strong>Lección Aprendida sobre Escritorio Limpio (Clean Desk):</strong> 
-      En <strong>Suiche7B</strong>, la ciberseguridad empieza en nuestro espacio físico de trabajo. Triturar documentos sensibles, no anotar claves en post-its corporativos, guardar la tarjeta inteligente de acceso y bloquear la computadora con **Win + L** de inmediato previene el espionaje de pasillo u obtención de credenciales no autorizadas.
+      En <strong>Corporación Suiche 7B</strong>, la ciberseguridad empieza en nuestro espacio físico de trabajo. Triturar documentos sensibles, no anotar claves en post-its corporativos, guardar la tarjeta inteligente de acceso y bloquear la computadora con **Win + L** de inmediato previene el espionaje de pasillo u obtención de credenciales no autorizadas.
     `;
   }
 }
@@ -389,14 +389,14 @@ class IncidentGame {
     // Árbol de historia interactiva de Vishing y SMS corporativos
     this.nodes = {
       start: {
-        text: "Es un viernes por la tarde en Suiche7B. Recibes un mensaje de WhatsApp urgente de un número con el imagotipo corporativo: 'Hola, soy Carlos de Soporte TI. Hacemos mantenimiento imprevisto del switch interbancario de Suiche7B. Te llegó un SMS de 6 dígitos para validar tu perfil, por favor reenvíamelo rápido para no suspender tus accesos hoy'. ¿Qué haces?",
+        text: "Es un viernes por la tarde en Corporación Suiche 7B. Recibes un mensaje de WhatsApp urgente de un número con el imagotipo corporativo: 'Hola, soy Carlos de Soporte TI. Hacemos mantenimiento imprevisto del switch interbancario de Corporación Suiche 7B. Te llegó un SMS de 6 dígitos para validar tu perfil, por favor reenvíamelo rápido para no suspender tus accesos hoy'. ¿Qué haces?",
         logs: [
           "14:15:02 - CANAL:: Chat entrante no verificado en WhatsApp Corporativo.",
           "14:15:20 - SISTEMA:: Código de verificación de un solo uso (OTP) enviado por SMS."
         ],
         options: [
           {
-            text: "No compartir el código. Cortar comunicación y reportar de inmediato a la Gerencia de Seguridad.",
+            text: "No compartir el código. Cortar comunicación y reportar de inmediato a la Gerencia Seguridad de la Información.",
             next: "vishing_call",
             points: 40,
             impact: { integrity: 0, trust: 0, uptime: 0 }
@@ -410,20 +410,20 @@ class IncidentGame {
         ]
       },
       whatsapp_hacked: {
-        text: "¡Alerta Crítica! Al entregar el código SMS, el atacante ha clonado tu cuenta de WhatsApp corporativa. Ahora la usa para escribir a tus compañeros pidiéndoles transferencias bancarias de emergencia y claves de accesos a tu nombre. De repente, suena tu teléfono y una voz femenina se identifica como 'Gerente de Finanzas'. ¿Qué haces?",
+        text: "¡Alerta Crítica! Al entregar el código SMS, el atacante ha clonado tu cuenta de WhatsApp corporativa. Ahora la usa para escribir a tus compañeros pidiéndoles transferencias bancarias de emergencia y claves de accesos a tu nombre. De repente, suena tu teléfono y una voz femenina se identifica como 'Directora de Finanzas'. ¿Qué haces?",
         logs: [
           "14:17:15 - ALERTA:: Acceso no autorizado detectado en WhatsApp Web externo.",
           "14:17:50 - MONITOREO:: Campaña de mensajería masiva de fraude iniciada desde tu número."
         ],
         options: [
           {
-            text: "Colgar inmediatamente la llamada telefónica y alertar al departamento de Seguridad y a tus compañeros de que tu cuenta fue comprometida.",
+            text: "Colgar inmediatamente la llamada telefónica y alertar a la Gerencia Seguridad de la Información y a tus compañeros de que tu cuenta fue comprometida.",
             next: "phone_extortion",
             points: 30,
             impact: { trust: -10, uptime: -10 }
           },
           {
-            text: "Seguir las instrucciones telefónicas de la supuesta Gerente de Finanzas de transferir fondos corporativos para 'controlar la contingencia'.",
+            text: "Seguir las instrucciones telefónicas de la supuesta Directora de Finanzas de transferir fondos corporativos para 'controlar la contingencia'.",
             next: "total_crisis",
             points: 0,
             impact: { integrity: -50, trust: -30, uptime: -20 }
@@ -431,20 +431,20 @@ class IncidentGame {
         ]
       },
       vishing_call: {
-        text: "¡Excelente reflejo! Neutralizaste el hackeo del WhatsApp. Sin embargo, a los 5 minutos suena el teléfono fijo de tu oficina. Una voz profesional te dice: 'Hola, habla el Oficial de Cumplimiento de Suiche7B. Estamos en medio de una auditoría extraordinaria y sorpresa de SUDEBAN. Léame las credenciales administrativas o los datos al reverso de su carnet de acceso físico para validar su perfil'. ¿Cuál es tu postura?",
+        text: "¡Excelente reflejo! Neutralizaste el hackeo del WhatsApp. Sin embargo, a los 5 minutos suena el teléfono fijo de tu oficina. Una voz profesional te dice: 'Hola, habla el Oficial de Cumplimiento de Corporación Suiche 7B. Estamos en medio de una auditoría extraordinaria y sorpresa de SUDEBAN. Léame las credenciales administrativas o los datos al reverso de su carnet de acceso físico para validar su perfil'. ¿Cuál es tu postura?",
         logs: [
           "14:18:22 - CANAL:: Llamada de voz externa entrante a teléfono fijo.",
           "14:18:40 - SISTEMA:: Monitoreo preventivo del canal de soporte fijo activo."
         ],
         options: [
           {
-            text: "Rechazar dar cualquier clave o datos del carnet de acceso por teléfono. Solicitarle su extensión interna e informar a la Gerencia de Seguridad.",
+            text: "Rechazar dar cualquier clave o datos del carnet de acceso por teléfono. Solicitarle su extensión interna e informar a la Gerencia Seguridad de la Información.",
             next: "win_secure",
             points: 40,
             impact: { integrity: 0, trust: 0, uptime: 0 }
           },
           {
-            text: "Darle la contraseña e información del carnet para evitar que sancionen a Suiche7B y cooperar con SUDEBAN.",
+            text: "Darle la contraseña e información del carnet para evitar que sancionen a Corporación Suiche 7B y cooperar con SUDEBAN.",
             next: "vishing_compromise",
             points: 0,
             impact: { integrity: -30, trust: -20, uptime: -10 }
@@ -452,14 +452,14 @@ class IncidentGame {
         ]
       },
       phone_extortion: {
-        text: "El atacante se da cuenta de que intentas reportarlo. Tu celular timbra con amenazas: 'Sabemos quién eres, cooperas enviándonos una clave administrativa temporal de Suiche7B o bloquearemos definitivamente todas tus credenciales'. ¿Qué haces?",
+        text: "El atacante se da cuenta de que intentas reportarlo. Tu celular timbra con amenazas: 'Sabemos quién eres, cooperas enviándonos una clave administrativa temporal de Corporación Suiche 7B o bloquearemos definitivamente todas tus credenciales'. ¿Qué haces?",
         logs: [
           "14:20:11 - SEGURIDAD:: Canal de extorsión activo en telefonía móvil.",
           "14:20:40 - ALERTA:: Intento de amedrentamiento psicológico detectado."
         ],
         options: [
           {
-            text: "Mantener la calma, colgar la llamada y reportarlo formalmente de inmediato al Oficial de Seguridad de la Información.",
+            text: "Mantener la calma, colgar la llamada y reportarlo formalmente de inmediato a la Gerencia Seguridad de la Información.",
             next: "win_mitigated",
             points: 30,
             impact: { integrity: 5, trust: 10, uptime: 0 }
@@ -494,7 +494,7 @@ class IncidentGame {
         ]
       },
       win_secure: {
-        text: "¡Felicidades! Has defendido la infraestructura de Suiche7B con éxito absoluto. Al identificar que Soporte TI oficial de Suiche7B jamás solicita códigos SMS, contraseñas ni datos magnéticos de carnet por canales informales (WhatsApp/Llamada), has evitado una brecha crítica.",
+        text: "¡Felicidades! Has defendido la infraestructura de Corporación Suiche 7B con éxito absoluto. Al identificar que Soporte TI oficial de Corporación Suiche 7B jamás solicita códigos SMS, contraseñas ni datos magnéticos de carnet por canales informales (WhatsApp/Llamada), has evitado una brecha crítica.",
         logs: [
           "14:25:00 - OK:: Monitoreo del switch de transacciones estable al 100%.",
           "14:25:20 - REPORTE:: Número telefónico del estafador boletinado al CISO corporativo."
@@ -524,7 +524,7 @@ class IncidentGame {
         ]
       },
       total_crisis: {
-        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante posee accesos administrativos al switch de Suiche7B, sustrajo capital de caja chica virtual y la red enfrenta auditorías de SUDEBAN con penalizaciones de telecomunicación financiera severas.",
+        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante posee accesos administrativos al switch de Corporación Suiche 7B, sustrajo capital de caja chica virtual y la red enfrenta auditorías de SUDEBAN con penalizaciones de telecomunicación financiera severas.",
         logs: [
           "14:35:12 - ERROR:: Pérdida de integridad de accesos en el núcleo central.",
           "14:38:00 - CRÍTICO:: Fuga masiva de confianza en las transacciones interbancarias."
@@ -579,7 +579,7 @@ class IncidentGame {
     if (value >= 75) {
       element.style.background = 'var(--accent-green)';
     } else if (value >= 40) {
-      element.style.background = '#f59e0b'; // Amber
+      element.style.background = '#fbba0a'; // Amber
     } else {
       element.style.background = 'var(--accent-red-light)';
     }
@@ -756,7 +756,7 @@ class PasswordGame {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.ctx.fillStyle = '#00f2fe'; // Neon Cyan
+      this.ctx.fillStyle = '#fbba0a'; // Neon Cyan
       this.ctx.font = `${this.fontSize}px monospace`;
 
       this.columns.forEach(col => {
@@ -829,9 +829,9 @@ class PasswordGame {
       this.matrixSpeed = 4;
     } else if (metCount === 2) {
       strengthText.textContent = 'Débil ⚠️';
-      strengthText.style.color = '#f59e0b'; // Orange
-      bars[0].style.background = '#f59e0b';
-      bars[1].style.background = '#f59e0b';
+      strengthText.style.color = '#fbba0a'; // Orange
+      bars[0].style.background = '#fbba0a';
+      bars[1].style.background = '#fbba0a';
       timeText = '2 minutos ⚠️';
       statusText = '[ESTADO]: Fuerza bruta exitosa usando un diccionario de palabras común.';
       this.matrixSpeed = 2.5;
@@ -894,7 +894,7 @@ class PasswordGame {
     app.markModuleCompleted('password');
     app.showModalAlert({
       title: '🔑 Fortalecimiento de Clave Completado',
-      message: '¡Excelente! Has configurado una contraseña robusta e inquebrantable de prueba. Recuerda aplicar estas mismas reglas de complejidad en todas tus credenciales oficiales de Suiche7B.',
+      message: '¡Excelente! Has configurado una contraseña robusta e inquebrantable de prueba. Recuerda aplicar estas mismas reglas de complejidad en todas tus credenciales oficiales de Corporación Suiche 7B.',
       type: 'success'
     }).then(() => {
       app.navigateTo('dashboard');
@@ -909,8 +909,8 @@ class UsbGame {
 
     this.cases = [
       {
-        scenarioTitle: "Pendrive 'Nómina Suiche7B' en el Pasillo",
-        speech: "\"Vas caminando por el pasillo hacia la cocina o el ascensor y ves tirada en el suelo una memoria USB nueva de 64GB etiquetada con marcador: 'Nómina_Suiche7B_2026.xlsx'. No hay nadie cerca en ese momento.\"",
+        scenarioTitle: "Pendrive 'Nómina Corporación Suiche 7B' en el Pasillo",
+        speech: "\"Vas caminando por el pasillo hacia la cocina o el ascensor y ves tirada en el suelo una memoria USB nueva de 64GB etiquetada con marcador: 'Nómina_Corporación Suiche 7B_2026.xlsx'. No hay nadie cerca en ese momento.\"",
         item: {
           icon: "💾",
           name: "Pendrive 'Nómina 2026'",
@@ -921,7 +921,7 @@ class UsbGame {
           { text: "🟡 Insertarla en tu computadora corporativa para abrir el archivo y buscar el dueño", isCorrect: false },
           { text: "🔴 Formatear la memoria USB en tu PC de oficina para usarla como almacenamiento personal", isCorrect: false }
         ],
-        explanation: "¡Excelente decisión! Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Los ciberdelincuentes colocan nombres llamativos como 'Nómina' o 'Evaluaciones' para tentar al personal a conectarlas. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de Suiche7B sin que te des cuenta."
+        explanation: "¡Excelente decisión! Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Los ciberdelincuentes colocan nombres llamativos como 'Nómina' o 'Evaluaciones' para tentar al personal a conectarlas. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de Corporación Suiche 7B sin que te des cuenta."
       },
       {
         scenarioTitle: "Visitante pidiendo Cargar Celular/PowerBank por USB",
@@ -936,7 +936,7 @@ class UsbGame {
           { text: "🟡 Permitirle conectar su celular a tu puerto USB mientras vigilas la pantalla", isCorrect: false },
           { text: "🔴 Prestarle tu computadora corporativa para que transfiera fotos de su trabajo", isCorrect: false }
         ],
-        explanation: "¡Muy bien pensado! Los teléfonos inteligentes y cables USB modificados pueden ejecutar transferencia de archivos y scripts de exfiltración de datos (Juice Jacking) en el momento en que se conectan a un puerto USB de una computadora corporativa. NUNCA debes conectar dispositivos móviles de terceros a las PC de Suiche7B; siempre debes dirigir a los visitantes a tomacorrientes eléctricos de pared."
+        explanation: "¡Muy bien pensado! Los teléfonos inteligentes y cables USB modificados pueden ejecutar transferencia de archivos y scripts de exfiltración de datos (Juice Jacking) en el momento en que se conectan a un puerto USB de una computadora corporativa. NUNCA debes conectar dispositivos móviles de terceros a las PC de Corporación Suiche 7B; siempre debes dirigir a los visitantes a tomacorrientes eléctricos de pared."
       },
       {
         scenarioTitle: "Disco Duro Externo Olvidado en Sala de Juntas",
@@ -1048,7 +1048,7 @@ class UsbGame {
       app.markModuleCompleted('usb');
       app.showModalAlert({
         title: '🔌 Módulo Dispositivos USB Completado',
-        message: '¡Felicidades! Has completado exitosamente la simulación de protección de dispositivos USB. Aprendiste a evitar trampas de Baiting y proteger los equipos corporativos de Suiche7B.',
+        message: '¡Felicidades! Has completado exitosamente la simulación de protección de dispositivos USB. Aprendiste a evitar trampas de Baiting y proteger los equipos corporativos de Corporación Suiche 7B.',
         type: 'success'
       }).then(() => {
         app.navigateTo('dashboard');

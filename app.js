@@ -1,12 +1,17 @@
 /**
- * Academia CiberSegura Suiche7B - Core App Controller
- * Manejo del Estado Global (SPA), persistencia en LocalStorage y Sintetizador de Audio Web.
+ * Academia CiberSegura Corporación Suiche 7B - Core App Controller (v2.0 Segura)
+ * Manejo del Estado Global (SPA), sincronización con API REST segura en PostgreSQL,
+ * persistencia local resiliente y Sintetizador de Audio Web.
  */
 
 class AppController {
   constructor() {
+    this.apiBaseUrl = '/api/v1';
+    this.isServerOnline = false;
+
     this.state = {
       user: {
+        id: null,
         name: '',
         department: '',
         score: 0,
@@ -27,19 +32,23 @@ class AppController {
 
     this.audioCtx = null;
     this.leaderboardData = [
-      { dept: 'Tecnología y Desarrollo', correctPercent: 92, count: 12 },
-      { dept: 'Operaciones y Canales', correctPercent: 88, count: 18 },
-      { dept: 'Legal y Cumplimiento', correctPercent: 86, count: 6 },
-      { dept: 'Finanzas y Contabilidad', correctPercent: 81, count: 9 },
-      { dept: 'Administración', correctPercent: 78, count: 11 },
-      { dept: 'Atención al Cliente', correctPercent: 75, count: 24 },
-      { dept: 'Recursos Humanos', correctPercent: 72, count: 7 }
+      { dept: 'Dirección Tecnología', correctPercent: 92, count: 12 },
+      { dept: 'Gerencia Operaciones y Servicio al Cliente', correctPercent: 88, count: 18 },
+      { dept: 'Oficial de Cumplimiento', correctPercent: 86, count: 6 },
+      { dept: 'Dirección Finanzas', correctPercent: 81, count: 9 },
+      { dept: 'Presidencia Ejecutiva', correctPercent: 78, count: 11 },
+      { dept: 'Dirección Desarrollo Nuevos Negocios', correctPercent: 75, count: 24 },
+      { dept: 'Gerencia Capital Humano', correctPercent: 72, count: 7 }
     ];
   }
 
-  init() {
+  async init() {
     this.loadState();
     
+    // Comprobar conexión con la API y cargar departamentos / leaderboard desde la BD
+    await this.checkServerConnection();
+    await this.fetchLeaderboardFromDB();
+
     // Si ya existe usuario registrado, saltar directamente al Dashboard
     if (this.state.user.name) {
       this.showMainLayout();
@@ -49,6 +58,21 @@ class AppController {
     }
 
     this.renderLeaderboard();
+  }
+
+  // --- COMPROBACIÓN DE CONEXIÓN CON EL SERVIDOR Y BASE DE DATOS ---
+  async checkServerConnection() {
+    try {
+      const res = await fetch('/health', { method: 'GET', headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        this.isServerOnline = data.status === 'healthy' || data.database === 'connected';
+        console.log(`🛡️ Conexión segura con API y PostgreSQL: ${this.isServerOnline ? 'Activa' : 'Parcial'}`);
+      }
+    } catch (e) {
+      console.warn('⚡ Modo Offline / Sin conexión directa a la API. Usando almacenamiento local seguro.');
+      this.isServerOnline = false;
+    }
   }
 
   // --- NAVEGACIÓN SINGLE PAGE APPLICATION (SPA) ---
@@ -81,32 +105,72 @@ class AppController {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // --- REGISTRO / AUTENTICACIÓN SIMULADA ---
-  handleRegistration(event) {
-    event.preventDefault();
+  // --- REGISTRO / AUTENTICACIÓN SEGURA ---
+  async handleRegistration(event) {
+    if (event) event.preventDefault();
     
     const nameInput = document.getElementById('user-name');
     const deptInput = document.getElementById('user-dept');
 
-    if (!nameInput.value || !deptInput.value) return;
+    if (!nameInput || !deptInput) return;
 
-    this.state.user.name = nameInput.value.trim();
-    this.state.user.department = deptInput.value;
-    this.state.user.score = 0;
-    this.state.user.completedModules = {
-      phishing: false,
-      pci: false,
-      incident: false,
-      password: false,
-      usb: false
-    };
-    this.state.user.attempts = 0;
-    this.state.user.correctAnswers = 0;
-    this.state.user.totalQuestions = 0;
+    const rawName = nameInput.value.trim();
+    const rawDept = deptInput.value.trim();
+
+    if (!rawName || !rawDept) {
+      this.showModalAlert({
+        title: 'Campos Requeridos',
+        message: 'Por favor ingresa tu nombre completo y selecciona tu departamento para continuar.',
+        type: 'warning'
+      });
+      return;
+    }
+
+    // Sanitización básica en cliente
+    const sanitizedName = rawName.replace(/[<>&"']/g, '').substring(0, 100);
+    const sanitizedDept = rawDept.replace(/[<>&"']/g, '').substring(0, 100);
+
+    this.state.user.name = sanitizedName;
+    this.state.user.department = sanitizedDept;
+
+    // Intentar sincronizar con la Base de Datos vía API REST
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: sanitizedName,
+          department: sanitizedDept
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          this.state.user.id = result.data.id;
+          this.state.user.score = result.data.score || 0;
+          this.state.user.correctAnswers = result.data.correctAnswers || 0;
+          this.state.user.totalQuestions = result.data.totalQuestions || 0;
+          if (result.data.completedModules) {
+            this.state.user.completedModules = {
+              ...this.state.user.completedModules,
+              ...result.data.completedModules
+            };
+          }
+          console.log(`✅ Usuario registrado en PostgreSQL con ID: ${result.data.id}`);
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ No se pudo sincronizar el registro con PostgreSQL. Continuando localmente.', err);
+    }
 
     this.saveState();
     this.showMainLayout();
     this.updateUI();
+    await this.fetchLeaderboardFromDB();
     this.renderLeaderboard();
     this.navigateTo('dashboard');
     
@@ -115,13 +179,19 @@ class AppController {
   }
 
   showMainLayout() {
-    document.getElementById('main-nav').style.display = 'flex';
-    document.getElementById('user-widget').style.display = 'flex';
+    const mainNav = document.getElementById('main-nav');
+    const userWidget = document.getElementById('user-widget');
+    if (mainNav) mainNav.style.display = 'flex';
+    if (userWidget) userWidget.style.display = 'flex';
   }
 
   // --- MANEJO DE ESTADO LOCAL ---
   saveState() {
-    localStorage.setItem('s7b_cybershield_state', JSON.stringify(this.state));
+    try {
+      localStorage.setItem('s7b_cybershield_state', JSON.stringify(this.state));
+    } catch (e) {
+      console.error('Error guardando en almacenamiento local:', e);
+    }
   }
 
   loadState() {
@@ -130,7 +200,11 @@ class AppController {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.user && parsed.user.name) {
-          this.state = parsed;
+          this.state = {
+            ...this.state,
+            ...parsed,
+            user: { ...this.state.user, ...parsed.user }
+          };
         }
       } catch (e) {
         console.error('Error cargando el progreso guardado:', e);
@@ -138,39 +212,56 @@ class AppController {
     }
   }
 
-  resetProgress() {
-    this.showModalConfirm({
+  async resetProgress() {
+    const confirmed = await this.showModalConfirm({
       title: '🚨 ¿Reiniciar Todo el Progreso?',
-      message: 'Esta acción borrará todas tus puntuaciones, insignias y módulos completados de la red de Suiche7B de forma permanente. ¿Deseas continuar?',
+      message: 'Esta acción borrará todas tus puntuaciones, insignias y módulos completados de la base de datos de Corporación Suiche 7B de forma permanente. ¿Deseas continuar?',
       type: 'danger'
-    }).then(confirmed => {
-      if (confirmed) {
-        localStorage.removeItem('s7b_cybershield_state');
-        this.state.user = {
-          name: '',
-          department: '',
-          score: 0,
-          completedModules: { 
-            phishing: false, 
-            pci: false, 
-            incident: false, 
-            password: false, 
-            usb: false 
-          },
-          attempts: 0,
-          correctAnswers: 0,
-          totalQuestions: 0
-        };
-        
-        document.getElementById('main-nav').style.display = 'none';
-        document.getElementById('user-widget').style.display = 'none';
-        
-        document.getElementById('user-name').value = '';
-        document.getElementById('user-dept').value = '';
-        
-        this.navigateTo('welcome');
-      }
     });
+
+    if (confirmed) {
+      // Reiniciar en base de datos si tenemos ID
+      if (this.state.user.id) {
+        try {
+          await fetch(`${this.apiBaseUrl}/progress/reset/${this.state.user.id}`, {
+            method: 'POST'
+          });
+        } catch (e) {
+          console.warn('Error reiniciando en servidor:', e);
+        }
+      }
+
+      localStorage.removeItem('s7b_cybershield_state');
+      this.state.user = {
+        id: null,
+        name: '',
+        department: '',
+        score: 0,
+        completedModules: { 
+          phishing: false, 
+          pci: false, 
+          incident: false, 
+          password: false, 
+          usb: false 
+        },
+        attempts: 0,
+        correctAnswers: 0,
+        totalQuestions: 0
+      };
+      
+      const mainNav = document.getElementById('main-nav');
+      const userWidget = document.getElementById('user-widget');
+      if (mainNav) mainNav.style.display = 'none';
+      if (userWidget) userWidget.style.display = 'none';
+      
+      const nameInput = document.getElementById('user-name');
+      const deptInput = document.getElementById('user-dept');
+      if (nameInput) nameInput.value = '';
+      if (deptInput) deptInput.value = '';
+      
+      await this.fetchLeaderboardFromDB();
+      this.navigateTo('welcome');
+    }
   }
 
   // --- ACTUALIZACIONES DE INTERFAZ DE USUARIO ---
@@ -178,16 +269,21 @@ class AppController {
     if (!this.state.user.name) return;
 
     // Nombre en Dashboard
-    document.getElementById('dash-user-name').textContent = this.state.user.name;
+    const nameEl = document.getElementById('dash-user-name');
+    if (nameEl) nameEl.textContent = this.state.user.name;
 
     // Estado en el Widget de la cabecera
-    document.getElementById('widget-score').textContent = this.state.user.score;
+    const widgetScore = document.getElementById('widget-score');
+    if (widgetScore) widgetScore.textContent = this.state.user.score;
     const level = this.getSecurityLevel(this.state.user.score);
-    document.getElementById('widget-level').textContent = level;
+    const widgetLevel = document.getElementById('widget-level');
+    if (widgetLevel) widgetLevel.textContent = level;
 
     // Estado en el Sidebar
-    document.getElementById('stats-score').textContent = `${this.state.user.score} PTS`;
-    document.getElementById('stats-level-text').textContent = level;
+    const statsScore = document.getElementById('stats-score');
+    if (statsScore) statsScore.textContent = `${this.state.user.score} PTS`;
+    const statsLevel = document.getElementById('stats-level-text');
+    if (statsLevel) statsLevel.textContent = level;
 
     // Calcular completados
     let completedCount = 0;
@@ -196,13 +292,16 @@ class AppController {
     if (this.state.user.completedModules.incident) completedCount++;
     if (this.state.user.completedModules.password) completedCount++;
     if (this.state.user.completedModules.usb) completedCount++;
-    document.getElementById('stats-modules').textContent = `${completedCount} / 5`;
+    
+    const statsModules = document.getElementById('stats-modules');
+    if (statsModules) statsModules.textContent = `${completedCount} / 5`;
 
     // Porcentaje de acierto
     const accuracy = this.state.user.totalQuestions > 0 
       ? Math.round((this.state.user.correctAnswers / this.state.user.totalQuestions) * 100)
       : 0;
-    document.getElementById('stats-accuracy').textContent = `${accuracy}%`;
+    const statsAccuracy = document.getElementById('stats-accuracy');
+    if (statsAccuracy) statsAccuracy.textContent = `${accuracy}%`;
 
     // Actualizar badges de estado de tarjetas del dashboard
     this.updateStatusBadge('phishing', this.state.user.completedModules.phishing);
@@ -212,10 +311,13 @@ class AppController {
     this.updateStatusBadge('usb', this.state.user.completedModules.usb);
 
     // Si completó todos los módulos, habilitar botón de certificado
-    if (completedCount === 5) {
-      document.getElementById('cert-grant-container').style.display = 'block';
-    } else {
-      document.getElementById('cert-grant-container').style.display = 'none';
+    const certGrant = document.getElementById('cert-grant-container');
+    if (certGrant) {
+      if (completedCount === 5) {
+        certGrant.style.display = 'block';
+      } else {
+        certGrant.style.display = 'none';
+      }
     }
   }
 
@@ -233,15 +335,15 @@ class AppController {
   }
 
   getSecurityLevel(score) {
-    if (score >= 450) return 'Centinela de Suiche7B (Leyenda)';
+    if (score >= 450) return 'Centinela de Corporación Suiche 7B (Leyenda)';
     if (score >= 350) return 'Guardián de Datos Élite';
     if (score >= 220) return 'Analista de Defensa';
     if (score >= 100) return 'Operador Alerta';
     return 'Novicio de Seguridad';
   }
 
-  // Agregar puntuación al usuario
-  addPoints(points, isCorrectAnswer = true) {
+  // Agregar puntuación al usuario y sincronizar con base de datos
+  async addPoints(points, isCorrectAnswer = true, moduleKey = null) {
     this.state.user.score += points;
     this.state.user.totalQuestions++;
     if (isCorrectAnswer) {
@@ -249,63 +351,131 @@ class AppController {
     }
     this.saveState();
     this.updateUI();
+
+    // Sincronizar con backend si hay sesión
+    if (this.state.user.id && moduleKey) {
+      try {
+        await fetch(`${this.apiBaseUrl}/progress/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: this.state.user.id,
+            moduleKey: moduleKey,
+            scoreEarned: points,
+            isCompleted: this.state.user.completedModules[moduleKey] || false,
+            isCorrectAnswer: isCorrectAnswer
+          })
+        });
+      } catch (err) {
+        console.warn('Error sincronizando puntos con backend:', err);
+      }
+    }
   }
 
-  markModuleCompleted(moduleId) {
+  async markModuleCompleted(moduleId, scoreBonus = 0) {
     this.state.user.completedModules[moduleId] = true;
+    if (scoreBonus > 0) {
+      this.state.user.score += scoreBonus;
+    }
     this.saveState();
     this.updateUI();
-    this.renderLeaderboard(); // Recalcular con el progreso del departamento del usuario
+
+    // Sincronizar módulo completado en PostgreSQL
+    if (this.state.user.id) {
+      try {
+        await fetch(`${this.apiBaseUrl}/progress/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: this.state.user.id,
+            moduleKey: moduleId,
+            scoreEarned: scoreBonus,
+            isCompleted: true,
+            isCorrectAnswer: true
+          })
+        });
+      } catch (err) {
+        console.warn('Error sincronizando módulo completado con PostgreSQL:', err);
+      }
+    }
+
+    await this.fetchLeaderboardFromDB();
+    this.renderLeaderboard();
   }
 
   // --- LÓGICA DE COMPETENCIA DEPARTAMENTAL (LEADERBOARD) ---
+  async fetchLeaderboardFromDB() {
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/stats/leaderboard`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          this.leaderboardData = json.data;
+          this.renderLeaderboard();
+        }
+      }
+    } catch (e) {
+      console.warn('Usando ranking local:', e);
+    }
+  }
+
   renderLeaderboard() {
     const container = document.getElementById('leaderboard-container');
     if (!container) return;
 
-    // Copiar y calcular datos del ranking
     let leaderboard = [...this.leaderboardData];
 
-    // Si el usuario ya está registrado, integrar su desempeño en el promedio de su área
+    // Marcar el departamento del usuario
     if (this.state.user.name && this.state.user.department) {
-      const userDeptName = this.state.user.department;
-      const deptIndex = leaderboard.findIndex(d => d.dept.toLowerCase().includes(userDeptName.substring(0, 5).toLowerCase()));
-      
-      if (deptIndex !== -1) {
-        // Simular que el desempeño del usuario impacta el promedio del departamento
-        const dept = leaderboard[deptIndex];
-        const accuracy = this.state.user.totalQuestions > 0 
-          ? (this.state.user.correctAnswers / this.state.user.totalQuestions) * 100 
-          : 50; // Inicial
-        
-        // Promediar el desempeño histórico con el del usuario actual
-        dept.correctPercent = Math.round((dept.correctPercent * dept.count + accuracy) / (dept.count + 1));
-        dept.count += 1;
-        dept.isUserDept = true;
-      }
+      const userDeptName = this.state.user.department.toLowerCase();
+      leaderboard.forEach(d => {
+        if (d.dept && d.dept.toLowerCase().includes(userDeptName.substring(0, 5))) {
+          d.isUserDept = true;
+        }
+      });
     }
 
     // Ordenar por porcentaje de acierto descendente
-    leaderboard.sort((a, b) => b.correctPercent - a.correctPercent);
+    leaderboard.sort((a, b) => (b.correctPercent || 0) - (a.correctPercent || 0));
 
-    // Renderizar filas
+    // Renderizar filas de forma segura
     container.innerHTML = '';
     leaderboard.forEach((item, index) => {
       const rank = index + 1;
-      let rankClass = `rank-${rank}`;
-      if (rank > 3) rankClass = '';
-
+      let rankClass = rank <= 3 ? `rank-${rank}` : '';
       const isHighlight = item.isUserDept ? 'highlight' : '';
 
-      container.innerHTML += `
-        <div class="leaderboard-item ${isHighlight}">
-          <div class="leaderboard-rank-name">
-            <span class="rank-badge ${rankClass}">${rank}</span>
-            <span class="department-name">${item.dept} ${item.isUserDept ? '<small style="color:var(--accent-cyan); font-weight:700;">(Tu Área)</small>' : ''}</span>
-          </div>
-          <span class="leaderboard-score">${item.correctPercent}%</span>
-        </div>
-      `;
+      const itemDiv = document.createElement('div');
+      itemDiv.className = `leaderboard-item ${isHighlight}`;
+      
+      const rankBadge = document.createElement('span');
+      rankBadge.className = `rank-badge ${rankClass}`;
+      rankBadge.textContent = rank;
+
+      const deptNameSpan = document.createElement('span');
+      deptNameSpan.className = 'department-name';
+      deptNameSpan.textContent = `${item.dept} `;
+
+      if (item.isUserDept) {
+        const tag = document.createElement('small');
+        tag.style.color = 'var(--accent-cyan)';
+        tag.style.fontWeight = '700';
+        tag.textContent = '(Tu Área)';
+        deptNameSpan.appendChild(tag);
+      }
+
+      const leftDiv = document.createElement('div');
+      leftDiv.className = 'leaderboard-rank-name';
+      leftDiv.appendChild(rankBadge);
+      leftDiv.appendChild(deptNameSpan);
+
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'leaderboard-score';
+      scoreSpan.textContent = `${item.correctPercent || 0}%`;
+
+      itemDiv.appendChild(leftDiv);
+      itemDiv.appendChild(scoreSpan);
+      container.appendChild(itemDiv);
     });
   }
 
@@ -333,129 +503,101 @@ class AppController {
     
     try {
       this.initAudio();
-      
       const ctx = this.audioCtx;
       const now = ctx.currentTime;
       
       switch (type) {
         case 'click': {
-          // Un clic corto y futurista de alta frecuencia
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          
           osc.type = 'sine';
           osc.frequency.setValueAtTime(1400, now);
           osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-          
           gain.gain.setValueAtTime(0.04, now);
           gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
-          
           osc.connect(gain);
           gain.connect(ctx.destination);
-          
           osc.start(now);
           osc.stop(now + 0.06);
           break;
         }
         case 'correct': {
-          // Tono ascendente agradable en acordes (Premio)
-          const frequencies = [523.25, 659.25, 783.99, 1046.50]; // Do - Mi - Sol - Do
+          const frequencies = [523.25, 659.25, 783.99, 1046.50];
           frequencies.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             const playTime = now + (idx * 0.08);
-            
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, playTime);
-            
             gain.gain.setValueAtTime(0.0, playTime);
             gain.gain.linearRampToValueAtTime(0.08, playTime + 0.02);
             gain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.25);
-            
             osc.connect(gain);
             gain.connect(ctx.destination);
-            
             osc.start(playTime);
             osc.stop(playTime + 0.35);
           });
           break;
         }
         case 'incorrect': {
-          // Sonido de advertencia o error descendente (Buzzer)
           const osc1 = ctx.createOscillator();
           const osc2 = ctx.createOscillator();
           const gain = ctx.createGain();
-          
           osc1.type = 'sawtooth';
           osc1.frequency.setValueAtTime(180, now);
           osc1.frequency.linearRampToValueAtTime(90, now + 0.35);
-          
           osc2.type = 'sine';
           osc2.frequency.setValueAtTime(185, now);
           osc2.frequency.linearRampToValueAtTime(92, now + 0.35);
-          
           gain.gain.setValueAtTime(0.0, now);
           gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-          
           osc1.connect(gain);
           osc2.connect(gain);
           gain.connect(ctx.destination);
-          
           osc1.start(now);
           osc2.start(now);
-          
           osc1.stop(now + 0.4);
           osc2.stop(now + 0.4);
           break;
         }
         case 'complete': {
-          // Fanfarria triunfal ascendente
           const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
           notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             const time = now + (idx * 0.06);
-            
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, time);
-            
             gain.gain.setValueAtTime(0, time);
             gain.gain.linearRampToValueAtTime(0.06, time + 0.02);
             gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
-            
             osc.connect(gain);
             gain.connect(ctx.destination);
-            
             osc.start(time);
             osc.stop(time + 0.45);
           });
           break;
         }
         case 'incident_alert': {
-          // Alerta cíclica de sirena corta
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          
           osc.type = 'sine';
           osc.frequency.setValueAtTime(600, now);
           osc.frequency.linearRampToValueAtTime(1000, now + 0.15);
           osc.frequency.linearRampToValueAtTime(600, now + 0.3);
-          
           gain.gain.setValueAtTime(0.06, now);
           gain.gain.linearRampToValueAtTime(0.06, now + 0.2);
           gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
-          
           osc.connect(gain);
           gain.connect(ctx.destination);
-          
           osc.start(now);
           osc.stop(now + 0.35);
           break;
         }
       }
     } catch (e) {
-      console.warn('Web Audio no inicializado completamente por políticas del navegador.', e);
+      console.warn('Web Audio no inicializado por el navegador.', e);
     }
   }
 
@@ -463,55 +605,59 @@ class AppController {
   showCertificate() {
     this.playAudio('complete');
     
-    // Inyectar datos en el diploma
-    document.getElementById('cert-recipient').textContent = this.state.user.name;
+    const recipient = document.getElementById('cert-recipient');
+    if (recipient) recipient.textContent = this.state.user.name;
     
-    // Generar código de validación único
-    const hash = btoa(this.state.user.name + this.state.user.score).substring(0, 8).toUpperCase();
-    document.getElementById('cert-val-code').textContent = `S7B-${hash}-SEC`;
+    const hash = btoa(encodeURIComponent(this.state.user.name + (this.state.user.score || 0))).substring(0, 8).toUpperCase();
+    const valCode = document.getElementById('cert-val-code');
+    if (valCode) valCode.textContent = `S7B-${hash}-SEC`;
 
     const modal = document.getElementById('certificate-modal');
-    modal.classList.add('active');
+    if (modal) modal.classList.add('active');
   }
 
   hideCertificate() {
     this.playAudio('click');
     const modal = document.getElementById('certificate-modal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
   }
 
   // --- INICIALIZACIÓN DE JUEGOS ---
   startPhishingGame() {
     this.navigateTo('phishing');
-    games.phishing.init();
+    if (window.games && games.phishing) games.phishing.init();
   }
 
   startPciGame() {
     this.navigateTo('pci');
-    games.pci.init();
+    if (window.games && games.pci) games.pci.init();
   }
 
   startIncidentGame() {
     this.navigateTo('incident');
-    games.incident.init();
+    if (window.games && games.incident) games.incident.init();
   }
 
   startPasswordGame() {
     this.navigateTo('password');
-    games.password.init();
+    if (window.games && games.password) games.password.init();
   }
 
   startUsbGame() {
     this.navigateTo('usb');
-    games.usb.init();
+    if (window.games && games.usb) games.usb.init();
   }
 
-  // --- SISTEMA DE DIÁLOGOS DE SEGURIDAD PERSONALIZADOS (PROMISE-BASED) ---
+  // --- SISTEMA DE DIÁLOGOS DE SEGURIDAD PERSONALIZADOS ---
   showModalAlert(options) {
     const { title = 'Notificación de Seguridad', message = '', type = 'info', callback = null } = options;
     
     return new Promise((resolve) => {
       const modal = document.getElementById('custom-dialog-modal');
+      if (!modal) {
+        alert(message);
+        return resolve(true);
+      }
       const dialogContent = modal.querySelector('.custom-dialog-content');
       const titleEl = document.getElementById('dialog-title');
       const msgEl = document.getElementById('dialog-message');
@@ -519,11 +665,13 @@ class AppController {
       const cancelBtn = document.getElementById('dialog-cancel-btn');
       const iconEl = document.getElementById('dialog-icon');
 
-      titleEl.textContent = title;
-      msgEl.innerHTML = message;
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.innerHTML = message;
       
-      dialogContent.className = 'modal-content custom-dialog-content';
-      dialogContent.classList.add(`dialog-${type}`);
+      if (dialogContent) {
+        dialogContent.className = 'modal-content custom-dialog-content';
+        dialogContent.classList.add(`dialog-${type}`);
+      }
 
       let icon = '⚠️';
       if (type === 'success') {
@@ -539,20 +687,20 @@ class AppController {
         icon = 'ℹ️';
         this.playAudio('click');
       }
-      iconEl.textContent = icon;
+      if (iconEl) iconEl.textContent = icon;
 
-      cancelBtn.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = 'none';
       modal.classList.add('active');
 
       const handleOk = () => {
         this.playAudio('click');
         modal.classList.remove('active');
-        okBtn.removeEventListener('click', handleOk);
+        if (okBtn) okBtn.removeEventListener('click', handleOk);
         if (callback) callback();
         resolve(true);
       };
 
-      okBtn.addEventListener('click', handleOk);
+      if (okBtn) okBtn.addEventListener('click', handleOk);
     });
   }
 
@@ -561,6 +709,9 @@ class AppController {
 
     return new Promise((resolve) => {
       const modal = document.getElementById('custom-dialog-modal');
+      if (!modal) {
+        return resolve(confirm(message));
+      }
       const dialogContent = modal.querySelector('.custom-dialog-content');
       const titleEl = document.getElementById('dialog-title');
       const msgEl = document.getElementById('dialog-message');
@@ -568,26 +719,28 @@ class AppController {
       const cancelBtn = document.getElementById('dialog-cancel-btn');
       const iconEl = document.getElementById('dialog-icon');
 
-      titleEl.textContent = title;
-      msgEl.innerHTML = message;
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.innerHTML = message;
 
-      dialogContent.className = 'modal-content custom-dialog-content';
-      dialogContent.classList.add(`dialog-${type}`);
+      if (dialogContent) {
+        dialogContent.className = 'modal-content custom-dialog-content';
+        dialogContent.classList.add(`dialog-${type}`);
+      }
 
       let icon = '❓';
       if (type === 'danger') icon = '🚨';
       else if (type === 'warning') icon = '⚠️';
-      iconEl.textContent = icon;
+      if (iconEl) iconEl.textContent = icon;
 
-      cancelBtn.style.display = 'block';
+      if (cancelBtn) cancelBtn.style.display = 'block';
 
       this.playAudio('incident_alert');
       modal.classList.add('active');
 
       const cleanup = () => {
         modal.classList.remove('active');
-        okBtn.removeEventListener('click', handleConfirm);
-        cancelBtn.removeEventListener('click', handleCancel);
+        if (okBtn) okBtn.removeEventListener('click', handleConfirm);
+        if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
       };
 
       const handleConfirm = () => {
@@ -602,15 +755,21 @@ class AppController {
         resolve(false);
       };
 
-      okBtn.addEventListener('click', handleConfirm);
-      cancelBtn.addEventListener('click', handleCancel);
+      if (okBtn) okBtn.addEventListener('click', handleConfirm);
+      if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
     });
   }
 }
 
 // Declarar variable global de instancia
-let app;
+let app = new AppController();
+window.app = app;
+
 window.addEventListener('DOMContentLoaded', () => {
-  app = new AppController();
   app.init();
+  document.getElementById('register-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    app.handleRegistration(e);
+  });
 });
+

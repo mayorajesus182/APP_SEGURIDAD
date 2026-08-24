@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia CiberSegura Suiche7B - Simulación y Entrenamiento en Ciberseguridad</title>
+  <title>Academia CiberSegura Corporación Suiche 7B - Simulación y Entrenamiento en Ciberseguridad</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,8 +11,8 @@
 
   <header>
     <div class="logo-container" onclick="app.navigateTo('dashboard')">
-      <!-- Logotipo Oficial Suiche7B -->
-      <img src="img/logo-suiche7b.png" alt="Suiche7B Logo" class="brand-logo-header">
+      <!-- Logotipo Oficial Corporación Suiche 7B -->
+      <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B Logo" class="brand-logo-header">
       <span class="logo-badge">v2.0</span>
     </div>
 
@@ -49,13 +49,13 @@
     <section id="welcome-view" class="view-section active">
       <div class="welcome-container">
         <div class="welcome-logo">
-          <!-- Logotipo Oficial Vertical Suiche7B -->
-          <img src="img/Logo-Suiche-7B-vertical.jpg" alt="Suiche7B Logo" class="brand-logo-welcome">
+          <!-- Logotipo Oficial Vertical Corporación Suiche 7B -->
+          <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B Logo" class="brand-logo-welcome">
         </div>
-        <h1>Academia CiberSegura Suiche7B</h1>
-        <p>Bienvenido a la suite interactiva de simulación de ciberseguridad para el personal no técnico de <strong>Suiche7B</strong>. Supera los 5 módulos interactivos prácticos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
+        <h1>Academia CiberSegura Corporación Suiche 7B</h1>
+        <p>Bienvenido a la suite interactiva de simulación de ciberseguridad para el personal no técnico de <strong>Corporación Suiche 7B</strong>. Supera los 5 módulos interactivos prácticos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
         
-        <form id="register-form" onsubmit="app.handleRegistration(event)">
+        <form id="register-form" onsubmit="event.preventDefault(); if(window.app) window.app.handleRegistration(event); return false;">
           <div class="input-group">
             <label for="user-name">Nombre y Apellido</label>
             <input type="text" id="user-name" class="text-input" placeholder="Ej. Ana Pérez" required>
@@ -65,13 +65,18 @@
             <label for="user-dept">Departamento / Área</label>
             <select id="user-dept" class="select-input" required>
               <option value="" disabled selected>Selecciona tu área...</option>
-              <option value="Administración">Administración</option>
-              <option value="Finanzas">Finanzas y Contabilidad</option>
-              <option value="Atención al Cliente">Atención al Cliente / Soporte</option>
-              <option value="Operaciones">Operaciones y Canales</option>
-              <option value="Recursos Humanos">Recursos Humanos</option>
-              <option value="Tecnología">Tecnología y Desarrollo</option>
-              <option value="Legal y Cumplimiento">Legal, Cumplimiento y Auditoría</option>
+              <option value="Junta Directiva">Junta Directiva</option>
+              <option value="Oficial de Cumplimiento">Oficial de Cumplimiento</option>
+              <option value="Comité de Riesgos">Comité de Riesgos</option>
+              <option value="Presidencia Ejecutiva">Presidencia Ejecutiva</option>
+              <option value="Auditoría de Sistemas">Auditoría de Sistemas</option>
+              <option value="Dirección Desarrollo Nuevos Negocios">Dirección Desarrollo Nuevos Negocios</option>
+              <option value="Dirección Tecnología">Dirección Tecnología</option>
+              <option value="Dirección Finanzas">Dirección Finanzas</option>
+              <option value="Gerencia Gestión Estratégica">Gerencia Gestión Estratégica</option>
+              <option value="Gerencia Seguridad de la Información">Gerencia Seguridad de la Información</option>
+              <option value="Gerencia Operaciones y Servicio al Cliente">Gerencia Operaciones y Servicio al Cliente</option>
+              <option value="Gerencia Capital Humano">Gerencia Capital Humano</option>
             </select>
           </div>
           
@@ -88,7 +93,7 @@
       <div class="hero-banner">
         <div class="hero-content">
           <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
-          <p>Tu misión hoy es salvaguardar los sistemas y la información de Suiche7B. Completa la suite de 5 módulos interactivos básicos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
+          <p>Tu misión hoy es salvaguardar los sistemas y la información de Corporación Suiche 7B. Completa la suite de 5 módulos interactivos básicos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
         </div>
         <div id="cert-grant-container" style="display:none;">
           <button class="btn btn-success" onclick="app.showCertificate()">
@@ -249,7 +254,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
               Competencia Departamental
             </h3>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.4;">Ranking promedio de respuestas correctas en la plataforma Suiche7B.</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.4;">Ranking promedio de respuestas correctas en la plataforma Corporación Suiche 7B.</p>
             <div class="leaderboard-list" id="leaderboard-container">
               <!-- Cargado dinámicamente -->
             </div>
@@ -355,7 +360,7 @@
           🧹 Auditoría Visual de la Oficina Segura
         </h3>
         <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5;">
-          ¡La ciberseguridad empieza en el mundo físico! En los pasillos y escritorios de <strong>Suiche7B</strong>, debemos resguardar los datos sensibles. Clasifica cada hábito diario arrastrándolo a la bóveda correcta.
+          ¡La ciberseguridad empieza en el mundo físico! En los pasillos y escritorios de <strong>Corporación Suiche 7B</strong>, debemos resguardar los datos sensibles. Clasifica cada hábito diario arrastrándolo a la bóveda correcta.
         </p>
       </div>
 
@@ -385,7 +390,7 @@
             <div class="pci-vault-title vault-safe">
               🟢 BUENAS PRÁCTICAS (SEGURIDAD ACTIVA)
             </div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Acciones correctas que protegen el entorno físico e intelectual de Suiche7B.</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Acciones correctas que protegen el entorno físico e intelectual de Corporación Suiche 7B.</p>
             <div class="vault-dropped-items" id="vault-safe-items">
               <!-- Elementos soltados aquí -->
             </div>
@@ -501,7 +506,7 @@
               <div class="cracking-label-speed" id="cracking-time-label">Tiempo Estimado de Descifrado</div>
             </div>
 
-            <div style="font-family:var(--font-mono); font-size:0.75rem; color:#a7f3d0; background:rgba(16,185,129,0.06); padding:0.6rem; border-radius:6px; border:1px solid rgba(16,185,129,0.15);" id="cracking-status-log">
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:#a7f3d0; background:rgba(53,126,50,0.06); padding:0.6rem; border-radius:6px; border:1px solid rgba(53,126,50,0.15);" id="cracking-status-log">
               [ESTADO]: Esperando credencial de prueba...
             </div>
           </div>
@@ -615,7 +620,7 @@
         <div class="inspection-sidebar">
           <div class="sidebar-panel" style="padding:1.2rem; text-align:center;">
             <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.4rem; color:var(--accent-purple);">⚠️ Alerta de Seguridad (Baiting)</h4>
-            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Los ciberdelincuentes dejan memorias USB maliciosas con nombres tentadores (ej. <i>Nómina Suiche7B 2026.xlsx</i>) para infectar la red al conectarlas por curiosidad.</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Los ciberdelincuentes dejan memorias USB maliciosas con nombres tentadores (ej. <i>Nómina Corporación Suiche 7B 2026.xlsx</i>) para infectar la red al conectarlas por curiosidad.</p>
           </div>
 
           <div class="physical-badge" id="usb-item-card" style="background: rgba(18, 24, 38, 0.95); border:1px solid var(--accent-purple); text-align:center; padding:1.5rem 1rem;">
@@ -674,9 +679,9 @@
       
       <!-- Cuadro Imprimible del Diploma -->
       <div class="certificate-frame">
-        <!-- Logotipo Oficial Suiche7B en Certificado -->
+        <!-- Logotipo Oficial Corporación Suiche 7B en Certificado -->
         <div class="cert-logo-container">
-          <img src="img/logo-suiche7b.png" alt="Suiche7B Logo" class="cert-logo-img">
+          <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B Logo" class="cert-logo-img">
         </div>
         
         <!-- Sello de Seguridad Físico Premium -->
@@ -685,13 +690,13 @@
         </div>
 
         <div class="cert-header">Certificado de Finalización</div>
-        <h2 class="cert-title">ACADEMIA CIBERSEGURA SUICHE7B</h2>
+        <h2 class="cert-title">ACADEMIA CIBERSEGURA Corporación Suiche 7B</h2>
         
         <div class="cert-recipient-intro">Otorgado con distinción en Ciberseguridad Financiera a:</div>
         <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>
         
         <div class="cert-body-text">
-          Por haber completado con éxito la Suite Completa de simulaciones en la prevención de Phishing, seguridad física de oficina (Escritorio Limpio), concientización en Vishing/SMS, fortificación de claves y protección contra dispositivos USB desconocidos en la red de <strong>Suiche7B</strong>.
+          Por haber completado con éxito la Suite Completa de simulaciones en la prevención de Phishing, seguridad física de oficina (Escritorio Limpio), concientización en Vishing/SMS, fortificación de claves y protección contra dispositivos USB desconocidos en la red de <strong>Corporación Suiche 7B</strong>.
         </div>
 
         <div class="cert-signature-row">

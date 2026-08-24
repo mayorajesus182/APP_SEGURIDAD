@@ -10,18 +10,18 @@
   --border-hover: rgba(27, 75, 162, 0.45);
   
   /* Colores de Marca y Estados */
-  --primary-blue: #1b4ba2;
-  --primary-glow: #0088ff;
-  --primary-light: #4ea8ff;
+  --primary-blue: #005e9c;
+  --primary-glow: #005e9c;
+  --primary-light: #005e9c;
   
-  --accent-red: #d61a27;
-  --accent-red-glow: #ff2e3b;
-  --accent-red-light: #ff757e;
+  --accent-red: #b60e80;
+  --accent-red-glow: #b60e80;
+  --accent-red-light: #b60e80;
   
-  --accent-cyan: #00f2fe;
-  --accent-green: #2ecc71;
-  --accent-green-glow: #1e7e34;
-  --accent-purple: #b50094; /* Magenta de Marca */
+  --accent-cyan: #fbba0a;
+  --accent-green: #357e32;
+  --accent-green-glow: #357e32;
+  --accent-purple: #b60e80; /* Magenta de Marca */
   
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
@@ -680,8 +680,8 @@ main {
   border-radius: 50%;
 }
 .dot-red { background: #ef4444; }
-.dot-yellow { background: #f59e0b; }
-.dot-green { background: #10b981; }
+.dot-yellow { background: #fbba0a; }
+.dot-green { background: #357e32; }
 
 .email-client-title {
   font-size: 0.8rem;
@@ -938,7 +938,7 @@ main {
 }
 
 .vault-safe { color: var(--accent-green); }
-.vault-restricted { color: #f59e0b; }
+.vault-restricted { color: #fbba0a; }
 .vault-forbidden { color: var(--accent-red-light); }
 
 .vault-dropped-items {
@@ -1249,7 +1249,7 @@ main {
 }
 
 .indicator-weak { background: var(--accent-red); }
-.indicator-medium { background: #f59e0b; }
+.indicator-medium { background: #fbba0a; }
 .indicator-strong { background: var(--primary-light); }
 .indicator-secure { background: var(--accent-green); }
 
@@ -1443,7 +1443,7 @@ main {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #00f2fe, #8a2be2, #39ff14);
+  background: radial-gradient(circle at 30% 30%, #fbba0a, #8a2be2, #39ff14);
   opacity: 0.35;
   border: 1px solid rgba(255,255,255,0.2);
   filter: blur(0.5px);
@@ -1978,7 +1978,7 @@ main {
 
 .dialog-warning .dialog-icon-wrapper {
   background: rgba(245, 158, 11, 0.1);
-  border-color: #f59e0b;
+  border-color: #fbba0a;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
 }
 .dialog-warning .custom-dialog-content {

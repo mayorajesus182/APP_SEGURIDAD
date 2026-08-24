@@ -1,0 +1,9 @@
+tls:
+  certificates:
+    - certFile: /certs/selfsigned.crt
+      keyFile: /certs/selfsigned.key
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/selfsigned.crt
+        keyFile: /certs/selfsigned.key

@@ -1,0 +1,29 @@
+{
+  "name": "academia-cibersegura-suiche7b",
+  "version": "2.0.0",
+  "description": "Plataforma de Entrenamiento y Simulación en Ciberseguridad - Suiche7B",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "keywords": [
+    "cybersecurity",
+    "suiche7b",
+    "training",
+    "gamification",
+    "docker",
+    "security"
+  ],
+  "author": "Suiche7B",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0"
+  }
+}
