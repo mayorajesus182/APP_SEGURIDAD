@@ -12,7 +12,8 @@ const configureHelmet = () => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"], // Permite onclick/onload inline (Helmet pone 'none' por defecto)
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "data:", "blob:"],
