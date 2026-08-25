@@ -83,9 +83,9 @@ class PhishingGame {
         body: `
           Estimado Equipo de Corporación Suiche 7B,
           <br><br>
-          Como parte de nuestros planes preventivos y normativas de seguridad física industrial, el próximo martes 26 de mayo a las 10:00 AM realizaremos nuestro <strong>Simulacro Anual de Evacuación</strong> en la sede principal de Caracas.
+          Como parte de nuestros planes preventivos y normativas de seguridad física industrial, el próximo lunes 28 de septiembre a las 10:00 AM realizaremos nuestro <strong>Simulacro Anual de Evacuación</strong> en las instalaciones de la Corporación.
           <br><br>
-          La participación de todo el personal de Finanzas, Administración y Operaciones es obligatoria para validar nuestros tiempos de respuesta en contingencias.
+          La participación de todo el personal es obligatoria para validar nuestros tiempos de respuesta en contingencias.
           <br><br>
           Para registrar su asistencia previa y conocer los puntos de encuentro seguros asignados a su piso, por favor ingrese a nuestro portal interno HTTPS de autogestión:
           <br>
@@ -105,7 +105,7 @@ class PhishingGame {
             isHazard: false
           }
         },
-        explanation: "Este correo es <strong>SEGURO</strong>. Es una comunicación interna estándar de Recursos Humanos. El remitente utiliza el dominio real de la empresa ('@suiche7b.com.ve'), no genera pánico irracional y el enlace dirige a la intranet segura mediante HTTPS."
+        explanation: "Este correo es <strong>SEGURO</strong>. Es una comunicación interna estándar de Gerencia Capital Humano. El remitente utiliza el dominio real de la empresa ('@suiche7b.com.ve'), no genera pánico irracional y el enlace dirige a la intranet segura mediante HTTPS."
       }
     ];
   }
@@ -389,7 +389,7 @@ class IncidentGame {
     // Árbol de historia interactiva de Vishing y SMS corporativos
     this.nodes = {
       start: {
-        text: "Es un viernes por la tarde en Corporación Suiche 7B. Recibes un mensaje de WhatsApp urgente de un número con el imagotipo corporativo: 'Hola, soy Carlos de Soporte TI. Hacemos mantenimiento imprevisto del switch interbancario de Corporación Suiche 7B. Te llegó un SMS de 6 dígitos para validar tu perfil, por favor reenvíamelo rápido para no suspender tus accesos hoy'. ¿Qué haces?",
+        text: "Es un viernes por la tarde en Corporación Suiche 7B. Recibes un mensaje de WhatsApp urgente de un número con el Logo corporativo: 'Hola, soy Carlos de Plataforma TI. Hacemos mantenimiento imprevisto del Suiche Transaccional de la Corporación Suiche 7B. Te llegó un SMS de 6 dígitos para validar tu perfil, por favor reenvíamelo rápido para no suspender tus accesos hoy'. ¿Qué haces?",
         logs: [
           "14:15:02 - CANAL:: Chat entrante no verificado en WhatsApp Corporativo.",
           "14:15:20 - SISTEMA:: Código de verificación de un solo uso (OTP) enviado por SMS."
@@ -509,7 +509,7 @@ class IncidentGame {
         ]
       },
       win_mitigated: {
-        text: "Mitigación Exitosa. Aunque caíste en la trampa inicial del estafador, tu reporte veloz de seguridad a las gerencias centrales permitió bloquear oportunamente los perfiles de red del switch financiero antes de que se concretaran desvíos monetarios.",
+        text: "Mitigación Exitosa. Aunque caíste en la trampa inicial del estafador, tu reporte veloz de seguridad a las gerencias centrales permitió bloquear oportunamente los perfiles de red del Suiche Transaccional antes de que se concretaran desvíos monetarios.",
         logs: [
           "14:28:10 - MITIGADO:: Intrusión bloqueada a nivel de firewall corporativo.",
           "14:28:40 - SISTEMA:: Credenciales obsoletas desactivadas exitosamente."
@@ -524,7 +524,7 @@ class IncidentGame {
         ]
       },
       total_crisis: {
-        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante posee accesos administrativos al switch de Corporación Suiche 7B, sustrajo capital de caja chica virtual y la red enfrenta auditorías de SUDEBAN con penalizaciones de telecomunicación financiera severas.",
+        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante obtuvo acceso al Suiche Transaccional de la Corporación, comprometiendo la disponibilidad del servicio para los clientes internos. La Gerencia Seguridad de la Información activó el protocolo de respuesta a incidentes, pero los daños ya son cuantificables y requieren un reporte formal con revisión completa de todas tus credenciales corporativas.",
         logs: [
           "14:35:12 - ERROR:: Pérdida de integridad de accesos en el núcleo central.",
           "14:38:00 - CRÍTICO:: Fuga masiva de confianza en las transacciones interbancarias."
@@ -912,14 +912,14 @@ class UsbGame {
         scenarioTitle: "Pendrive 'Nómina Corporación Suiche 7B' en el Pasillo",
         speech: "\"Vas caminando por el pasillo hacia la cocina o el ascensor y ves tirada en el suelo una memoria USB nueva de 64GB etiquetada con marcador: 'Nómina_Corporación Suiche 7B_2026.xlsx'. No hay nadie cerca en ese momento.\"",
         item: {
-          icon: "💾",
+          icon: "🔌",
           name: "Pendrive 'Nómina 2026'",
           location: "Pasillo Principal / Ascensores"
         },
         options: [
           { text: "🟢 Entregarla de inmediato a la Gerencia de Seguridad de la Información o TI sin conectarla", isCorrect: true },
-          { text: "🟡 Insertarla en tu computadora corporativa para abrir el archivo y buscar el dueño", isCorrect: false },
-          { text: "🔴 Formatear la memoria USB en tu PC de oficina para usarla como almacenamiento personal", isCorrect: false }
+          { text: "🟡 Insertarla EN tu computador Corporativo para abrir el archivo y buscar el dueño", isCorrect: false },
+          { text: "🔴 Formatear la memoria USB EN tu computador Corporativo para usarla como almacenamiento personal", isCorrect: false }
         ],
         explanation: "¡Excelente decisión! Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Los ciberdelincuentes colocan nombres llamativos como 'Nómina' o 'Evaluaciones' para tentar al personal a conectarlas. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de Corporación Suiche 7B sin que te des cuenta."
       },
@@ -933,8 +933,8 @@ class UsbGame {
         },
         options: [
           { text: "🟢 Indicarle amablemente un tomacorriente de pared y negarle la conexión a tu puerto USB", isCorrect: true },
-          { text: "🟡 Permitirle conectar su celular a tu puerto USB mientras vigilas la pantalla", isCorrect: false },
-          { text: "🔴 Prestarle tu computadora corporativa para que transfiera fotos de su trabajo", isCorrect: false }
+          { text: "🟡 Permitirle conectar su celular EN tu computador Corporativo mientras vigilas la pantalla", isCorrect: false },
+          { text: "🔴 Prestarle tu computador Corporativo para que transfiera fotos de su trabajo", isCorrect: false }
         ],
         explanation: "¡Muy bien pensado! Los teléfonos inteligentes y cables USB modificados pueden ejecutar transferencia de archivos y scripts de exfiltración de datos (Juice Jacking) en el momento en que se conectan a un puerto USB de una computadora corporativa. NUNCA debes conectar dispositivos móviles de terceros a las PC de Corporación Suiche 7B; siempre debes dirigir a los visitantes a tomacorrientes eléctricos de pared."
       },
@@ -948,7 +948,7 @@ class UsbGame {
         },
         options: [
           { text: "🟢 Notificar a la Gerencia de Seguridad de la Información / Soporte de TI para su resguardo", isCorrect: true },
-          { text: "🟡 Conectarlo a tu laptop corporativa para explorar sus carpetas e identificar a quién pertenece", isCorrect: false },
+          { text: "🟡 Conectarlo EN tu computador Corporativo para explorar sus carpetas e identificar a quién pertenece", isCorrect: false },
           { text: "🔴 Llevarte el disco duro a tu casa para probarlo en tu computadora personal", isCorrect: false }
         ],
         explanation: "¡Respuesta correcta! Nunca debemos inspeccionar archivos de dispositivos de almacenamiento desconocidos por nuestra cuenta. El área de TI y la Gerencia de Seguridad de la Información cuentan con entornos seguros y aislados (Sandbox) para analizar la integridad de estos dispositivos antes de devolverlos a su dueño."
@@ -1022,12 +1022,16 @@ class UsbGame {
       statusEl.className = 'feedback-header feedback-incorrect';
       statusEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        Riesgo de Infección por Malware (0 PTS)
+        Decisión de Riesgo — Revisa la explicación correcta (0 PTS)
       `;
     }
 
+    // Siempre mostrar la explicación educativa con la respuesta correcta
     descEl.innerHTML = `
-      <p style="margin-bottom:0.8rem; font-weight:600; color:white;">Explicación Práctica de Seguridad:</p>
+      <p style="margin-bottom:0.4rem; font-weight:600; color:white;">Explicación Práctica de Seguridad:</p>
+      <p style="margin-bottom:0.6rem; font-size:0.82rem; color:var(--accent-green);">
+        ✅ <strong>La respuesta correcta era:</strong> ${currentCase.options.find(o => o.isCorrect).text}
+      </p>
       ${currentCase.explanation}
     `;
 
@@ -1038,6 +1042,7 @@ class UsbGame {
       nextBtn.textContent = 'Siguiente Caso →';
     }
   }
+
 
   nextCase() {
     app.playAudio('click');
