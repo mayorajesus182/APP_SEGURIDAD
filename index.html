@@ -5,6 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Academia CiberSegura Corporación Suiche 7B - Simulación y Entrenamiento en Ciberseguridad</title>
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Playball&family=Alex+Brush&display=swap"
+    rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -761,49 +766,20 @@
 
   <!-- MODAL FLOTANTE DE CERTIFICADO DE CIBERSEGURIDAD -->
   <div class="modal-overlay" id="certificate-modal">
-    <div class="modal-content">
-      <button class="modal-close-btn" onclick="app.hideCertificate()">×</button>
+    <div class="modal-content cert-modal-wrapper">
+      <button class="modal-close-btn cert-close-btn" onclick="app.hideCertificate()" title="Cerrar">×</button>
 
-      <!-- Cuadro Imprimible del Diploma -->
-      <div class="certificate-frame">
-        <!-- Logotipo Oficial Corporación Suiche 7B en Certificado -->
-        <div class="cert-logo-container">
-          <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B Logo" class="cert-logo-img">
-        </div>
-
-        <!-- Sello de Seguridad Físico Premium -->
-        <div class="cert-stamp-container">
-          <img src="img/logo_3d07ed538611b4f71645810870ca3f13_2x.png" alt="Official Seal" class="cert-stamp-img">
-        </div>
-
-        <div class="cert-header">Certificado de Finalización</div>
-        <h2 class="cert-title">ACADEMIA CIBERSEGURA Corporación Suiche 7B</h2>
-
-        <div class="cert-recipient-intro">Otorgado con distinción en Ciberseguridad Financiera a:</div>
-        <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>
-
-        <div class="cert-body-text">
-          Por haber completado con éxito la Suite Completa de simulaciones en la prevención de Phishing, seguridad
-          física de oficina (Escritorio Limpio), concientización en Vishing/SMS, fortificación de claves y protección
-          contra dispositivos USB desconocidos en la red de <strong>Corporación Suiche 7B</strong>.
-        </div>
-
-        <div class="cert-signature-row">
-          <div class="signature-block">
-            <div class="sig-line"></div>
-            <div class="sig-name">Gerente de Seguridad de la Información</div>
-            <div class="sig-title">Leonardo Noguera</div>
-          </div>
-          <div class="signature-block">
-            <div class="sig-line"></div>
-            <div class="sig-name">Director de Tecnología</div>
-            <div class="sig-title">Javier Asis</div>
-          </div>
-        </div>
-
-        <div class="cert-code">
-          Código de Verificación Único: <span id="cert-val-code"
-            style="font-family:var(--font-mono); font-weight:700; color:var(--primary-light);">S7B-X9823-SEC</span>
+      <!-- Cuadro Imprimible del Diploma Oficial Canva -->
+      <div class="certificate-frame canva-frame">
+        <!-- Plantilla Oficial en Alta Definición exportada de Canva (Página 4) -->
+        <img src="img/canva_cert_p4.png" alt="Certificado Oficial Suiche 7B" class="cert-canva-bg">
+        
+        <!-- Capa de datos dinámicos superpuestos -->
+        <div class="cert-dynamic-overlay">
+          <!-- Nombre del participante ubicado con precisión milimétrica sobre la línea -->
+          <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>
+          <!-- Código único sutil de validación -->
+          <div class="cert-code-stamp" id="cert-val-code">S7B-X9823-SEC</div>
         </div>
       </div>
 

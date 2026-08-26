@@ -612,6 +612,15 @@ class AppController {
     const valCode = document.getElementById('cert-val-code');
     if (valCode) valCode.textContent = `S7B-${hash}-SEC`;
 
+    // Fecha dinámica en español
+    const dateDisplay = document.getElementById('cert-date-display');
+    if (dateDisplay) {
+      const now = new Date();
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      dateDisplay.textContent = `${meses[now.getMonth()]} de ${now.getFullYear()}`;
+    }
+
     const modal = document.getElementById('certificate-modal');
     if (modal) modal.classList.add('active');
   }
