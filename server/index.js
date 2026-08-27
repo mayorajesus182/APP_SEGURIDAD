@@ -1,6 +1,6 @@
 /**
  * Servidor Principal - Academia CiberSegura Corporación Suiche 7B
- * SSL/TLS gestionado por Nginx (academiaSI.suiche7b.com)
+ * SSL/TLS gestionado por Nginx (academiasi.suiche7b.com)
  */
 const express = require('express');
 const http = require('http');
@@ -70,7 +70,7 @@ const server = http.createServer(app).listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
   console.log(`🔒 Academia CiberSegura Corporación Suiche 7B - Servidor Iniciado`);
   console.log(`🌐 Puerto interno: ${PORT} | Modo: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌍 URL Producción: https://academiaSI.suiche7b.com`);
+  console.log(`🌍 URL Producción: https://academiasi.suiche7b.com`);
   console.log(`🛡️  Seguridad: Helmet, CSP, Rate-Limiter, CORS y Nginx activos`);
   console.log(`=======================================================`);
 });
