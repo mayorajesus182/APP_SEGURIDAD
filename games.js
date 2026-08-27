@@ -16,7 +16,7 @@ class PhishingGame {
         from: "soporte-ti@suiche7b-ve.com",
         subject: "🚨 URGENTE: Bloqueo de cuenta inminente por actualización de seguridad",
         body: `
-          Estimado Colaborador de Corporación Suiche 7B,
+          Estimado Colaborador de La Corporación Suiche 7B,
           <br><br>
           Hemos detectado múltiples intentos de inicio de sesión fallidos en su cuenta corporativa desde una ubicación sospechosa fuera de Venezuela. Para evitar la suspensión preventiva de su cuenta de correo y accesos administrativos, requerimos que verifique sus credenciales de inmediato.
           <br><br>
@@ -52,7 +52,7 @@ class PhishingGame {
         from: "facturacion@cantv-ve.net",
         subject: "Cobro Administrativo: Factura Pendiente Mayo 2026 - Conexión Principal",
         body: `
-          Estimado cliente de Corporación Suiche 7B,
+          Estimado cliente de La Corporación Suiche 7B,
           <br><br>
           Le informamos que presenta un saldo vencido en su factura telefónica y de enlace dedicado empresarial correspondiente al período de Mayo 2026. A fin de evitar el corte del servicio interbancario de telecomunicaciones, solicitamos procesar el pago a la brevedad.
           <br><br>
@@ -81,9 +81,9 @@ class PhishingGame {
         from: "talento@suiche7b.com.ve",
         subject: "Convocatoria: Simulacro Anual de Evacuación y Seguridad Física",
         body: `
-          Estimado Equipo de Corporación Suiche 7B,
+          Estimado Equipo de La Corporación Suiche 7B,
           <br><br>
-          Como parte de nuestros planes preventivos y normativas de seguridad física industrial, el próximo lunes 28 de septiembre a las 10:00 AM realizaremos nuestro <strong>Simulacro Anual de Evacuación</strong> en las instalaciones de la Corporación.
+          Como parte de nuestros planes preventivos y normativas de Seguridad y Salud Laboral, el próximo lunes 28 de septiembre a las 10:00 AM realizaremos nuestro <strong>Simulacro Anual de Evacuación</strong> en las instalaciones de la Corporación.
           <br><br>
           La participación de todo el personal es obligatoria para validar nuestros tiempos de respuesta en contingencias.
           <br><br>
@@ -114,7 +114,7 @@ class PhishingGame {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
     this.selectedClueId = null;
-    
+
     // Ocultar feedback
     document.getElementById('phishing-feedback').style.display = 'none';
     document.getElementById('phishing-actions').style.display = 'flex';
@@ -125,16 +125,16 @@ class PhishingGame {
   renderCase() {
     this.hasAnswered = false;
     this.selectedClueId = null;
-    
+
     const currentCase = this.cases[this.currentCaseIndex];
-    
+
     document.getElementById('phishing-case-index').textContent = this.currentCaseIndex + 1;
     document.getElementById('phishing-case-total').textContent = this.cases.length;
-    
+
     document.getElementById('email-from').textContent = currentCase.from;
     document.getElementById('email-subject').textContent = currentCase.subject;
     document.getElementById('email-body-content').innerHTML = currentCase.body;
-    
+
     // Ocultar overlay de feedback
     document.getElementById('phishing-feedback').style.display = 'none';
     document.getElementById('phishing-actions').style.display = 'flex';
@@ -156,10 +156,10 @@ class PhishingGame {
 
   selectClue(clueId) {
     if (!clueId) return;
-    
+
     const currentCase = this.cases[this.currentCaseIndex];
     const clue = currentCase.clues[clueId];
-    
+
     if (!clue) return;
 
     app.playAudio('click');
@@ -238,7 +238,7 @@ class PhishingGame {
       app.markModuleCompleted('phishing');
       app.showModalAlert({
         title: '🏆 Módulo Phishing Detective Completado',
-        message: '¡Excelente trabajo! Has analizado todos los correos del simulador con éxito. Has aprendido a identificar dominios suplantados, enlaces dudosos y archivos adjuntos peligrosos en la red de Corporación Suiche 7B.',
+        message: '¡Excelente trabajo! Has analizado todos los correos del simulador con éxito. Has aprendido a identificar dominios suplantados, enlaces dudosos y archivos adjuntos peligrosos en la red de La Corporación Suiche 7B.',
         type: 'success'
       }).then(() => {
         app.navigateTo('dashboard');
@@ -249,14 +249,72 @@ class PhishingGame {
 
 class PciGame {
   constructor() {
-    // Reemplazado por Oficina Segura (Clean Desk)
+    // Módulo de Oficina Segura y Política de Escritorio Limpio (Clean Desk & Clear Screen)
     this.dataItems = [
-      { id: 'postit', name: 'Post-it con Contraseña', desc: 'Nota física en el monitor con clave secreta de red.', category: 'forbidden' },
-      { id: 'lockpc', name: 'Bloqueo de PC (Win + L)', desc: 'Bloquear sistema al apartarse temporalmente del puesto.', category: 'safe' },
-      { id: 'idcard', name: 'Carnet de Acceso en Mesa', desc: 'Dejar el carnet inteligente sobre la mesa al almorzar.', category: 'forbidden' },
-      { id: 'shredder', name: 'Triturado de Documentos', desc: 'Destrucción inmediata de reportes interbancarios obsoletos.', category: 'safe' },
-      { id: 'usbunknown', name: 'Conectar USB Encontrado', desc: 'Insertar pendrive ajeno para averiguar de quién es.', category: 'forbidden' },
-      { id: 'cloudsave', name: 'Almacenar en Nube Corporativa', desc: 'Guardar archivos de trabajo en SharePoint/OneDrive oficial.', category: 'safe' }
+      {
+        id: 'lockpc',
+        name: 'Bloqueo de Pantalla (Win + L)',
+        desc: 'Bloquear la sesión de la computadora inmediatamente al levantarse o alejarse del puesto de trabajo.',
+        category: 'safe',
+        wrongTitle: '💡 Consejo: Bloqueo de Pantalla',
+        wrongMessage: '¡Atención! Bloquear tu computadora con <strong>Win + L</strong> al ausentarte de tu escritorio NO es una infracción; es una <strong>Buena Práctica Obligatoria (Clear Screen)</strong> en Corporación Suiche 7B para evitar que curiosos o terceros manipulen tu sesión abierta.'
+      },
+      {
+        id: 'postit',
+        name: 'Post-it con Contraseña en el Monitor',
+        desc: 'Pegar notas adhesivas con contraseñas o claves de acceso en el marco de la pantalla, teclado o escritorio.',
+        category: 'forbidden',
+        wrongTitle: '⚠️ Riesgo: Contraseñas a la Vista',
+        wrongMessage: '¡Cuidado! Anotar contraseñas en post-its visibles es una <strong>Infracción Grave</strong> a la Política de Escritorio Limpio. Cualquier persona que transite por tu puesto (compañeros, personal de limpieza o visitantes) puede copiarlas y vulnerar los sistemas.'
+      },
+      {
+        id: 'idcard',
+        name: 'Carnet de Acceso en el Escritorio',
+        desc: 'Dejar el carnet institucional y la tarjeta de proximidad desatendidos sobre la mesa al salir a almorzar.',
+        category: 'forbidden',
+        wrongTitle: '⚠️ Riesgo: Credencial Desatendida',
+        wrongMessage: '¡Atención! Dejar tu carnet institucional sobre la mesa es una <strong>Infracción de Seguridad Física</strong>. Tu carnet es personal e intransferible; un tercero podría usarlo para ingresar a áreas restringidas de La Corporación Suiche 7B.'
+      },
+      {
+        id: 'shredder',
+        name: 'Triturado de Documentos en Papel',
+        desc: 'Destruir en la máquina trituradora los reportes impresos, minutas y papeles de trabajo que ya no se utilicen.',
+        category: 'safe',
+        wrongTitle: '💡 Consejo: Destrucción Segura',
+        wrongMessage: '¡Atención! Triturar documentos con información interna NO es una infracción; es una <strong>Buena Práctica Obligatoria</strong> de Escritorio Limpio para evitar la fuga de datos confidenciales a través de la papelera de reciclaje.'
+      },
+      {
+        id: 'usbunknown',
+        name: 'Conectar USB Encontrado',
+        desc: 'Insertar un pendrive o dispositivo USB ajeno en la laptop corporativa para averiguar de quién es.',
+        category: 'forbidden',
+        wrongTitle: '⚠️ Riesgo: Ataque por USB (Baiting)',
+        wrongMessage: '¡Peligro! Conectar una memoria USB encontrada en tu computadora de trabajo es una <strong>Infracción de Alto Riesgo</strong>. Puede contener malware o scripts automatizados (BadUSB) que infecten de inmediato la red de La Corporación Suiche 7B.'
+      },
+      {
+        id: 'lockdrawer',
+        name: 'Guardar Carpetas y Documentos Bajo Llave',
+        desc: 'Archivar expedientes, libretas de notas, contratos y tokens de acceso en gavetas con llave al ausentarse o terminar la jornada.',
+        category: 'safe',
+        wrongTitle: '💡 Consejo: Resguardo Físico',
+        wrongMessage: '¡Atención! Guardar documentos bajo llave al ausentarte NO es una infracción; es la esencia de la <strong>Política de Escritorio Limpio (Clean Desk)</strong> para garantizar que ninguna información confidencial quede expuesta.'
+      },
+      {
+        id: 'printleft',
+        name: 'Reportes Olvidados en la Impresora',
+        desc: 'Enviar a imprimir listados o documentos con datos corporativos y dejarlos desatendidos en la bandeja de la impresora.',
+        category: 'forbidden',
+        wrongTitle: '⚠️ Riesgo: Impresiones Abandonadas',
+        wrongMessage: '¡Cuidado! Dejar documentos en la bandeja de una impresora compartida es una <strong>Infracción Física</strong>. Siempre debes enviar a imprimir cuando estés listo para retirar las hojas inmediatamente y evitar que otros las lean.'
+      },
+      {
+        id: 'cleandesk_endday',
+        name: 'Mesa Despejada al Finalizar la Jornada',
+        desc: 'Dejar la superficie del escritorio completamente libre de papeles confidenciales, sellos húmedos y medios extraíbles al salir.',
+        category: 'safe',
+        wrongTitle: '💡 Consejo: Mesa Despejada',
+        wrongMessage: '¡Atención! Dejar el escritorio despejado y ordenado al retirarse es una <strong>Buena Práctica Indispensable</strong> de la Política de Escritorio Limpio en Corporación Suiche 7B, protegiendo los activos físicos contra extravíos o miradas no autorizadas.'
+      }
     ];
     this.placedCount = 0;
   }
@@ -315,7 +373,7 @@ class PciGame {
     }
   }
 
-  // Lógica principal de asignación
+  // Lógica principal de asignación y retroalimentación pedagógica
   moveItem(itemId, targetVaultId) {
     const item = this.dataItems.find(i => i.id === itemId);
     const card = document.getElementById(`pci-card-${itemId}`);
@@ -324,7 +382,7 @@ class PciGame {
 
     // Verificar si la respuesta es correcta
     const isCorrect = (item.category === targetVaultId);
-    
+
     // Remover de la lista inicial
     card.remove();
 
@@ -334,22 +392,24 @@ class PciGame {
     const tagClass = isCorrect ? 'style="border-color:rgba(57,255,20,0.3);"' : 'style="border-color:rgba(214,26,39,0.3);"';
 
     vaultContainer.innerHTML += `
-      <div class="dropped-tag" ${tagClass} title="${isCorrect ? 'Clasificación correcta' : 'Alerta de Infracción'}">
+      <div class="dropped-tag" ${tagClass} title="${isCorrect ? 'Clasificación correcta' : 'Clasificación incorrecta'}">
         <span>${statusIcon} ${item.name}</span>
       </div>
     `;
 
-    // Procesar puntos
+    // Procesar puntos y mensaje modal adaptado
     if (isCorrect) {
       app.playAudio('correct');
       app.addPoints(20, true);
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false);
+
+      const modalType = (item.category === 'safe') ? 'info' : 'danger';
       app.showModalAlert({
-        title: '⚠️ Alerta de Hábito Inadecuado',
-        message: `La acción <strong>"${item.name}"</strong> representa un riesgo potencial en el espacio físico de Corporación Suiche 7B.<br><br>Los atacantes aprovechan descuidos en el puesto de trabajo (como post-its con claves o laptops desbloqueadas) para obtener acceso no autorizado.`,
-        type: 'danger'
+        title: item.wrongTitle || 'Aviso de Seguridad',
+        message: item.wrongMessage || `La clasificación de <strong>"${item.name}"</strong> fue incorrecta.<br><br>${item.desc}`,
+        type: modalType
       });
     }
 
@@ -364,16 +424,16 @@ class PciGame {
   finishGame() {
     app.playAudio('complete');
     app.markModuleCompleted('pci');
-    
+
     document.getElementById('pci-items-list').style.display = 'none';
     const feedback = document.getElementById('pci-completion-feedback');
     feedback.style.display = 'block';
-    
+
     document.getElementById('pci-completion-text').innerHTML = `
       Has clasificado todos los hábitos físicos de escritorio con éxito.
       <br><br>
-      <strong>Lección Aprendida sobre Escritorio Limpio (Clean Desk):</strong> 
-      En <strong>Corporación Suiche 7B</strong>, la ciberseguridad empieza en nuestro espacio físico de trabajo. Triturar documentos sensibles, no anotar claves en post-its corporativos, guardar la tarjeta inteligente de acceso y bloquear la computadora con **Win + L** de inmediato previene el espionaje de pasillo u obtención de credenciales no autorizadas.
+      <strong>Lección Aprendida sobre Escritorio Limpio (Clean Desk & Clear Screen):</strong> 
+      En <strong>Corporación Suiche 7B</strong>, la ciberseguridad empieza en nuestro espacio físico de trabajo. Triturar documentos sensibles, no anotar claves en post-its, guardar el carnet de acceso, mantener gavetas bajo llave y bloquear la computadora con <strong>Win + L</strong> de inmediato previenen el espionaje de pasillo, fugas de datos y accesos no autorizados al ecosistema transaccional.
     `;
   }
 }
@@ -431,7 +491,7 @@ class IncidentGame {
         ]
       },
       vishing_call: {
-        text: "¡Excelente reflejo! Neutralizaste el hackeo del WhatsApp. Sin embargo, a los 5 minutos suena el teléfono fijo de tu oficina. Una voz profesional te dice: 'Hola, habla el Oficial de Cumplimiento de Corporación Suiche 7B. Estamos en medio de una auditoría extraordinaria y sorpresa de SUDEBAN. Léame las credenciales administrativas o los datos al reverso de su carnet de acceso físico para validar su perfil'. ¿Cuál es tu postura?",
+        text: "¡Excelente reflejo! Neutralizaste el hackeo del WhatsApp. Sin embargo, a los 5 minutos suena el teléfono fijo de tu oficina. Una voz profesional te dice: 'Hola, habla el Oficial de Cumplimiento de La Corporación Suiche 7B. Estamos en medio de una auditoría extraordinaria y sorpresa de SUDEBAN. Léame las credenciales administrativas o los datos al reverso de su carnet de acceso físico para validar su perfil'. ¿Cuál es tu postura?",
         logs: [
           "14:18:22 - CANAL:: Llamada de voz externa entrante a teléfono fijo.",
           "14:18:40 - SISTEMA:: Monitoreo preventivo del canal de soporte fijo activo."
@@ -452,7 +512,7 @@ class IncidentGame {
         ]
       },
       phone_extortion: {
-        text: "El atacante se da cuenta de que intentas reportarlo. Tu celular timbra con amenazas: 'Sabemos quién eres, cooperas enviándonos una clave administrativa temporal de Corporación Suiche 7B o bloquearemos definitivamente todas tus credenciales'. ¿Qué haces?",
+        text: "El atacante se da cuenta de que intentas reportarlo. Tu celular timbra con amenazas: 'Sabemos quién eres, cooperas enviándonos una clave administrativa temporal de La Corporación Suiche 7B o bloquearemos definitivamente todas tus credenciales'. ¿Qué haces?",
         logs: [
           "14:20:11 - SEGURIDAD:: Canal de extorsión activo en telefonía móvil.",
           "14:20:40 - ALERTA:: Intento de amedrentamiento psicológico detectado."
@@ -473,14 +533,14 @@ class IncidentGame {
         ]
       },
       vishing_compromise: {
-        text: "¡Falla grave! Los datos que entregaste eran para un atacante de Vishing (ingeniería social telefónica). Tu contraseña administrativa ya no funciona y tus compañeros informan que hay transferencias sospechosas en proceso. ¿Cuál es tu respuesta de urgencia?",
+        text: "¡Falla grave! Los datos que entregaste eran para un atacante de Vishing (ingeniería social telefónica). Tus credenciales ya no funcionan y tus compañeros informan que hay transferencias sospechosas en proceso. ¿Cuál es tu respuesta de urgencia?",
         logs: [
           "14:22:12 - CRÍTICO:: Cambio de credencial no autorizado en el portal administrativo.",
           "14:22:35 - ALERTA:: Transacciones transfronterizas anómalas iniciadas."
         ],
         options: [
           {
-            text: "Llamar urgentemente a Seguridad Informática y Soporte TI para bloquear de inmediato tus perfiles de red corporativos.",
+            text: "Llamar urgentemente a Seguridad de la Información para realizar los cambios de contraseña necesarios.",
             next: "win_mitigated",
             points: 30,
             impact: { integrity: 10, trust: 10, uptime: 0 }
@@ -494,7 +554,7 @@ class IncidentGame {
         ]
       },
       win_secure: {
-        text: "¡Felicidades! Has defendido la infraestructura de Corporación Suiche 7B con éxito absoluto. Al identificar que Soporte TI oficial de Corporación Suiche 7B jamás solicita códigos SMS, contraseñas ni datos magnéticos de carnet por canales informales (WhatsApp/Llamada), has evitado una brecha crítica.",
+        text: "¡Felicidades! Has defendido la infraestructura de La Corporación Suiche 7B con éxito absoluto. Al identificar que Plataforma TI oficial de La Corporación Suiche 7B jamás solicita códigos SMS, contraseñas ni datos magnéticos de carnet por canales informales (WhatsApp/Llamada), has evitado una brecha crítica.",
         logs: [
           "14:25:00 - OK:: Monitoreo del switch de transacciones estable al 100%.",
           "14:25:20 - REPORTE:: Número telefónico del estafador boletinado al CISO corporativo."
@@ -509,7 +569,7 @@ class IncidentGame {
         ]
       },
       win_mitigated: {
-        text: "Mitigación Exitosa. Aunque caíste en la trampa inicial del estafador, tu reporte veloz de seguridad a las gerencias centrales permitió bloquear oportunamente los perfiles de red del Suiche Transaccional antes de que se concretaran desvíos monetarios.",
+        text: "Mitigación Exitosa. Aunque caíste en la trampa inicial del estafador, tu reporte veloz de seguridad a las gerencias centrales permitió bloquear oportunamente tus perfiles de red del Suiche Transaccional antes de que se concretaran transacciones.",
         logs: [
           "14:28:10 - MITIGADO:: Intrusión bloqueada a nivel de firewall corporativo.",
           "14:28:40 - SISTEMA:: Credenciales obsoletas desactivadas exitosamente."
@@ -524,7 +584,7 @@ class IncidentGame {
         ]
       },
       total_crisis: {
-        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante obtuvo acceso al Suiche Transaccional de la Corporación, comprometiendo la disponibilidad del servicio para los clientes internos. La Gerencia Seguridad de la Información activó el protocolo de respuesta a incidentes, pero los daños ya son cuantificables y requieren un reporte formal con revisión completa de todas tus credenciales corporativas.",
+        text: "Desastre. Has cedido por completo ante la ingeniería social. El atacante obtuvo acceso al Suiche Transaccional de la Corporación, comprometiendo la disponibilidad del servicio. La Gerencia Seguridad de la Información activó el protocolo de respuesta a incidentes, pero los daños ya son cuantificables y requieren un reporte formal con revisión completa de todas tus credenciales corporativas.",
         logs: [
           "14:35:12 - ERROR:: Pérdida de integridad de accesos en el núcleo central.",
           "14:38:00 - CRÍTICO:: Fuga masiva de confianza en las transacciones interbancarias."
@@ -550,7 +610,7 @@ class IncidentGame {
       uptime: 100
     };
     this.currentNodeId = 'start';
-    
+
     document.getElementById('incident-terminal-logs').innerHTML = '';
     this.updateMetricsUI();
     this.renderNode();
@@ -591,7 +651,7 @@ class IncidentGame {
 
     // Desplegar logs en la terminal
     const terminal = document.getElementById('incident-terminal-logs');
-    
+
     // Inyectar alertas y logs con micro-retraso
     node.logs.forEach(log => {
       let tagClass = 'tag-system';
@@ -636,17 +696,17 @@ class IncidentGame {
 
   makeChoice(option) {
     app.playAudio('click');
-    
+
     // Aplicar puntos e impactos
     if (option.points > 0) {
       app.addPoints(option.points, true);
     }
-    
+
     if (option.impact) {
       this.metrics.integrity = Math.max(0, Math.min(100, this.metrics.integrity + (option.impact.integrity || 0)));
       this.metrics.trust = Math.max(0, Math.min(100, this.metrics.trust + (option.impact.trust || 0)));
       this.metrics.uptime = Math.max(0, Math.min(100, this.metrics.uptime + (option.impact.uptime || 0)));
-      
+
       // Reproducir sonido de alerta si hay impactos negativos
       if (option.impact.integrity < 0 || option.impact.trust < 0 || option.impact.uptime < 0) {
         app.playAudio('incident_alert');
@@ -676,15 +736,15 @@ class IncidentGame {
     switch (endNodeId) {
       case 'end_perfect':
         title = '🛡️ Escudo de Ingeniería Social';
-        description = '¡Excelente! Mantuviste la confidencialidad absoluta al no divulgar claves ni SMS de un solo uso por llamadas o chats no oficiales. El switch central opera con plena confianza.';
+        description = '¡Excelente! Mantuviste la confidencialidad absoluta al no divulgar claves ni SMS de un solo uso por llamadas o chats no oficiales.';
         break;
       case 'end_recovery':
         title = '⚠️ Contención Post-Incidente';
-        description = 'Caíste en los trucos telefónicos corporativos inicialmente, pero tu reporte veloz detuvo transferencias de red a tiempo. Para el futuro, verifica siempre llamando a extensiones oficiales.';
+        description = 'Caíste en los trucos telefónicos corporativos inicialmente, pero tu reporte veloz detuvo fuga de información o desvío de fondos a tiempo. Para el futuro, verifica siempre llamando a extensiones oficiales.';
         break;
       case 'end_fail':
         title = '❌ Brecha en Ingeniería Social';
-        description = 'Las decisiones que tomaste permitieron el control absoluto de tus perfiles a cibercriminales, generando fraudes interbancarios. ¡Esta simulación demuestra que las claves NUNCA se entregan!';
+        description = 'Las decisiones que tomaste permitieron el control absoluto de tus perfiles a cibercriminales, generando fraudes. ¡Esta simulación demuestra que las claves NUNCA se entregan!';
         break;
     }
 
@@ -894,7 +954,7 @@ class PasswordGame {
     app.markModuleCompleted('password');
     app.showModalAlert({
       title: '🔑 Fortalecimiento de Clave Completado',
-      message: '¡Excelente! Has configurado una contraseña robusta e inquebrantable de prueba. Recuerda aplicar estas mismas reglas de complejidad en todas tus credenciales oficiales de Corporación Suiche 7B.',
+      message: '¡Excelente! Has configurado una contraseña robusta e inquebrantable de prueba. Recuerda aplicar estas mismas reglas de complejidad en todas tus credenciales oficiales de La Corporación Suiche 7B.',
       type: 'success'
     }).then(() => {
       app.navigateTo('dashboard');
@@ -912,16 +972,16 @@ class UsbGame {
         scenarioTitle: "Pendrive 'Nómina Corporación Suiche 7B' en el Pasillo",
         speech: "\"Vas caminando por el pasillo hacia la cocina o el ascensor y ves tirada en el suelo una memoria USB nueva de 64GB etiquetada con marcador: 'Nómina_Corporación Suiche 7B_2026.xlsx'. No hay nadie cerca en ese momento.\"",
         item: {
-          icon: "🔌",
+          image: "img/pendrive.png",
           name: "Pendrive 'Nómina 2026'",
           location: "Pasillo Principal / Ascensores"
         },
         options: [
-          { text: "🟢 Entregarla de inmediato a la Gerencia de Seguridad de la Información o TI sin conectarla", isCorrect: true },
+          { text: "🟢 Entregarla de inmediato a la Gerencia de Seguridad de la Información sin conectarla", isCorrect: true },
           { text: "🟡 Insertarla EN tu computador Corporativo para abrir el archivo y buscar el dueño", isCorrect: false },
           { text: "🔴 Formatear la memoria USB EN tu computador Corporativo para usarla como almacenamiento personal", isCorrect: false }
         ],
-        explanation: "¡Excelente decisión! Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Los ciberdelincuentes colocan nombres llamativos como 'Nómina' o 'Evaluaciones' para tentar al personal a conectarlas. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de Corporación Suiche 7B sin que te des cuenta."
+        explanation: "Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Los ciberdelincuentes colocan nombres llamativos como 'Nómina' o 'Evaluaciones' para tentar al personal a conectarlas. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de La Corporación Suiche 7B sin que te des cuenta."
       },
       {
         scenarioTitle: "Visitante pidiendo Cargar Celular/PowerBank por USB",
@@ -936,22 +996,22 @@ class UsbGame {
           { text: "🟡 Permitirle conectar su celular EN tu computador Corporativo mientras vigilas la pantalla", isCorrect: false },
           { text: "🔴 Prestarle tu computador Corporativo para que transfiera fotos de su trabajo", isCorrect: false }
         ],
-        explanation: "¡Muy bien pensado! Los teléfonos inteligentes y cables USB modificados pueden ejecutar transferencia de archivos y scripts de exfiltración de datos (Juice Jacking) en el momento en que se conectan a un puerto USB de una computadora corporativa. NUNCA debes conectar dispositivos móviles de terceros a las PC de Corporación Suiche 7B; siempre debes dirigir a los visitantes a tomacorrientes eléctricos de pared."
+        explanation: "Los teléfonos inteligentes y cables USB modificados pueden ejecutar transferencia de archivos y scripts de exfiltración de datos (Juice Jacking) en el momento en que se conectan a un puerto USB de una computadora corporativa. NUNCA debes conectar dispositivos móviles de terceros a las PC de La Corporación Suiche 7B; siempre debes dirigir a los visitantes a tomacorrientes eléctricos de pared."
       },
       {
         scenarioTitle: "Disco Duro Externo Olvidado en Sala de Juntas",
         speech: "\"Al finalizar una reunión con un equipo multidisciplinario, notas que alguien dejó olvidado un disco duro externo sin ningún nombre ni etiqueta sobre la mesa.\"",
         item: {
-          icon: "💽",
+          image: "img/disco_duro.png",
           name: "Disco Duro Externo Sin Etiqueta",
           location: "Mesa de Reuniones"
         },
         options: [
-          { text: "🟢 Notificar a la Gerencia de Seguridad de la Información / Soporte de TI para su resguardo", isCorrect: true },
+          { text: "🟢 Notificar a la Gerencia de Seguridad de la Información / Plataforma TI para su resguardo", isCorrect: true },
           { text: "🟡 Conectarlo EN tu computador Corporativo para explorar sus carpetas e identificar a quién pertenece", isCorrect: false },
           { text: "🔴 Llevarte el disco duro a tu casa para probarlo en tu computadora personal", isCorrect: false }
         ],
-        explanation: "¡Respuesta correcta! Nunca debemos inspeccionar archivos de dispositivos de almacenamiento desconocidos por nuestra cuenta. El área de TI y la Gerencia de Seguridad de la Información cuentan con entornos seguros y aislados (Sandbox) para analizar la integridad de estos dispositivos antes de devolverlos a su dueño."
+        explanation: "Nunca debemos inspeccionar archivos de dispositivos de almacenamiento desconocidos por nuestra cuenta.la Gerencia de Seguridad de la Información cuentan con entornos seguros y aislados (Sandbox) para analizar la integridad de estos dispositivos antes de devolverlos a su dueño."
       }
     ];
   }
@@ -971,7 +1031,13 @@ class UsbGame {
     document.getElementById('usb-scenario-title').textContent = currentCase.scenarioTitle;
     document.getElementById('usb-scenario-desc').textContent = currentCase.speech;
 
-    document.getElementById('usb-item-icon').textContent = currentCase.item.icon;
+    const iconContainer = document.getElementById('usb-item-icon');
+    if (currentCase.item.image) {
+      iconContainer.innerHTML = `<img src="${currentCase.item.image}" alt="${currentCase.item.name}" style="width:76px; height:76px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0, 229, 255, 0.35)); display:inline-block; vertical-align:middle;">`;
+    } else {
+      iconContainer.innerHTML = currentCase.item.icon || '🔌';
+    }
+
     document.getElementById('usb-item-name').textContent = currentCase.item.name;
     document.getElementById('usb-item-location').textContent = `Ubicación: ${currentCase.item.location}`;
 
@@ -1053,7 +1119,7 @@ class UsbGame {
       app.markModuleCompleted('usb');
       app.showModalAlert({
         title: '🔌 Módulo Dispositivos USB Completado',
-        message: '¡Felicidades! Has completado exitosamente la simulación de protección de dispositivos USB. Aprendiste a evitar trampas de Baiting y proteger los equipos corporativos de Corporación Suiche 7B.',
+        message: '¡Felicidades! Has completado exitosamente la simulación de protección de dispositivos USB. Aprendiste a evitar trampas de Baiting y proteger los equipos corporativos de La Corporación Suiche 7B.',
         type: 'success'
       }).then(() => {
         app.navigateTo('dashboard');

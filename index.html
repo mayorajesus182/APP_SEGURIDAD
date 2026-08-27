@@ -8,13 +8,14 @@
   <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Playball&family=Alex+Brush&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Playball&family=Alex+Brush&display=swap"
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body data-view="welcome">
 
   <header>
     <div class="logo-container" onclick="app.navigateTo('dashboard')">
@@ -78,27 +79,15 @@
         <form id="register-form"
           onsubmit="event.preventDefault(); if(window.app) window.app.handleRegistration(event); return false;">
           <div class="input-group">
-            <label for="user-name">Nombre y Apellido</label>
-            <input type="text" id="user-name" class="text-input" placeholder="Ej. Ana Pérez" required>
+            <label for="user-username">Usuario de Dominio</label>
+            <input type="text" id="user-username" class="text-input" placeholder="Ej. jmayora" required>
           </div>
 
           <div class="input-group">
-            <label for="user-dept">Departamento / Área</label>
-            <select id="user-dept" class="select-input" required>
-              <option value="" disabled selected>Selecciona tu área...</option>
-              <option value="Oficial de Cumplimiento">Oficial de Cumplimiento</option>
-              <option value="Presidencia Ejecutiva">Presidencia Ejecutiva</option>
-              <option value="Auditoría de Sistemas">Auditoría de Sistemas</option>
-              <option value="Dirección Desarrollo Nuevos Negocios">Dirección Desarrollo Nuevos Negocios</option>
-              <option value="Dirección Tecnología">Dirección Tecnología</option>
-              <option value="Dirección Finanzas">Dirección Finanzas</option>
-              <option value="Gerencia Gestión Estratégica">Gerencia Gestión Estratégica</option>
-              <option value="Gerencia Seguridad de la Información">Gerencia Seguridad de la Información</option>
-              <option value="Gerencia Operaciones y Servicio al Cliente">Gerencia Operaciones y Servicio al Cliente
-              </option>
-              <option value="Gerencia Capital Humano">Gerencia Capital Humano</option>
-            </select>
+            <label for="user-password">Contraseña Corporativa</label>
+            <input type="password" id="user-password" class="text-input" placeholder="Tu contraseña de red" required>
           </div>
+
 
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
             Iniciar Entrenamiento
@@ -116,7 +105,8 @@
       <div class="hero-banner">
         <div class="hero-content">
           <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
-          <p>Tu misión hoy es salvaguardar los sistemas y la información de Corporación Suiche 7B. Completa la suite de
+          <p>Tu misión hoy es salvaguardar los sistemas y la información de La Corporación Suiche 7B. Completa la suite
+            de
             5 módulos interactivos básicos para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
         </div>
         <div id="cert-grant-container" style="display:none;">
@@ -445,7 +435,7 @@
               🟢 BUENAS PRÁCTICAS (SEGURIDAD ACTIVA)
             </div>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Acciones correctas que protegen
-              el entorno físico e intelectual de Corporación Suiche 7B.</p>
+              el entorno físico e intelectual de La Corporación Suiche 7B.</p>
             <div class="vault-dropped-items" id="vault-safe-items">
               <!-- Elementos soltados aquí -->
             </div>
@@ -712,11 +702,16 @@
 
           <div class="physical-badge" id="usb-item-card"
             style="background: rgba(18, 24, 38, 0.95); border:1px solid var(--accent-purple); text-align:center; padding:1.5rem 1rem;">
-            <div style="font-size:2.8rem; margin-bottom:0.5rem;" id="usb-item-icon">🔌</div>
+            <div
+              style="font-size:2.8rem; margin-bottom:0.5rem; display:flex; justify-content:center; align-items:center; min-height:80px;"
+              id="usb-item-icon">
+              <img src="img/pendrive.png" alt="Pendrive"
+                style="width:76px; height:76px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0, 229, 255, 0.35));">
+            </div>
             <div style="font-weight:700; font-size:0.95rem; color:var(--primary-light);" id="usb-item-name">Pendrive
               'Nómina 2026'</div>
-            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;" id="usb-item-location">Hallado
-              en: Pasillo de Ascensores</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;" id="usb-item-location">Ubicación:
+              Pasillo Principal / Ascensores</div>
           </div>
         </div>
       </div>
@@ -773,7 +768,7 @@
       <div class="certificate-frame canva-frame">
         <!-- Plantilla Oficial en Alta Definición exportada de Canva (Página 4) -->
         <img src="img/canva_cert_p4.png" alt="Certificado Oficial Suiche 7B" class="cert-canva-bg">
-        
+
         <!-- Capa de datos dinámicos superpuestos -->
         <div class="cert-dynamic-overlay">
           <!-- Nombre del participante ubicado con precisión milimétrica sobre la línea -->
@@ -815,9 +810,9 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js"></script>
-  <script src="customizer.js"></script>
-  <script src="app.js"></script>
+  <script src="games.js?v=2.2"></script>
+  <script src="customizer.js?v=2.2"></script>
+  <script src="app.js?v=2.2"></script>
 </body>
 
 </html>

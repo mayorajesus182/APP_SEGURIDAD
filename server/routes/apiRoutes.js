@@ -23,9 +23,12 @@ const {
   getGeneralStats
 } = require('../controllers/statsController');
 
+const authController = require('../controllers/authController');
+
 // --- Rutas de Usuarios y Autenticación ---
 router.get('/departments', getDepartments);
-router.post('/users/register', authLimiter, validateUserRegistration, registerUser);
+router.post('/auth/login', authLimiter, authController.loginWithAD);
+// router.post('/users/register', authLimiter, validateUserRegistration, registerUser); // Deprecated
 router.get('/users/:id', getUserProfile);
 
 // --- Rutas de Progreso de Entrenamiento ---

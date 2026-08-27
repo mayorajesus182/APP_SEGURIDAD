@@ -51,7 +51,7 @@ La base de datos se inicializa automáticamente mediante el script `server/db/in
 
 | Tabla | Propósito |
 |---|---|
-| `departments` | Catálogo oficial de departamentos de Corporación Suiche 7B. |
+| `departments` | Catálogo oficial de departamentos de La Corporación Suiche 7B. |
 | `users` | Registro de usuarios, departamento, puntaje acumulado y aciertos. |
 | `module_progress` | Trazabilidad de cada módulo (Phishing, PCI-DSS, Incidentes, Contraseñas, USB) con estado y fechas de completado. |
 | `audit_logs` | Registro inmutable de eventos de seguridad (registro, login, completado de módulos, IP y User-Agent). |

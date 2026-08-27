@@ -44,7 +44,7 @@ class AppController {
 
   async init() {
     this.loadState();
-    
+
     // Comprobar conexión con la API y cargar departamentos / leaderboard desde la BD
     await this.checkServerConnection();
     await this.fetchLeaderboardFromDB();
@@ -78,7 +78,8 @@ class AppController {
   // --- NAVEGACIÓN SINGLE PAGE APPLICATION (SPA) ---
   navigateTo(viewId) {
     this.currentView = viewId;
-    
+    document.body.setAttribute('data-view', viewId);
+
     // Ocultar todas las secciones
     const sections = document.querySelectorAll('.view-section');
     sections.forEach(sec => sec.classList.remove('active'));
@@ -108,63 +109,81 @@ class AppController {
   // --- REGISTRO / AUTENTICACIÓN SEGURA ---
   async handleRegistration(event) {
     if (event) event.preventDefault();
-    
-    const nameInput = document.getElementById('user-name');
-    const deptInput = document.getElementById('user-dept');
 
-    if (!nameInput || !deptInput) return;
+    const usernameInput = document.getElementById('user-username');
+    const passwordInput = document.getElementById('user-password');
 
-    const rawName = nameInput.value.trim();
-    const rawDept = deptInput.value.trim();
+    if (!usernameInput || !passwordInput) return;
 
-    if (!rawName || !rawDept) {
+    const rawUsername = usernameInput.value.trim();
+    const rawPassword = passwordInput.value;
+
+    if (!rawUsername || !rawPassword) {
       this.showModalAlert({
         title: 'Campos Requeridos',
-        message: 'Por favor ingresa tu nombre completo y selecciona tu departamento para continuar.',
+        message: 'Por favor ingresa tu usuario de dominio y contraseña corporativa.',
         type: 'warning'
       });
       return;
     }
 
-    // Sanitización básica en cliente
-    const sanitizedName = rawName.replace(/[<>&"']/g, '').substring(0, 100);
-    const sanitizedDept = rawDept.replace(/[<>&"']/g, '').substring(0, 100);
-
-    this.state.user.name = sanitizedName;
-    this.state.user.department = sanitizedDept;
-
     // Intentar sincronizar con la Base de Datos vía API REST
     try {
-      const response = await fetch(`${this.apiBaseUrl}/users/register`, {
+      // Mostrar estado de carga temporal
+      const submitBtn = document.querySelector('#register-form button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = 'Conectando con Active Directory...';
+      submitBtn.disabled = true;
+
+      const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          name: sanitizedName,
-          department: sanitizedDept
+          username: rawUsername,
+          password: rawPassword
         })
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          this.state.user.id = result.data.id;
-          this.state.user.score = result.data.score || 0;
-          this.state.user.correctAnswers = result.data.correctAnswers || 0;
-          this.state.user.totalQuestions = result.data.totalQuestions || 0;
-          if (result.data.completedModules) {
-            this.state.user.completedModules = {
-              ...this.state.user.completedModules,
-              ...result.data.completedModules
-            };
-          }
-          console.log(`✅ Usuario registrado en PostgreSQL con ID: ${result.data.id}`);
+      submitBtn.innerHTML = originalBtnText;
+      submitBtn.disabled = false;
+
+      const result = await response.json();
+
+      if (response.ok && result.success && result.data) {
+        this.state.user.id = result.data.id;
+        this.state.user.name = result.data.name; // Nombre extraído del AD
+        this.state.user.department = result.data.department; // Departamento del AD
+        this.state.user.score = result.data.score || 0;
+        this.state.user.correctAnswers = result.data.correctAnswers || 0;
+        this.state.user.totalQuestions = result.data.totalQuestions || 0;
+        
+        if (result.data.completedModules) {
+          this.state.user.completedModules = {
+            ...this.state.user.completedModules,
+            ...result.data.completedModules
+          };
         }
+        console.log(`✅ Usuario autenticado y registrado en PostgreSQL con ID: ${result.data.id}`);
+      } else {
+        // Error de autenticación AD
+        this.showModalAlert({
+          title: 'Error de Autenticación',
+          message: result.message || 'Usuario o contraseña de dominio incorrectos.',
+          type: 'danger'
+        });
+        return;
       }
     } catch (err) {
-      console.warn('⚠️ No se pudo sincronizar el registro con PostgreSQL. Continuando localmente.', err);
+      console.warn('⚠️ No se pudo conectar con el servidor de autenticación.', err);
+      this.showModalAlert({
+        title: 'Error de Conexión',
+        message: 'No se pudo conectar con el servidor corporativo para validar las credenciales.',
+        type: 'danger'
+      });
+      return;
     }
 
     this.saveState();
@@ -173,7 +192,7 @@ class AppController {
     await this.fetchLeaderboardFromDB();
     this.renderLeaderboard();
     this.navigateTo('dashboard');
-    
+
     // Sonido de inicio triunfal
     this.playAudio('complete');
   }
@@ -215,7 +234,7 @@ class AppController {
   async resetProgress() {
     const confirmed = await this.showModalConfirm({
       title: '🚨 ¿Reiniciar Todo el Progreso?',
-      message: 'Esta acción borrará todas tus puntuaciones, insignias y módulos completados de la base de datos de Corporación Suiche 7B de forma permanente. ¿Deseas continuar?',
+      message: 'Esta acción borrará todas tus puntuaciones, insignias y módulos completados de la base de datos de La Corporación Suiche 7B de forma permanente. ¿Deseas continuar?',
       type: 'danger'
     });
 
@@ -237,28 +256,28 @@ class AppController {
         name: '',
         department: '',
         score: 0,
-        completedModules: { 
-          phishing: false, 
-          pci: false, 
-          incident: false, 
-          password: false, 
-          usb: false 
+        completedModules: {
+          phishing: false,
+          pci: false,
+          incident: false,
+          password: false,
+          usb: false
         },
         attempts: 0,
         correctAnswers: 0,
         totalQuestions: 0
       };
-      
+
       const mainNav = document.getElementById('main-nav');
       const userWidget = document.getElementById('user-widget');
       if (mainNav) mainNav.style.display = 'none';
       if (userWidget) userWidget.style.display = 'none';
-      
+
       const nameInput = document.getElementById('user-name');
       const deptInput = document.getElementById('user-dept');
       if (nameInput) nameInput.value = '';
       if (deptInput) deptInput.value = '';
-      
+
       await this.fetchLeaderboardFromDB();
       this.navigateTo('welcome');
     }
@@ -292,12 +311,12 @@ class AppController {
     if (this.state.user.completedModules.incident) completedCount++;
     if (this.state.user.completedModules.password) completedCount++;
     if (this.state.user.completedModules.usb) completedCount++;
-    
+
     const statsModules = document.getElementById('stats-modules');
     if (statsModules) statsModules.textContent = `${completedCount} / 5`;
 
     // Porcentaje de acierto
-    const accuracy = this.state.user.totalQuestions > 0 
+    const accuracy = this.state.user.totalQuestions > 0
       ? Math.round((this.state.user.correctAnswers / this.state.user.totalQuestions) * 100)
       : 0;
     const statsAccuracy = document.getElementById('stats-accuracy');
@@ -335,7 +354,7 @@ class AppController {
   }
 
   getSecurityLevel(score) {
-    if (score >= 450) return 'Centinela de Corporación Suiche 7B (Leyenda)';
+    if (score >= 450) return 'Centinela de La Corporación Suiche 7B (Leyenda)';
     if (score >= 350) return 'Guardián de Datos Élite';
     if (score >= 220) return 'Analista de Defensa';
     if (score >= 100) return 'Operador Alerta';
@@ -447,7 +466,7 @@ class AppController {
 
       const itemDiv = document.createElement('div');
       itemDiv.className = `leaderboard-item ${isHighlight}`;
-      
+
       const rankBadge = document.createElement('span');
       rankBadge.className = `rank-badge ${rankClass}`;
       rankBadge.textContent = rank;
@@ -500,12 +519,12 @@ class AppController {
 
   playAudio(type) {
     if (!this.state.audioEnabled) return;
-    
+
     try {
       this.initAudio();
       const ctx = this.audioCtx;
       const now = ctx.currentTime;
-      
+
       switch (type) {
         case 'click': {
           const osc = ctx.createOscillator();
@@ -604,10 +623,10 @@ class AppController {
   // --- MODAL DE CERTIFICADOS ---
   showCertificate() {
     this.playAudio('complete');
-    
+
     const recipient = document.getElementById('cert-recipient');
     if (recipient) recipient.textContent = this.state.user.name;
-    
+
     const hash = btoa(encodeURIComponent(this.state.user.name + (this.state.user.score || 0))).substring(0, 8).toUpperCase();
     const valCode = document.getElementById('cert-val-code');
     if (valCode) valCode.textContent = `S7B-${hash}-SEC`;
@@ -616,8 +635,8 @@ class AppController {
     const dateDisplay = document.getElementById('cert-date-display');
     if (dateDisplay) {
       const now = new Date();
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
       dateDisplay.textContent = `${meses[now.getMonth()]} de ${now.getFullYear()}`;
     }
 
@@ -660,7 +679,7 @@ class AppController {
   // --- SISTEMA DE DIÁLOGOS DE SEGURIDAD PERSONALIZADOS ---
   showModalAlert(options) {
     const { title = 'Notificación de Seguridad', message = '', type = 'info', callback = null } = options;
-    
+
     return new Promise((resolve) => {
       const modal = document.getElementById('custom-dialog-modal');
       if (!modal) {
@@ -676,7 +695,7 @@ class AppController {
 
       if (titleEl) titleEl.textContent = title;
       if (msgEl) msgEl.innerHTML = message;
-      
+
       if (dialogContent) {
         dialogContent.className = 'modal-content custom-dialog-content';
         dialogContent.classList.add(`dialog-${type}`);
