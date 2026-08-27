@@ -17,7 +17,7 @@ const configureHelmet = () => {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'", "https://desafio.suiche7b.com"],
+        connectSrc: ["'self'", "https://academiaSI.suiche7b.com"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
@@ -63,7 +63,7 @@ const authLimiter = rateLimit({
 const corsOptions = {
   origin: (origin, callback) => {
     // Permitir solicitudes del mismo origen o localhost/servidor web interno
-    const allowed = process.env.CORS_ORIGIN || 'https://desafio.suiche7b.com';
+    const allowed = process.env.CORS_ORIGIN || 'https://academiaSI.suiche7b.com';
     if (allowed === '*' || !origin || allowed.split(',').includes(origin)) {
       callback(null, true);
     } else {
