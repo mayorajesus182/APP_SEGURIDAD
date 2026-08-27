@@ -13,6 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
 <body data-view="welcome">
@@ -783,7 +784,13 @@
             </div>
           </div>
           
-          <h3 class="modules-title">Auditoría de Usuarios</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+            <h3 class="modules-title" style="margin-bottom:0;">Auditoría de Usuarios</h3>
+            <div>
+              <button class="btn btn-secondary" onclick="app.exportTableToCSV()" style="margin-right: 0.5rem; font-size: 0.9rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
+              <button class="btn btn-primary" onclick="app.exportTableToPDF()" style="font-size: 0.9rem; padding: 0.5rem 1rem;">📄 PDF</button>
+            </div>
+          </div>
           <div style="overflow-x:auto;">
             <table style="width:100%; text-align:left; border-collapse:collapse;">
               <thead>

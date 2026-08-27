@@ -855,6 +855,86 @@ class AppController {
       if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
     });
   }
+
+  // --- EXPORTAR REPORTES (CSV/PDF) ---
+  exportTableToCSV() {
+    const table = document.querySelector("#admin-dashboard-view table");
+    if (!table) return;
+    
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel
+    const rows = table.querySelectorAll("tr");
+    
+    rows.forEach(row => {
+      let rowData = [];
+      const cols = row.querySelectorAll("th, td");
+      cols.forEach(col => {
+        let text = col.innerText.replace(/"/g, '""'); // Escapar comillas
+        rowData.push(`"${text}"`);
+      });
+      csvContent += rowData.join(";") + "\r\n"; // Punto y coma para separar (mejor en español)
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "auditoria_suiche7b_" + new Date().toISOString().split('T')[0] + ".csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  exportTableToPDF() {
+    if (typeof html2pdf === 'undefined') {
+      this.showModalAlert({ title: 'Error', message: 'Librería PDF no cargada.', type: 'danger' });
+      return;
+    }
+    const element = document.createElement('div');
+    element.innerHTML = `
+      <h2 style="font-family: Arial, sans-serif; color: #2e3a59; text-align: center; margin-bottom: 20px;">
+        Auditoría de Entrenamiento - Corporación Suiche 7B
+      </h2>
+      <p style="text-align:right; font-family: Arial; font-size: 12px; color: #666;">Fecha: ${new Date().toLocaleDateString('es-VE')}</p>
+    `;
+    const table = document.querySelector("#admin-dashboard-view table").cloneNode(true);
+    
+    // Aplicar estilos básicos para el PDF
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.fontFamily = 'Arial, sans-serif';
+    table.style.fontSize = '12px';
+    
+    const cells = table.querySelectorAll('th, td');
+    cells.forEach(cell => {
+      cell.style.border = '1px solid #ccc';
+      cell.style.padding = '8px';
+      cell.style.textAlign = 'left';
+      cell.style.color = '#333';
+    });
+    
+    const headers = table.querySelectorAll('th');
+    headers.forEach(th => {
+      th.style.backgroundColor = '#f4f4f4';
+      th.style.fontWeight = 'bold';
+    });
+
+    element.appendChild(table);
+
+    const opt = {
+      margin:       0.5,
+      filename:     'auditoria_suiche7b.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+    };
+
+    // Agregar un mensaje de carga
+    const originalBtn = document.querySelector('button[onclick="app.exportTableToPDF()"]');
+    if(originalBtn) originalBtn.innerText = 'Generando...';
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      if(originalBtn) originalBtn.innerText = '📄 PDF';
+    });
+  }
 }
 
 // Declarar variable global de instancia
