@@ -42,6 +42,9 @@ services:
       AD_URL: ${AD_URL}
       AD_BASE_DN: ${AD_BASE_DN}
       AD_DOMAIN: ${AD_DOMAIN}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
     depends_on:
       db:
         condition: service_healthy

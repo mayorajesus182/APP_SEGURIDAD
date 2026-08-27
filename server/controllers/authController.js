@@ -9,11 +9,32 @@ const loginWithAD = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Usuario y contraseña son requeridos.' });
     }
 
+    // --- Verificación de Administrador Local ---
+    if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+      return res.json({
+        success: true,
+        data: {
+          id: 'admin',
+          name: 'Administrador de Seguridad',
+          department: 'Auditoría Interna',
+          isAdmin: true,
+          token: process.env.ADMIN_TOKEN
+        }
+      });
+    }
+    // -------------------------------------------
+
     const config = {
       url: process.env.AD_URL,
       baseDN: process.env.AD_BASE_DN,
       domain: process.env.AD_DOMAIN,
-      tlsOptions: { rejectUnauthorized: false }
+      tlsOptions: { rejectUnauthorized: false },
+      attributes: {
+        user: [
+          'dn', 'distinguishedName', 'userPrincipalName', 'sAMAccountName',
+          'displayName', 'department', 'physicalDeliveryOfficeName', 'cn'
+        ]
+      }
     };
 
     if (!config.url || !config.baseDN) {
@@ -49,7 +70,8 @@ const loginWithAD = async (req, res, next) => {
             baseDN: config.baseDN,
             username: userPrincipalName,
             password: password,
-            tlsOptions: config.tlsOptions
+            tlsOptions: config.tlsOptions,
+            attributes: config.attributes
         });
 
         adUserBound.findUser(username, async (findErr, userProfile) => {
@@ -59,7 +81,7 @@ const loginWithAD = async (req, res, next) => {
           }
 
           const fullName = userProfile.displayName || userProfile.cn || username;
-          const department = userProfile.department || 'Área General'; // Por defecto si no está definido en AD
+          const department = userProfile.physicalDeliveryOfficeName || userProfile.department || 'Área General';
 
           try {
             const clientIp = req.ip || req.connection.remoteAddress;

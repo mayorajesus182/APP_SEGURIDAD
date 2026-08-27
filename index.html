@@ -59,6 +59,11 @@
         <span id="widget-score">0</span> <span style="font-size:0.75rem; color:var(--text-muted)">PTS</span>
       </div>
     </div>
+    
+    <!-- Botón de Cerrar Sesión (oculto por defecto) -->
+    <button id="logout-btn" class="btn btn-secondary" style="display: none; padding: 0.4rem 0.8rem; font-size: 0.75rem; margin-left: 10px;" onclick="app.logout()">
+      Cerrar Sesión
+    </button>
   </header>
 
   <!-- CONTENEDOR PRINCIPAL DE LA APP -->
@@ -753,6 +758,47 @@
         <div class="customizer-main-panel">
           <div id="customizer-editor-content">
             <!-- Formulario dinámico según selección -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 9: PANEL DE AUDITORÍA (ADMIN) -->
+    <section id="admin-dashboard-view" class="view-section">
+      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-family:var(--font-mono); font-size:1.2rem; color:var(--primary-light);">Panel de Auditoría (Admin)</span>
+      </div>
+
+      <div class="dashboard-grid">
+        <div style="grid-column: 1 / -1;">
+          <h3 class="modules-title">Métricas Generales</h3>
+          <div style="display:flex; gap: 1rem; margin-bottom: 2rem;">
+            <div class="module-card" style="flex:1; text-align:center;">
+              <h3>Total Usuarios</h3>
+              <p id="admin-total-users" style="font-size:2rem; font-weight:bold; color:var(--accent-cyan);">0</p>
+            </div>
+            <div class="module-card" style="flex:1; text-align:center;">
+              <h3>Módulos Completados</h3>
+              <p id="admin-total-modules" style="font-size:2rem; font-weight:bold; color:var(--accent-purple);">0</p>
+            </div>
+          </div>
+          
+          <h3 class="modules-title">Auditoría de Usuarios</h3>
+          <div style="overflow-x:auto;">
+            <table style="width:100%; text-align:left; border-collapse:collapse;">
+              <thead>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <th style="padding:1rem;">Nombre</th>
+                  <th style="padding:1rem;">Departamento</th>
+                  <th style="padding:1rem;">Puntuación</th>
+                  <th style="padding:1rem;">Progreso (Módulos)</th>
+                  <th style="padding:1rem;">Última Actividad</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table">
+                <!-- Se llenará dinámicamente -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -52,7 +52,12 @@ class AppController {
     // Si ya existe usuario registrado, saltar directamente al Dashboard
     if (this.state.user.name) {
       this.showMainLayout();
-      this.navigateTo('dashboard');
+      if (this.state.user.isAdmin) {
+        this.navigateTo('admin-dashboard');
+        this.loadAdminDashboard();
+      } else {
+        this.navigateTo('dashboard');
+      }
     } else {
       this.navigateTo('welcome');
     }
@@ -154,54 +159,117 @@ class AppController {
 
       if (response.ok && result.success && result.data) {
         this.state.user.id = result.data.id;
-        this.state.user.name = result.data.name; // Nombre extraído del AD
-        this.state.user.department = result.data.department; // Departamento del AD
+        this.state.user.name = result.data.name; 
+        this.state.user.department = result.data.department; 
         this.state.user.score = result.data.score || 0;
         this.state.user.correctAnswers = result.data.correctAnswers || 0;
         this.state.user.totalQuestions = result.data.totalQuestions || 0;
         
+        // Atributos de administrador
+        if (result.data.isAdmin) {
+          this.state.user.isAdmin = true;
+          this.state.user.token = result.data.token;
+        }
+
         if (result.data.completedModules) {
           this.state.user.completedModules = {
             ...this.state.user.completedModules,
             ...result.data.completedModules
           };
         }
-        console.log(`✅ Usuario autenticado y registrado en PostgreSQL con ID: ${result.data.id}`);
       } else {
-        // Error de autenticación AD
         this.showModalAlert({
           title: 'Error de Autenticación',
-          message: result.message || 'Usuario o contraseña de dominio incorrectos.',
+          message: result.message || 'Usuario o contraseña incorrectos.',
           type: 'danger'
         });
         return;
       }
     } catch (err) {
-      console.warn('⚠️ No se pudo conectar con el servidor de autenticación.', err);
       this.showModalAlert({
         title: 'Error de Conexión',
-        message: 'No se pudo conectar con el servidor corporativo para validar las credenciales.',
+        message: 'No se pudo conectar con el servidor corporativo.',
         type: 'danger'
       });
       return;
     }
 
     this.saveState();
+    this.playAudio('success');
     this.showMainLayout();
     this.updateUI();
-    await this.fetchLeaderboardFromDB();
-    this.renderLeaderboard();
-    this.navigateTo('dashboard');
+    
+    try {
+      await this.fetchLeaderboardFromDB();
+      this.renderLeaderboard();
+    } catch (e) {
+      console.warn("No se pudo cargar el leaderboard");
+    }
+    
+    if (this.state.user.isAdmin) {
+      this.navigateTo('admin-dashboard');
+      this.loadAdminDashboard();
+    } else {
+      this.navigateTo('dashboard');
+    }
+  }
 
-    // Sonido de inicio triunfal
-    this.playAudio('complete');
+  // --- CIERRE DE SESIÓN ---
+  logout() {
+    localStorage.removeItem('s7b_cybershield_state');
+    location.reload();
+  }
+
+  // --- CARGA DEL DASHBOARD ADMIN ---
+  async loadAdminDashboard() {
+    if (!this.state.user.isAdmin) return;
+
+    try {
+      const summaryRes = await fetch(`${this.apiBaseUrl}/stats/summary`, {
+        headers: { 'Authorization': `Bearer ${this.state.user.token}` }
+      });
+      const summaryData = await summaryRes.json();
+      
+      if (summaryData.success) {
+        document.getElementById('admin-total-users').innerText = summaryData.data.totalUsers;
+        document.getElementById('admin-total-modules').innerText = summaryData.data.totalModulesCompleted;
+      }
+
+      const usersRes = await fetch(`${this.apiBaseUrl}/stats/users`, {
+        headers: { 'Authorization': `Bearer ${this.state.user.token}` }
+      });
+      const usersData = await usersRes.json();
+
+      if (usersData.success) {
+        const tbody = document.getElementById('admin-users-table');
+        tbody.innerHTML = '';
+        usersData.data.forEach(u => {
+          const row = document.createElement('tr');
+          row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+          const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
+          
+          row.innerHTML = `
+            <td style="padding:1rem;">${u.full_name}</td>
+            <td style="padding:1rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
+            <td style="padding:1rem; color:var(--accent-cyan); font-weight:bold;">${u.total_score}</td>
+            <td style="padding:1rem;">${u.modules_completed} / 5</td>
+            <td style="padding:1rem; font-size:0.8rem;">${lastActivityDate}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    } catch (e) {
+      console.error('Error al cargar panel de auditoría:', e);
+    }
   }
 
   showMainLayout() {
     const mainNav = document.getElementById('main-nav');
     const userWidget = document.getElementById('user-widget');
+    const logoutBtn = document.getElementById('logout-btn');
     if (mainNav) mainNav.style.display = 'flex';
     if (userWidget) userWidget.style.display = 'flex';
+    if (logoutBtn) logoutBtn.style.display = 'block';
   }
 
   // --- MANEJO DE ESTADO LOCAL ---

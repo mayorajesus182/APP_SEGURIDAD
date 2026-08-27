@@ -20,10 +20,24 @@ const {
 
 const {
   getLeaderboard,
-  getGeneralStats
+  getGeneralStats,
+  getUsersAudit
 } = require('../controllers/statsController');
 
 const authController = require('../controllers/authController');
+
+// Middleware para verificar token de admin
+const requireAdmin = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'No autorizado' });
+  }
+  const token = authHeader.split(' ')[1];
+  if (token !== process.env.ADMIN_TOKEN) {
+    return res.status(403).json({ success: false, message: 'Token inválido' });
+  }
+  next();
+};
 
 // --- Rutas de Usuarios y Autenticación ---
 router.get('/departments', getDepartments);
@@ -37,6 +51,7 @@ router.post('/progress/reset/:userId', resetProgress);
 
 // --- Rutas de Leaderboard y Métricas ---
 router.get('/stats/leaderboard', getLeaderboard);
-router.get('/stats/summary', getGeneralStats);
+router.get('/stats/summary', requireAdmin, getGeneralStats);
+router.get('/stats/users', requireAdmin, getUsersAudit);
 
 module.exports = router;

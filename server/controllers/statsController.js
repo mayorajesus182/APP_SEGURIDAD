@@ -65,7 +65,30 @@ const getGeneralStats = async (req, res, next) => {
   }
 };
 
+// Obtener auditoría detallada de todos los usuarios
+const getUsersAudit = async (req, res, next) => {
+  try {
+    const result = await query(`
+      SELECT 
+        u.id, u.full_name, d.name AS department, u.total_score, 
+        u.correct_answers, u.total_questions, u.created_at, u.last_activity,
+        (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE) as modules_completed
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      ORDER BY u.total_score DESC, u.last_activity DESC
+    `);
+    
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getLeaderboard,
-  getGeneralStats
+  getGeneralStats,
+  getUsersAudit
 };
