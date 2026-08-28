@@ -18,6 +18,9 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 const PORT = parseInt(process.env.PORT || '8085', 10);
 
+// Nginx termina TLS y reenvía la IP original mediante X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // 1. Cabeceras Seguras y Endurecimiento HTTP
 app.use(configureHelmet());
 
