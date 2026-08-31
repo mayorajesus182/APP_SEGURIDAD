@@ -137,7 +137,7 @@ class AppController {
       // Mostrar estado de carga temporal
       const submitBtn = document.querySelector('#register-form button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
-      submitBtn.innerHTML = 'Conectando con Active Directory...';
+      submitBtn.innerHTML = 'Conectando ...';
       submitBtn.disabled = true;
 
       const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
