@@ -51,6 +51,9 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- Índices de Rendimiento y Búsqueda
 CREATE INDEX IF NOT EXISTS idx_users_department ON users(department_id);
 CREATE INDEX IF NOT EXISTS idx_users_score ON users(total_score DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_users_employee_id
+    ON users (LOWER(employee_id))
+    WHERE employee_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_module_progress_user ON module_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_user_action ON audit_logs(user_id, action_type);
 

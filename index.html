@@ -773,7 +773,7 @@
       <div class="dashboard-grid">
         <div style="grid-column: 1 / -1;">
           <h3 class="modules-title">Métricas Generales</h3>
-          <div style="display:flex; gap: 1rem; margin-bottom: 2rem;">
+          <div style="display:flex; gap: 1rem; margin-bottom: 2rem; flex-wrap:wrap;">
             <div class="module-card" style="flex:1; text-align:center;">
               <h3>Total Usuarios</h3>
               <p id="admin-total-users" style="font-size:2rem; font-weight:bold; color:var(--accent-cyan);">0</p>
@@ -781,6 +781,10 @@
             <div class="module-card" style="flex:1; text-align:center;">
               <h3>Módulos Completados</h3>
               <p id="admin-total-modules" style="font-size:2rem; font-weight:bold; color:var(--accent-purple);">0</p>
+            </div>
+            <div class="module-card" style="flex:1; text-align:center;">
+              <h3>Puntuación Acumulada</h3>
+              <p id="admin-total-score" style="font-size:2rem; font-weight:bold; color:var(--primary-light);">0</p>
             </div>
           </div>
           
@@ -790,6 +794,10 @@
               <button class="btn btn-secondary" onclick="app.exportTableToCSV()" style="margin-right: 0.5rem; font-size: 0.9rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
               <button class="btn btn-primary" onclick="app.exportTableToPDF()" style="font-size: 0.9rem; padding: 0.5rem 1rem;">📄 PDF</button>
             </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label for="admin-user-filter" style="display:block; margin-bottom:0.4rem; color:var(--text-muted); font-size:0.8rem;">Buscar usuario o departamento</label>
+            <input id="admin-user-filter" class="text-input" type="search" placeholder="Ej. dirección tecnología o nombre" oninput="app.filterAdminUsers(this.value)">
           </div>
           <div style="overflow-x:auto;">
             <table style="width:100%; text-align:left; border-collapse:collapse;">

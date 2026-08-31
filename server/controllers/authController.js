@@ -109,8 +109,8 @@ const loginWithAD = async (req, res, next) => {
                       u.total_score, u.correct_answers, u.total_questions, u.created_at
                FROM users u
                JOIN departments d ON u.department_id = d.id
-               WHERE LOWER(u.full_name) = LOWER($1) AND u.department_id = $2`,
-              [fullName, departmentId]
+               WHERE LOWER(u.employee_id) = LOWER($1)`,
+              [username]
             );
 
             let dbUser;
@@ -119,15 +119,18 @@ const loginWithAD = async (req, res, next) => {
             if (userResult.rows.length > 0) {
               dbUser = userResult.rows[0];
               await query(
-                'UPDATE users SET last_activity = CURRENT_TIMESTAMP WHERE id = $1',
-                [dbUser.id]
+                `UPDATE users
+                 SET full_name = $1, department_id = $2, last_activity = CURRENT_TIMESTAMP
+                 WHERE id = $3`,
+                [fullName, departmentId, dbUser.id]
               );
+              dbUser.department_name = department;
             } else {
               const newUser = await query(
-                `INSERT INTO users (full_name, department_id, total_score, correct_answers, total_questions)
-                 VALUES ($1, $2, 0, 0, 0)
+                `INSERT INTO users (employee_id, full_name, department_id, total_score, correct_answers, total_questions)
+                 VALUES ($1, $2, $3, 0, 0, 0)
                  RETURNING id, full_name, department_id, total_score, correct_answers, total_questions, created_at`,
-                [fullName, departmentId]
+                [username, fullName, departmentId]
               );
               dbUser = newUser.rows[0];
               dbUser.department_name = department;

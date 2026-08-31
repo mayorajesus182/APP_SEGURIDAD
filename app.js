@@ -31,6 +31,7 @@ class AppController {
     };
 
     this.audioCtx = null;
+    this.adminUsers = [];
     this.leaderboardData = [
       { dept: 'Dirección Tecnología', correctPercent: 92, count: 12 },
       { dept: 'Gerencia Operaciones y Servicio al Cliente', correctPercent: 88, count: 18 },
@@ -233,6 +234,7 @@ class AppController {
       if (summaryData.success) {
         document.getElementById('admin-total-users').innerText = summaryData.data.totalUsers;
         document.getElementById('admin-total-modules').innerText = summaryData.data.totalModulesCompleted;
+        document.getElementById('admin-total-score').innerText = summaryData.data.totalScore;
       }
 
       const usersRes = await fetch(`${this.apiBaseUrl}/stats/users`, {
@@ -241,9 +243,27 @@ class AppController {
       const usersData = await usersRes.json();
 
       if (usersData.success) {
-        const tbody = document.getElementById('admin-users-table');
-        tbody.innerHTML = '';
-        usersData.data.forEach(u => {
+        this.adminUsers = usersData.data;
+        this.renderAdminUsers(this.adminUsers);
+      }
+    } catch (e) {
+      console.error('Error al cargar panel de auditoría:', e);
+    }
+  }
+
+  filterAdminUsers(searchTerm) {
+    const query = searchTerm.trim().toLocaleLowerCase();
+    const filteredUsers = this.adminUsers.filter(user =>
+      user.full_name.toLocaleLowerCase().includes(query) ||
+      (user.department || '').toLocaleLowerCase().includes(query)
+    );
+    this.renderAdminUsers(filteredUsers);
+  }
+
+  renderAdminUsers(users) {
+    const tbody = document.getElementById('admin-users-table');
+    tbody.innerHTML = '';
+    users.forEach(u => {
           const row = document.createElement('tr');
           row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
           const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
@@ -256,11 +276,7 @@ class AppController {
             <td style="padding:1rem; font-size:0.8rem;">${lastActivityDate}</td>
           `;
           tbody.appendChild(row);
-        });
-      }
-    } catch (e) {
-      console.error('Error al cargar panel de auditoría:', e);
-    }
+    });
   }
 
   showMainLayout() {
@@ -440,16 +456,17 @@ class AppController {
     this.updateUI();
 
     // Sincronizar con backend si hay sesión
-    if (this.state.user.id && moduleKey) {
+    const activeModule = moduleKey || this.currentView;
+    if (this.state.user.id && ['phishing', 'pci', 'incident', 'password', 'usb'].includes(activeModule)) {
       try {
         await fetch(`${this.apiBaseUrl}/progress/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: this.state.user.id,
-            moduleKey: moduleKey,
+            moduleKey: activeModule,
             scoreEarned: points,
-            isCompleted: this.state.user.completedModules[moduleKey] || false,
+            isCompleted: this.state.user.completedModules[activeModule] || false,
             isCorrectAnswer: isCorrectAnswer
           })
         });
