@@ -54,6 +54,7 @@ const fallbackStaticPath = path.join(__dirname, '../');
 // Servir recursos estáticos (CSS, JS, imágenes)
 app.use(express.static(publicPath));
 app.use(express.static(fallbackStaticPath));
+app.use('/vendor/html2pdf', express.static(path.join(__dirname, '../node_modules/html2pdf.js/dist')));
 
 // 9. Redirección SPA para rutas no coincidentes
 app.get('*', (req, res) => {

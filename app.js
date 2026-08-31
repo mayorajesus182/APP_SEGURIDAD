@@ -906,15 +906,39 @@ class AppController {
 
   exportTableToPDF() {
     if (typeof html2pdf === 'undefined') {
-      this.showModalAlert({ title: 'Error', message: 'Librería PDF no cargada.', type: 'danger' });
+      this.showModalAlert({ title: 'Exportación no disponible', message: 'No se pudo cargar el componente de PDF. Actualiza la página e intenta nuevamente.', type: 'danger' });
       return;
     }
+
+    const originalBtn = document.querySelector('button[onclick="app.exportTableToPDF()"]');
+    if (originalBtn) {
+      originalBtn.disabled = true;
+      originalBtn.textContent = 'Generando PDF...';
+    }
+
+    const generatedAt = new Date().toLocaleString('es-VE', { dateStyle: 'long', timeStyle: 'short' });
+    const totalScore = document.getElementById('admin-total-score')?.textContent || '0 PTS';
+    const completedModules = document.getElementById('admin-total-modules')?.textContent || '0';
+    const successRate = document.getElementById('admin-success-rate')?.textContent || '0%';
     const element = document.createElement('div');
+    element.style.cssText = 'width:100%; padding:28px 32px; color:#172033; background:#ffffff; font-family:Arial,sans-serif;';
     element.innerHTML = `
-      <h2 style="font-family: Arial, sans-serif; color: #2e3a59; text-align: center; margin-bottom: 20px;">
-        Auditoría de Entrenamiento - Corporación Suiche 7B
-      </h2>
-      <p style="text-align:right; font-family: Arial; font-size: 12px; color: #666;">Fecha: ${new Date().toLocaleDateString('es-VE')}</p>
+      <header style="display:flex; align-items:center; justify-content:space-between; padding-bottom:16px; border-bottom:3px solid #005e9c;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <img src="img/logo-suiche7b.png" alt="Suiche 7B" style="height:38px; width:auto;">
+          <div>
+            <div style="font-size:18px; font-weight:700; color:#005e9c;">Reporte de Auditoría de Entrenamiento</div>
+            <div style="font-size:10px; color:#536175; margin-top:3px;">Academia CiberSegura - Corporación Suiche 7B</div>
+          </div>
+        </div>
+        <div style="text-align:right; font-size:10px; color:#536175; line-height:1.5;">Generado el<br><strong style="color:#172033;">${generatedAt}</strong></div>
+      </header>
+      <section style="display:flex; gap:12px; margin:18px 0;">
+        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #fbba0a; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Puntaje total</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${totalScore}</div></div>
+        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #b60e80; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Módulos completados</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${completedModules}</div></div>
+        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #005e9c; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Porcentaje de éxito</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${successRate}</div></div>
+      </section>
+      <h2 style="margin:0 0 10px; font-size:14px;">Detalle de usuarios</h2>
     `;
     const table = document.querySelector("#admin-dashboard-view table").cloneNode(true);
     
@@ -922,38 +946,46 @@ class AppController {
     table.style.width = '100%';
     table.style.borderCollapse = 'collapse';
     table.style.fontFamily = 'Arial, sans-serif';
-    table.style.fontSize = '12px';
+    table.style.fontSize = '9px';
     
     const cells = table.querySelectorAll('th, td');
     cells.forEach(cell => {
-      cell.style.border = '1px solid #ccc';
-      cell.style.padding = '8px';
+      cell.style.border = '1px solid #dbe3ee';
+      cell.style.padding = '7px';
       cell.style.textAlign = 'left';
-      cell.style.color = '#333';
+      cell.style.color = '#172033';
     });
     
     const headers = table.querySelectorAll('th');
     headers.forEach(th => {
-      th.style.backgroundColor = '#f4f4f4';
+      th.style.backgroundColor = '#005e9c';
+      th.style.color = '#ffffff';
       th.style.fontWeight = 'bold';
     });
 
     element.appendChild(table);
+    element.insertAdjacentHTML('beforeend', `
+      <footer style="display:flex; justify-content:space-between; margin-top:18px; padding-top:10px; border-top:1px solid #dbe3ee; color:#536175; font-size:8px;">
+        <span>Uso interno - Información de auditoría y entrenamiento</span>
+        <span>Corporación Suiche 7B</span>
+      </footer>
+    `);
 
     const opt = {
-      margin:       0.5,
-      filename:     'auditoria_suiche7b.pdf',
+      margin:       0.35,
+      filename:     `auditoria_suiche7b_${new Date().toISOString().slice(0, 10)}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
+      html2canvas:  { scale: 2, useCORS: true },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
     };
 
-    // Agregar un mensaje de carga
-    const originalBtn = document.querySelector('button[onclick="app.exportTableToPDF()"]');
-    if(originalBtn) originalBtn.innerText = 'Generando...';
-
-    html2pdf().set(opt).from(element).save().then(() => {
-      if(originalBtn) originalBtn.innerText = '📄 PDF';
+    html2pdf().set(opt).from(element).save().catch(() => {
+      this.showModalAlert({ title: 'Error de exportación', message: 'No fue posible generar el PDF. Intenta nuevamente.', type: 'danger' });
+    }).finally(() => {
+      if (originalBtn) {
+        originalBtn.disabled = false;
+        originalBtn.textContent = 'PDF';
+      }
     });
   }
 }
