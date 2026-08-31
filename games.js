@@ -198,7 +198,7 @@ class PhishingGame {
 
     if (isCorrect) {
       app.playAudio('correct');
-      app.addPoints(50, true);
+      app.addPoints(50, true, 'phishing');
       statusEl.className = 'feedback-header feedback-correct';
       statusEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -206,7 +206,7 @@ class PhishingGame {
       `;
     } else {
       app.playAudio('incorrect');
-      app.addPoints(0, false);
+      app.addPoints(0, false, 'phishing');
       statusEl.className = 'feedback-header feedback-incorrect';
       statusEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -400,10 +400,10 @@ class PciGame {
     // Procesar puntos y mensaje modal adaptado
     if (isCorrect) {
       app.playAudio('correct');
-      app.addPoints(20, true);
+      app.addPoints(20, true, 'pci');
     } else {
       app.playAudio('incorrect');
-      app.addPoints(0, false);
+      app.addPoints(0, false, 'pci');
 
       const modalType = (item.category === 'safe') ? 'info' : 'danger';
       app.showModalAlert({
@@ -699,7 +699,7 @@ class IncidentGame {
 
     // Aplicar puntos e impactos
     if (option.points > 0) {
-      app.addPoints(option.points, true);
+      app.addPoints(option.points, true, 'incident');
     }
 
     if (option.impact) {
@@ -950,7 +950,7 @@ class PasswordGame {
   finishModule() {
     if (this.animationId) cancelAnimationFrame(this.animationId);
     app.playAudio('complete');
-    app.addPoints(50, true); // 50 bonus pts for safe key
+    app.addPoints(50, true, 'password'); // 50 bonus pts for safe key
     app.markModuleCompleted('password');
     app.showModalAlert({
       title: '🔑 Fortalecimiento de Clave Completado',
@@ -1076,7 +1076,7 @@ class UsbGame {
 
     if (isCorrect) {
       app.playAudio('correct');
-      app.addPoints(50, true);
+      app.addPoints(50, true, 'usb');
       statusEl.className = 'feedback-header feedback-correct';
       statusEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1084,7 +1084,7 @@ class UsbGame {
       `;
     } else {
       app.playAudio('incorrect');
-      app.addPoints(0, false);
+      app.addPoints(0, false, 'usb');
       statusEl.className = 'feedback-header feedback-incorrect';
       statusEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>

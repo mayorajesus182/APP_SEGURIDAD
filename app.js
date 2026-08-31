@@ -460,7 +460,7 @@ class AppController {
     const activeModule = moduleKey || this.currentView;
     if (this.state.user.id && ['phishing', 'pci', 'incident', 'password', 'usb'].includes(activeModule)) {
       try {
-        await fetch(`${this.apiBaseUrl}/progress/update`, {
+        const response = await fetch(`${this.apiBaseUrl}/progress/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -471,6 +471,9 @@ class AppController {
             isCorrectAnswer: isCorrectAnswer
           })
         });
+        if (!response.ok) {
+          throw new Error(`La API rechazó la actualización de puntos (${response.status}).`);
+        }
       } catch (err) {
         console.warn('Error sincronizando puntos con backend:', err);
       }

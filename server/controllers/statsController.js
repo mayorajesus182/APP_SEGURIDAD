@@ -81,11 +81,23 @@ const getGeneralStats = async (req, res, next) => {
 const getUsersAudit = async (req, res, next) => {
   try {
     const result = await query(`
-      SELECT 
-        u.id, u.full_name, d.name AS department, u.total_score, 
+      WITH current_users AS (
+        SELECT DISTINCT ON (LOWER(BTRIM(u.full_name)))
+          u.id, u.full_name, u.department_id, u.total_score,
+          u.correct_answers, u.total_questions, u.created_at, u.last_activity
+        FROM users u
+        WHERE u.is_active = TRUE
+        ORDER BY
+          LOWER(BTRIM(u.full_name)),
+          u.total_score DESC,
+          u.last_activity DESC,
+          u.id DESC
+      )
+      SELECT
+        u.id, u.full_name, d.name AS department, u.total_score,
         u.correct_answers, u.total_questions, u.created_at, u.last_activity,
-        (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE) as modules_completed
-      FROM users u
+        (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE) AS modules_completed
+      FROM current_users u
       LEFT JOIN departments d ON u.department_id = d.id
       ORDER BY u.total_score DESC, u.last_activity DESC
     `);
