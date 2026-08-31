@@ -232,9 +232,10 @@ class AppController {
       const summaryData = await summaryRes.json();
       
       if (summaryData.success) {
-        document.getElementById('admin-total-users').innerText = summaryData.data.totalUsers;
+        document.getElementById('admin-total-score').innerText = `${summaryData.data.totalScore} PTS`;
         document.getElementById('admin-total-modules').innerText = summaryData.data.totalModulesCompleted;
-        document.getElementById('admin-total-score').innerText = summaryData.data.totalScore;
+        document.getElementById('admin-success-rate').innerText = `${summaryData.data.successRate}%`;
+        document.getElementById('admin-user-count').innerText = `${summaryData.data.totalUsers} usuarios registrados`;
       }
 
       const usersRes = await fetch(`${this.apiBaseUrl}/stats/users`, {

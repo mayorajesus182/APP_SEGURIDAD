@@ -775,21 +775,24 @@
           <h3 class="modules-title">Métricas Generales</h3>
           <div style="display:flex; gap: 1rem; margin-bottom: 2rem; flex-wrap:wrap;">
             <div class="module-card" style="flex:1; text-align:center;">
-              <h3>Total Usuarios</h3>
-              <p id="admin-total-users" style="font-size:2rem; font-weight:bold; color:var(--accent-cyan);">0</p>
+              <h3>Puntaje Total</h3>
+              <p id="admin-total-score" style="font-size:2rem; font-weight:bold; color:var(--accent-cyan);">0 PTS</p>
             </div>
             <div class="module-card" style="flex:1; text-align:center;">
               <h3>Módulos Completados</h3>
               <p id="admin-total-modules" style="font-size:2rem; font-weight:bold; color:var(--accent-purple);">0</p>
             </div>
             <div class="module-card" style="flex:1; text-align:center;">
-              <h3>Puntuación Acumulada</h3>
-              <p id="admin-total-score" style="font-size:2rem; font-weight:bold; color:var(--primary-light);">0</p>
+              <h3>Porcentaje de Éxito</h3>
+              <p id="admin-success-rate" style="font-size:2rem; font-weight:bold; color:var(--primary-light);">0%</p>
             </div>
           </div>
           
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-            <h3 class="modules-title" style="margin-bottom:0;">Auditoría de Usuarios</h3>
+            <div>
+              <h3 class="modules-title" style="margin-bottom:0;">Auditoría de Usuarios</h3>
+              <span id="admin-user-count" style="color:var(--text-muted); font-size:0.8rem;">0 usuarios registrados</span>
+            </div>
             <div>
               <button class="btn btn-secondary" onclick="app.exportTableToCSV()" style="margin-right: 0.5rem; font-size: 0.9rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
               <button class="btn btn-primary" onclick="app.exportTableToPDF()" style="font-size: 0.9rem; padding: 0.5rem 1rem;">📄 PDF</button>

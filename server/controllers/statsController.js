@@ -45,6 +45,15 @@ const getGeneralStats = async (req, res, next) => {
     const totalUsersResult = await query('SELECT COUNT(*) AS total FROM users WHERE is_active = TRUE');
     const completedModulesResult = await query('SELECT COUNT(*) AS total FROM module_progress WHERE is_completed = TRUE');
     const totalScoreResult = await query('SELECT COALESCE(SUM(total_score), 0) AS total FROM users WHERE is_active = TRUE');
+    const successRateResult = await query(`
+      SELECT CASE
+        WHEN COALESCE(SUM(total_questions), 0) > 0
+        THEN ROUND((SUM(correct_answers)::numeric / SUM(total_questions)::numeric) * 100)
+        ELSE 0
+      END AS percentage
+      FROM users
+      WHERE is_active = TRUE
+    `);
     const recentAuditsResult = await query(`
       SELECT a.id, a.action_type, a.created_at, u.full_name, a.details
       FROM audit_logs a
@@ -59,6 +68,7 @@ const getGeneralStats = async (req, res, next) => {
         totalUsers: parseInt(totalUsersResult.rows[0].total, 10),
         totalModulesCompleted: parseInt(completedModulesResult.rows[0].total, 10),
         totalScore: parseInt(totalScoreResult.rows[0].total, 10),
+        successRate: parseInt(successRateResult.rows[0].percentage, 10),
         recentActivity: recentAuditsResult.rows
       }
     });
