@@ -1,8 +1,10 @@
 /**
  * Controlador de Usuarios
- * Maneja el registro, inicio de sesión seguro y consulta de perfil.
+ * Maneja departamentos, registro y consulta de perfil completo con soporte Fase 1 + Fase 2.
  */
-const { query, logAudit } = require('../config/db');
+const { query, logAudit, ALL_MODULES } = require('../config/db');
+const { getAcademyConfigFromDB } = require('./authController');
+const { signToken } = require('../config/jwt');
 
 // Obtener lista de departamentos
 const getDepartments = async (req, res, next) => {
@@ -23,10 +25,9 @@ const getDepartments = async (req, res, next) => {
 const registerUser = async (req, res, next) => {
   try {
     const { name, department, employeeId } = req.sanitizedBody;
-    const clientIp = req.ip || req.connection.remoteAddress;
+    const clientIp = req.ip || (req.connection && req.connection.remoteAddress) || '127.0.0.1';
     const userAgent = req.headers['user-agent'] || '';
 
-    // 1. Obtener o crear el departamento
     let deptResult = await query(
       'SELECT id FROM departments WHERE LOWER(name) = LOWER($1)',
       [department]
@@ -43,7 +44,6 @@ const registerUser = async (req, res, next) => {
       departmentId = deptResult.rows[0].id;
     }
 
-    // 2. Buscar si el usuario ya existe por nombre y departamento (o crear nuevo)
     let userResult = await query(
       `SELECT u.id, u.employee_id, u.full_name, u.department_id, d.name AS department_name,
               u.total_score, u.correct_answers, u.total_questions, u.created_at
@@ -58,7 +58,6 @@ const registerUser = async (req, res, next) => {
 
     if (userResult.rows.length > 0) {
       user = userResult.rows[0];
-      // Actualizar última actividad
       await query(
         'UPDATE users SET last_activity = CURRENT_TIMESTAMP WHERE id = $1',
         [user.id]
@@ -73,38 +72,37 @@ const registerUser = async (req, res, next) => {
       user = newUser.rows[0];
       user.department_name = department;
       isNew = true;
-
-      // Inicializar módulos de progreso
-      const modules = ['phishing', 'pci', 'incident', 'password', 'usb'];
-      for (const mod of modules) {
-        await query(
-          `INSERT INTO module_progress (user_id, module_key, is_completed, score_earned, attempts)
-           VALUES ($1, $2, FALSE, 0, 0)
-           ON CONFLICT DO NOTHING`,
-          [user.id, mod]
-        );
-      }
     }
 
-    // 3. Obtener el estado actual de los módulos
+    // Inicializar los 10 módulos (Fase 1 + Fase 2)
+    for (const mod of ALL_MODULES) {
+      await query(
+        `INSERT INTO module_progress (user_id, module_key, is_completed, score_earned, attempts)
+         VALUES ($1, $2, FALSE, 0, 0)
+         ON CONFLICT (user_id, module_key) DO NOTHING`,
+        [user.id, mod]
+      );
+    }
+
     const progressResult = await query(
       'SELECT module_key, is_completed, score_earned, attempts FROM module_progress WHERE user_id = $1',
       [user.id]
     );
 
-    const completedModules = {
-      phishing: false,
-      pci: false,
-      incident: false,
-      password: false,
-      usb: false
-    };
-
+    const completedModules = {};
+    ALL_MODULES.forEach(m => { completedModules[m] = false; });
     progressResult.rows.forEach(row => {
       completedModules[row.module_key] = row.is_completed;
     });
 
-    // 4. Registro de auditoría
+    const academyConfig = await getAcademyConfigFromDB();
+    const token = signToken({
+      id: user.id,
+      name: user.full_name,
+      department: user.department_name,
+      isAdmin: false
+    });
+
     await logAudit(
       user.id,
       isNew ? 'USER_REGISTERED' : 'USER_LOGIN',
@@ -123,6 +121,8 @@ const registerUser = async (req, res, next) => {
         correctAnswers: user.correct_answers,
         totalQuestions: user.total_questions,
         completedModules,
+        academyConfig,
+        token,
         isNew
       }
     });
@@ -158,9 +158,34 @@ const getUserProfile = async (req, res, next) => {
     );
 
     const completedModules = {};
+    const moduleScores = {};
+    ALL_MODULES.forEach(m => {
+      completedModules[m] = false;
+      moduleScores[m] = 0;
+    });
     progressResult.rows.forEach(r => {
       completedModules[r.module_key] = r.is_completed;
+      moduleScores[r.module_key] = parseInt(r.score_earned || 0, 10);
     });
+
+    let certificates = {};
+    try {
+      const certRes = await query(
+        'SELECT phase, certificate_code, score_at_issue, issued_at FROM certificates WHERE user_id = $1',
+        [userId]
+      );
+      certRes.rows.forEach(c => {
+        certificates[c.phase] = {
+          code: c.certificate_code,
+          score: c.score_at_issue,
+          issuedAt: c.issued_at
+        };
+      });
+    } catch (e) {
+      // ignore if certificates table not ready
+    }
+
+    const academyConfig = await getAcademyConfigFromDB();
 
     res.json({
       success: true,
@@ -171,7 +196,10 @@ const getUserProfile = async (req, res, next) => {
         score: user.total_score,
         correctAnswers: user.correct_answers,
         totalQuestions: user.total_questions,
-        completedModules
+        completedModules,
+        moduleScores,
+        certificates,
+        academyConfig
       }
     });
   } catch (error) {

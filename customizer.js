@@ -1,7 +1,7 @@
 /**
- * Academia CiberSegura Suiche7B - Customizer Control Panel
+ * Academia CiberSegura Suiche7B - Customizer Control Panel (Fase 1 + Fase 2 + Persistencia PostgreSQL)
  * Lógica para la administración interactiva de casos de juego,
- * edición en tiempo real e importación/exportación de plantillas JSON de entrenamiento.
+ * edición en tiempo real, sincronización en base de datos e importación/exportación JSON.
  */
 
 class TemplateCustomizer {
@@ -13,7 +13,6 @@ class TemplateCustomizer {
     app.playAudio('click');
     this.activeTab = tabId;
 
-    // Actualizar estados visuales del menú lateral del customizer
     const items = document.querySelectorAll('.customizer-menu-item');
     items.forEach(item => item.classList.remove('active'));
     if (menuItemElement) {
@@ -39,22 +38,81 @@ class TemplateCustomizer {
       case 'incident':
         this.renderIncidentEditor(container);
         break;
+      case 'phase2':
+        this.renderPhase2Editor(container);
+        break;
       case 'import-export':
         this.renderImportExport(container);
         break;
     }
   }
 
-  // --- EDITOR DE CASOS DE PHISHING ---
+  // Persistir configuración completa en PostgreSQL (si es Admin) y LocalStorage
+  async syncScenariosToServer() {
+    const fullConfig = this.getFullConfigObject();
+
+    try {
+      const savedState = localStorage.getItem('s7b_cybershield_state');
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        parsedState.customGamesConfig = fullConfig;
+        localStorage.setItem('s7b_cybershield_state', JSON.stringify(parsedState));
+      }
+    } catch (e) {
+      console.warn('Error guardando escenarios en localStorage:', e);
+    }
+
+    if (window.app && app.state.user && app.state.user.token && app.state.user.isAdmin) {
+      try {
+        await fetch('/api/v1/settings/scenarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${app.state.user.token}`
+          },
+          body: JSON.stringify(fullConfig)
+        });
+      } catch (e) {
+        console.warn('Aviso: No se pudo sincronizar escenarios con PostgreSQL:', e);
+      }
+    }
+  }
+
+  getFullConfigObject() {
+    return {
+      phishing: games.phishing.cases,
+      pci: games.pci.dataItems,
+      incident: games.incident.nodes,
+      ai_sec: games.ai_sec.cases,
+      pci_dss: games.pci_dss.items,
+      quishing_mfa: games.quishing_mfa.cases,
+      bec_fraud: games.bec_fraud.cases,
+      remote_vpn: games.remote_vpn.cases
+    };
+  }
+
+  applyFullConfigObject(parsed) {
+    if (!parsed || typeof parsed !== 'object') return;
+    if (Array.isArray(parsed.phishing)) games.phishing.cases = parsed.phishing;
+    if (Array.isArray(parsed.pci)) games.pci.dataItems = parsed.pci;
+    if (parsed.incident && typeof parsed.incident === 'object') games.incident.nodes = parsed.incident;
+    if (Array.isArray(parsed.ai_sec)) games.ai_sec.cases = parsed.ai_sec;
+    if (Array.isArray(parsed.pci_dss)) games.pci_dss.items = parsed.pci_dss;
+    if (Array.isArray(parsed.quishing_mfa)) games.quishing_mfa.cases = parsed.quishing_mfa;
+    if (Array.isArray(parsed.bec_fraud)) games.bec_fraud.cases = parsed.bec_fraud;
+    if (Array.isArray(parsed.remote_vpn)) games.remote_vpn.cases = parsed.remote_vpn;
+  }
+
+  // --- EDITOR DE CASOS DE PHISHING (FASE 1) ---
   renderPhishingEditor(container) {
     container.innerHTML = `
-      <h3 style="margin-bottom:1rem; color:var(--primary-light);">✍️ Administrador de Casos de Phishing</h3>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Modifica los casos de simulación de correo electrónico. Puedes adaptar los remitentes y enlaces para simular ataques dirigidos reales (Spear Phishing).</p>
+      <h3 style="margin-bottom:1rem; color:var(--primary-light);">✍️ Administrador de Casos de Phishing (Fase 1)</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Modifica los casos de simulación de correo electrónico. Al guardar como Administrador, los cambios se sincronizan en PostgreSQL para toda la Corporación.</p>
       
       <div class="customizer-form">
         ${games.phishing.cases.map((c, idx) => `
           <div class="sidebar-panel" style="background:rgba(255,255,255,0.01); border-color:rgba(255,255,255,0.05); margin-bottom:1rem; padding:1.2rem;">
-            <h4 style="color:var(--accent-cyan); font-size:0.95rem; margin-bottom:0.8rem; display:flex; justify-content:between;">
+            <h4 style="color:var(--accent-cyan); font-size:0.95rem; margin-bottom:0.8rem;">
               <span>Caso ${idx + 1}: ${c.isSafe ? '🟢 Seguro' : '🔴 Phishing'}</span>
             </h4>
             
@@ -70,7 +128,7 @@ class TemplateCustomizer {
             
             <div class="input-group">
               <label>Cuerpo del Mensaje (HTML permitido):</label>
-              <textarea class="text-input" id="phish-body-${idx}" style="min-height:120px; font-family:var(--font-mono); font-size:0.85rem;">${c.body.trim()}</textarea>
+              <textarea class="text-input" id="phish-body-${idx}" style="min-height:110px; font-family:var(--font-mono); font-size:0.82rem;">${c.body.trim()}</textarea>
             </div>
 
             <div class="input-group">
@@ -82,7 +140,7 @@ class TemplateCustomizer {
 
         <div class="customizer-action-bar">
           <button class="btn btn-primary" onclick="customizer.savePhishingChanges()">
-            💾 Guardar Casos de Phishing
+            💾 Guardar y Publicar en Base de Datos
           </button>
           <button class="btn btn-secondary" onclick="customizer.resetPhishingDefaults()">
             🔄 Restablecer Predeterminados
@@ -92,44 +150,39 @@ class TemplateCustomizer {
     `;
   }
 
-  savePhishingChanges() {
+  async savePhishingChanges() {
     games.phishing.cases.forEach((c, idx) => {
-      const fromVal = document.getElementById(`phish-from-${idx}`).value;
-      const subVal = document.getElementById(`phish-subject-${idx}`).value;
-      const bodyVal = document.getElementById(`phish-body-${idx}`).value;
-      const expVal = document.getElementById(`phish-exp-${idx}`).value;
-
-      c.from = fromVal;
-      c.subject = subVal;
-      c.body = bodyVal;
-      c.explanation = expVal;
+      c.from = document.getElementById(`phish-from-${idx}`).value;
+      c.subject = document.getElementById(`phish-subject-${idx}`).value;
+      c.body = document.getElementById(`phish-body-${idx}`).value;
+      c.explanation = document.getElementById(`phish-exp-${idx}`).value;
     });
 
+    await this.syncScenariosToServer();
     app.playAudio('complete');
     app.showModalAlert({
       title: '💾 Casos de Phishing Guardados',
-      message: 'Los casos de simulación de correo electrónico se han actualizado con éxito en tiempo real.',
+      message: 'Los casos de simulación de correo electrónico se han actualizado y sincronizado con éxito.',
       type: 'success'
-    }).then(() => {
-      app.navigateTo('dashboard');
     });
   }
 
   resetPhishingDefaults() {
     app.showModalConfirm({
       title: '🔄 ¿Restablecer Predeterminados?',
-      message: '¿Estás seguro de que deseas restaurar los casos de phishing predeterminados de fábrica? Se perderán las modificaciones actuales.',
+      message: '¿Estás seguro de que deseas restaurar los casos predeterminados de fábrica?',
       type: 'warning'
-    }).then(confirmed => {
+    }).then(async confirmed => {
       if (confirmed) {
         games.phishing = new PhishingGame();
+        await this.syncScenariosToServer();
         app.playAudio('complete');
         this.renderEditor();
       }
     });
   }
 
-  // --- EDITOR DE CLASIFICACIÓN DE OFICINA SEGURA ---
+  // --- EDITOR DE CLASIFICACIÓN DE OFICINA SEGURA (FASE 1) ---
   renderPciEditor(container) {
     container.innerHTML = `
       <h3 style="margin-bottom:1rem; color:var(--accent-green);">🧹 Parámetros de Escritorio Limpio (Oficina Segura)</h3>
@@ -166,35 +219,31 @@ class TemplateCustomizer {
     `;
   }
 
-  savePciChanges() {
+  async savePciChanges() {
     games.pci.dataItems.forEach((item, idx) => {
-      const descVal = document.getElementById(`pci-desc-${idx}`).value;
-      const catVal = document.getElementById(`pci-vault-${idx}`).value;
-
-      item.desc = descVal;
-      item.category = catVal;
+      item.desc = document.getElementById(`pci-desc-${idx}`).value;
+      item.category = document.getElementById(`pci-vault-${idx}`).value;
     });
 
+    await this.syncScenariosToServer();
     app.playAudio('complete');
     app.showModalAlert({
       title: '💾 Configuración Guardada',
-      message: 'La configuración de Oficina Segura (Escritorio Limpio) se ha guardado con éxito.',
+      message: 'La configuración de Oficina Segura (Escritorio Limpio) se ha sincronizado con éxito.',
       type: 'success'
-    }).then(() => {
-      app.navigateTo('dashboard');
     });
   }
 
-  // --- EDITOR DEL SIMULADOR DE INCIDENTES ---
+  // --- EDITOR DEL SIMULADOR DE INCIDENTES (FASE 1) ---
   renderIncidentEditor(container) {
     container.innerHTML = `
       <h3 style="margin-bottom:1rem; color:var(--accent-red-light);">🚨 Editor de Diálogos de Ingeniería Social (Vishing)</h3>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Modifica los textos narrativos de la aventura de Vishing y SMS para adaptarlos a situaciones reales de la oficina.</p>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Modifica los textos narrativos de la aventura de Vishing y SMS.</p>
       
       <div class="customizer-form" style="max-height:450px; overflow-y:auto; padding-right:0.5rem;">
         ${Object.keys(games.incident.nodes).map(nodeId => {
-          const node = games.incident.nodes[nodeId];
-          return `
+      const node = games.incident.nodes[nodeId];
+      return `
             <div class="sidebar-panel" style="background:rgba(255,255,255,0.01); border-color:rgba(255,255,255,0.05); margin-bottom:1rem; padding:1.2rem;">
               <h4 style="color:var(--accent-red-light); font-size:0.9rem; font-family:var(--font-mono); margin-bottom:0.5rem;">
                 Nodo: ${nodeId}
@@ -205,7 +254,7 @@ class TemplateCustomizer {
               </div>
             </div>
           `;
-        }).join('')}
+    }).join('')}
       </div>
 
       <div class="customizer-action-bar">
@@ -216,35 +265,80 @@ class TemplateCustomizer {
     `;
   }
 
-  saveIncidentChanges() {
+  async saveIncidentChanges() {
     Object.keys(games.incident.nodes).forEach(nodeId => {
-      const textVal = document.getElementById(`inc-node-text-${nodeId}`).value;
-      games.incident.nodes[nodeId].text = textVal;
+      games.incident.nodes[nodeId].text = document.getElementById(`inc-node-text-${nodeId}`).value;
     });
 
+    await this.syncScenariosToServer();
     app.playAudio('complete');
     app.showModalAlert({
       title: '💾 Narrativa Guardada',
       message: 'La narrativa y los diálogos de la simulación de incidentes se han guardado con éxito.',
       type: 'success'
-    }).then(() => {
-      app.navigateTo('dashboard');
+    });
+  }
+
+  // --- EDITOR DE MÓDULOS DE FASE 2 ---
+  renderPhase2Editor(container) {
+    container.innerHTML = `
+      <h3 style="margin-bottom:1rem; color:var(--accent-cyan);">🚀 Editor de Escenarios — Fase 2 (Especialización Transaccional)</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Personaliza los escenarios avanzados de Fraude Ejecutivo (BEC) e IA Generativa Segura.</p>
+      
+      <div class="customizer-form" style="max-height:480px; overflow-y:auto; padding-right:0.5rem;">
+        ${games.bec_fraud.cases.map((c, idx) => `
+          <div class="sidebar-panel" style="background:rgba(255,255,255,0.01); border-color:rgba(255,255,255,0.05); margin-bottom:1rem; padding:1.2rem;">
+            <h4 style="color:var(--accent-cyan); font-size:0.92rem; margin-bottom:0.6rem;">
+              Fraude BEC Caso ${idx + 1}: ${c.title}
+            </h4>
+            <div class="input-group">
+              <label>Remitente Simulado:</label>
+              <input type="text" class="text-input" id="bec-edit-sender-${idx}" value="${c.sender}">
+            </div>
+            <div class="input-group">
+              <label>Asunto:</label>
+              <input type="text" class="text-input" id="bec-edit-subject-${idx}" value="${c.subject}">
+            </div>
+            <div class="input-group">
+              <label>Descripción del Escenario:</label>
+              <textarea class="text-input" id="bec-edit-desc-${idx}" style="min-height:80px; font-size:0.84rem;">${c.scenarioDesc}</textarea>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="customizer-action-bar">
+        <button class="btn btn-primary" onclick="customizer.savePhase2Changes()">
+          💾 Guardar Escenarios Fase 2
+        </button>
+      </div>
+    `;
+  }
+
+  async savePhase2Changes() {
+    games.bec_fraud.cases.forEach((c, idx) => {
+      c.sender = document.getElementById(`bec-edit-sender-${idx}`).value;
+      c.subject = document.getElementById(`bec-edit-subject-${idx}`).value;
+      c.scenarioDesc = document.getElementById(`bec-edit-desc-${idx}`).value;
+    });
+
+    await this.syncScenariosToServer();
+    app.playAudio('complete');
+    app.showModalAlert({
+      title: '💾 Escenarios Fase 2 Guardados',
+      message: 'Los escenarios de la Fase 2 se han actualizado y sincronizado en PostgreSQL.',
+      type: 'success'
     });
   }
 
   // --- EXPORTACIÓN E IMPORTACIÓN DE PLANTILLAS JSON ---
   renderImportExport(container) {
-    const fullConfig = {
-      phishing: games.phishing.cases,
-      pci: games.pci.dataItems,
-      incident: games.incident.nodes
-    };
-
+    const fullConfig = this.getFullConfigObject();
     const jsonString = JSON.stringify(fullConfig, null, 2);
 
     container.innerHTML = `
-      <h3 style="margin-bottom:1rem; color:var(--text-main);">💾 Resguardo y Carga de Plantillas Personalizadas</h3>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Copia este JSON para respaldar tus escenarios editados de ciberseguridad, o pega una plantilla pre-diseñada y presiona 'Importar' para actualizar la academia de entrenamiento al instante.</p>
+      <h3 style="margin-bottom:1rem; color:var(--text-main);">💾 Resguardo y Carga de Plantillas Personalizadas (Fase 1 + Fase 2)</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">Copia este JSON para respaldar tus escenarios editados de Fase 1 y Fase 2, o pega una plantilla y presiona 'Importar' para actualizar toda la academia.</p>
       
       <div class="customizer-form">
         <div class="input-group">
@@ -254,7 +348,7 @@ class TemplateCustomizer {
 
         <div style="display:flex; gap:1rem;">
           <button class="btn btn-success" onclick="customizer.importTemplate()" style="flex:1;">
-            📥 Importar Plantilla JSON
+            📥 Importar y Publicar JSON
           </button>
           <button class="btn btn-primary" onclick="customizer.downloadTemplate()" style="flex:1;">
             📤 Descargar Archivo .json
@@ -264,37 +358,24 @@ class TemplateCustomizer {
     `;
   }
 
-  importTemplate() {
+  async importTemplate() {
     const text = document.getElementById('json-template-area').value;
     try {
       const parsed = JSON.parse(text);
-      
       if (parsed.phishing && parsed.pci && parsed.incident) {
-        games.phishing.cases = parsed.phishing;
-        games.pci.dataItems = parsed.pci;
-        games.incident.nodes = parsed.incident;
-        
-        // Guardar configuración modificada en LocalStorage global
-        const savedState = localStorage.getItem('s7b_cybershield_state');
-        if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          // Podemos persistir las modificaciones de juegos también en el estado
-          parsedState.customGamesConfig = parsed;
-          localStorage.setItem('s7b_cybershield_state', JSON.stringify(parsedState));
-        }
+        this.applyFullConfigObject(parsed);
+        await this.syncScenariosToServer();
 
         app.playAudio('complete');
         app.showModalAlert({
           title: '📥 Plantilla Importada',
-          message: '¡Plantilla importada con éxito! La academia se ha actualizado con tus nuevos escenarios.',
+          message: '¡Plantilla importada y sincronizada con éxito! La academia se ha actualizado con tus nuevos escenarios.',
           type: 'success'
-        }).then(() => {
-          app.navigateTo('dashboard');
         });
       } else {
         app.showModalAlert({
           title: '❌ Error de Estructura',
-          message: 'Estructura de JSON inválida. Asegúrate de incluir los nodos "phishing", "pci" e "incident".',
+          message: 'Estructura de JSON inválida. Asegúrate de incluir los nodos base de la academia.',
           type: 'danger'
         });
       }
@@ -309,16 +390,11 @@ class TemplateCustomizer {
   }
 
   downloadTemplate() {
-    const fullConfig = {
-      phishing: games.phishing.cases,
-      pci: games.pci.dataItems,
-      incident: games.incident.nodes
-    };
-    
+    const fullConfig = this.getFullConfigObject();
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullConfig, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "suiche7b_cybershield_template.json");
+    downloadAnchor.setAttribute("download", "suiche7b_cybershield_f1_f2_template.json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -326,6 +402,5 @@ class TemplateCustomizer {
   }
 }
 
-// Iniciar controlador en window
 const customizer = new TemplateCustomizer();
 window.customizer = customizer;

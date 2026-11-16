@@ -1,13 +1,17 @@
 services:
 
   db:
-    image: postgres:16-alpine
+    # Última versión estable: postgres:18-alpine (Nota: si tu volumen postgres_data ya fue creado con PG 16, haz backup antes de cambiar de 16 a 18 o usa postgres:16-alpine)
+    image: postgres:18-alpine
     container_name: suiche7b_postgres_db
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_DB: ${DB_NAME:-ciberseguridad_db}
       POSTGRES_USER: ${DB_USER:-s7b_security_admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-Suiche7B_SecurePassword_2026!}
+      PGDATA: /var/lib/postgresql/data
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -26,6 +30,10 @@ services:
       dockerfile: Dockerfile
     container_name: suiche7b_ciberseguridad_app
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     expose:
       - '8085'
     environment:
@@ -45,6 +53,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_TOKEN: ${ADMIN_TOKEN}
+      JWT_SECRET: ${JWT_SECRET:-Suiche7B_CyberShield_JWT_Secret_2026!}
     depends_on:
       db:
         condition: service_healthy

@@ -2040,3 +2040,146 @@ main {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 136, 255, 0.2);
 }
 
+/* ==========================================================================
+   ESTILOS FASE 2: SELECTORES DE FASE, INSIGNIAS Y MÓDULOS AVANZADOS
+   ========================================================================== */
+
+body[data-view="ai_sec"],
+body[data-view="pci_dss"],
+body[data-view="quishing_mfa"],
+body[data-view="bec_fraud"],
+body[data-view="remote_vpn"],
+body[data-view="admin-dashboard"] {
+  background-image: 
+    radial-gradient(circle at 50% 30%, rgba(6, 9, 19, 0.78) 0%, rgba(6, 9, 19, 0.94) 100%),
+    linear-gradient(180deg, rgba(6, 9, 19, 0.82) 0%, rgba(6, 9, 19, 0.96) 100%),
+    url('img/bg_matrix_circuit.jpg');
+}
+
+.phase-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: rgba(0, 94, 156, 0.25);
+  color: #93c5fd;
+  border: 1px solid rgba(0, 150, 255, 0.35);
+}
+
+.phase-pill-cyan {
+  background: rgba(251, 186, 10, 0.14);
+  color: var(--accent-cyan);
+  border-color: rgba(251, 186, 10, 0.38);
+}
+
+.phase-tabs-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.phase-tab-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  background: rgba(12, 19, 38, 0.75);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.phase-tab-btn:hover {
+  color: var(--text-main);
+  border-color: rgba(0, 150, 255, 0.4);
+}
+
+.phase-tab-btn.active {
+  background: linear-gradient(135deg, rgba(0, 94, 156, 0.45), rgba(182, 14, 128, 0.25));
+  color: #ffffff;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 16px rgba(0, 94, 156, 0.25);
+}
+
+.admin-phase-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.phase-mode-card {
+  text-align: left;
+  padding: 1rem 1.15rem;
+  border-radius: 12px;
+  background: rgba(6, 9, 19, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.phase-mode-card:hover {
+  border-color: rgba(0, 150, 255, 0.45);
+  transform: translateY(-2px);
+}
+
+.phase-mode-card.active {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 94, 156, 0.25);
+  box-shadow: 0 0 20px rgba(251, 186, 10, 0.18);
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.55rem;
+}
+
+.badge-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  transition: var(--transition);
+}
+
+.badge-chip.unlocked {
+  border-color: rgba(251, 186, 10, 0.4);
+  background: rgba(251, 186, 10, 0.08);
+  color: var(--text-main);
+}
+
+.badge-chip.locked {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  color: var(--text-muted);
+}
+
+.badge-chip-icon {
+  font-size: 1.1rem;
+}
+
+.cert-phase-banner {
+  position: absolute;
+  top: 63.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  font-size: clamp(0.48rem, 0.95vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #005e9c;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+

@@ -1,7 +1,7 @@
 {
   "name": "academia-cibersegura-suiche7b",
-  "version": "2.0.0",
-  "description": "Plataforma de Entrenamiento y Simulación en Ciberseguridad - Suiche7B",
+  "version": "2.5.0",
+  "description": "Plataforma de Entrenamiento y Simulación en Ciberseguridad (Fase 1 + Fase 2) - Suiche7B",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
@@ -13,19 +13,20 @@
     "training",
     "gamification",
     "docker",
-    "security"
+    "security",
+    "pci-dss"
   ],
   "author": "Suiche7B",
   "license": "ISC",
   "dependencies": {
     "activedirectory2": "^2.2.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.3.1",
-    "helmet": "^7.1.0",
-    "html2pdf.js": "^0.10.3",
-    "morgan": "^1.10.0",
-    "pg": "^8.12.0"
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "html2pdf.js": "^0.14.0",
+    "morgan": "^1.12.1",
+    "pg": "^8.23.1"
   }
 }

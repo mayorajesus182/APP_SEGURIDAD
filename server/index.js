@@ -1,5 +1,5 @@
 /**
- * Servidor Principal - Academia CiberSegura Corporación Suiche 7B
+ * Servidor Principal - Academia CiberSegura Corporación Suiche 7B (Fase 1 + Fase 2)
  * SSL/TLS gestionado por Nginx (academiasi.suiche7b.com)
  */
 const express = require('express');
@@ -10,6 +10,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+const { ensureSchema } = require('./config/db');
 const { configureHelmet, globalLimiter, corsOptions } = require('./config/security');
 const apiRoutes = require('./routes/apiRoutes');
 const healthRoutes = require('./routes/healthRoutes');
@@ -38,8 +39,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // 5. Parser de JSON con límite estricto de carga útil (Previene DoS por Payload Masivo)
-app.use(express.json({ limit: '100kb' }));
-app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(express.json({ limit: '250kb' }));
+app.use(express.urlencoded({ extended: true, limit: '250kb' }));
 
 // 6. Rutas del Sistema y Salud
 app.use('/', healthRoutes);
@@ -56,8 +57,8 @@ app.use(express.static(publicPath));
 app.use(express.static(fallbackStaticPath));
 app.use('/vendor/html2pdf', express.static(path.join(__dirname, '../node_modules/html2pdf.js/dist')));
 
-// 9. Redirección SPA para rutas no coincidentes
-app.get('*', (req, res) => {
+// 9. Redirección SPA para rutas no coincidentes (Compatible con Express 5)
+app.get('/{*splat}', (req, res) => {
   const indexPath = path.join(publicPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
@@ -69,13 +70,14 @@ app.get('*', (req, res) => {
 // 10. Manejador Central de Errores
 app.use(errorHandler);
 
-// Iniciar servidor HTTP (Nginx gestiona SSL/TLS en producción)
-const server = http.createServer(app).listen(PORT, '0.0.0.0', () => {
+// Iniciar servidor HTTP y verificar esquema de Base de Datos (Auto-Migración Fase 2)
+const server = http.createServer(app).listen(PORT, '0.0.0.0', async () => {
+  await ensureSchema();
   console.log(`=======================================================`);
   console.log(`🔒 Academia CiberSegura Corporación Suiche 7B - Servidor Iniciado`);
   console.log(`🌐 Puerto interno: ${PORT} | Modo: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌍 URL Producción: https://academiasi.suiche7b.com`);
-  console.log(`🛡️  Seguridad: Helmet, CSP, Rate-Limiter, CORS y Nginx activos`);
+  console.log(`🛡️  Seguridad: Helmet, CSP, Rate-Limiter, JWT, CORS y Fase 1+2 activos`);
   console.log(`=======================================================`);
 });
 

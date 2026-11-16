@@ -1,13 +1,37 @@
 /**
- * Academia CiberSegura Corporación Suiche 7B - Core App Controller (v2.0 Segura)
- * Manejo del Estado Global (SPA), sincronización con API REST segura en PostgreSQL,
- * persistencia local resiliente y Sintetizador de Audio Web.
+ * Academia CiberSegura Corporación Suiche 7B - Core App Controller (v2.5 Fase 1 + Fase 2)
+ * Manejo del Estado Global (SPA), control dinámico de Fases por Administrador (Fase 1 / Fase 2 / Ambas),
+ * sincronización con API REST segura en PostgreSQL (JWT + Anti-Farming), insignias y certificados verificables.
  */
+
+const PHASE1_KEYS = ['phishing', 'pci', 'incident', 'password', 'usb'];
+const PHASE2_KEYS = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
+const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_KEYS];
+
+const MODULE_LABELS = {
+  phishing: '1. Phishing Detective (F1)',
+  pci: '2. Oficina Segura Clean Desk (F1)',
+  incident: '3. Alerta Vishing y SMS (F1)',
+  password: '4. Fuerza Bruta Contraseñas (F1)',
+  usb: '5. Trampas USB y Dispositivos (F1)',
+  ai_sec: '6. IA Generativa y Fuga DLP (F2)',
+  pci_dss: '7. PCI-DSS 4.0 Transaccional (F2)',
+  quishing_mfa: '8. Quishing QR y Fatiga MFA (F2)',
+  bec_fraud: '9. Fraude Ejecutivo BEC (F2)',
+  remote_vpn: '10. Teletrabajo, VPN y Wi-Fi (F2)'
+};
 
 class AppController {
   constructor() {
     this.apiBaseUrl = '/api/v1';
     this.isServerOnline = false;
+    this.userPhaseFilter = 'all'; // 'all', 'phase1', 'phase2'
+
+    this.academyConfig = {
+      activePhaseMode: 'both', // 'phase1', 'phase2', 'both'
+      campaignName: 'Programa Anual de Concientización 2026',
+      requirePhase1ForPhase2: false
+    };
 
     this.state = {
       user: {
@@ -15,13 +39,21 @@ class AppController {
         name: '',
         department: '',
         score: 0,
+        token: null,
+        isAdmin: false,
         completedModules: {
           phishing: false,
           pci: false,
           incident: false,
           password: false,
-          usb: false
+          usb: false,
+          ai_sec: false,
+          pci_dss: false,
+          quishing_mfa: false,
+          bec_fraud: false,
+          remote_vpn: false
         },
+        certificates: {},
         attempts: 0,
         correctAnswers: 0,
         totalQuestions: 0
@@ -33,26 +65,36 @@ class AppController {
     this.audioCtx = null;
     this.adminUsers = [];
     this.leaderboardData = [
-      { dept: 'Dirección Tecnología', correctPercent: 92, count: 12 },
-      { dept: 'Gerencia Operaciones y Servicio al Cliente', correctPercent: 88, count: 18 },
-      { dept: 'Oficial de Cumplimiento', correctPercent: 86, count: 6 },
-      { dept: 'Dirección Finanzas', correctPercent: 81, count: 9 },
-      { dept: 'Presidencia Ejecutiva', correctPercent: 78, count: 11 },
-      { dept: 'Dirección Desarrollo Nuevos Negocios', correctPercent: 75, count: 24 },
-      { dept: 'Gerencia Capital Humano', correctPercent: 72, count: 7 }
+      { dept: 'Dirección Tecnología', correctPercent: 94, totalScore: 1250, count: 12 },
+      { dept: 'Gerencia Seguridad de la Información', correctPercent: 98, totalScore: 980, count: 6 },
+      { dept: 'Gerencia Operaciones y Servicio al Cliente', correctPercent: 89, totalScore: 1420, count: 18 },
+      { dept: 'Oficial de Cumplimiento', correctPercent: 91, totalScore: 760, count: 6 },
+      { dept: 'Dirección Finanzas', correctPercent: 85, totalScore: 890, count: 9 },
+      { dept: 'Presidencia Ejecutiva', correctPercent: 84, totalScore: 720, count: 11 },
+      { dept: 'Gerencia Capital Humano', correctPercent: 82, totalScore: 640, count: 7 }
     ];
   }
 
   async init() {
     this.loadState();
 
-    // Comprobar conexión con la API y cargar departamentos / leaderboard desde la BD
     await this.checkServerConnection();
+    await this.fetchAcademySettingsFromDB();
+    await this.fetchCustomScenariosFromDB();
     await this.fetchLeaderboardFromDB();
 
-    // Si ya existe usuario registrado, saltar directamente al Dashboard
+    const audioBtn = document.getElementById('audio-toggle-btn');
+    if (audioBtn) {
+      audioBtn.textContent = this.state.audioEnabled ? '🔊 Sonido: ON' : '🔇 Sonido: OFF';
+    }
+
     if (this.state.user.name) {
+      // Refrescar progreso real del servidor si tiene ID numérico
+      if (this.state.user.id && !this.state.user.isAdmin) {
+        await this.refreshUserProfileFromServer();
+      }
       this.showMainLayout();
+      this.updateUI();
       if (this.state.user.isAdmin) {
         this.navigateTo('admin-dashboard');
         this.loadAdminDashboard();
@@ -66,6 +108,17 @@ class AppController {
     this.renderLeaderboard();
   }
 
+  getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    if (this.state.user && this.state.user.token) {
+      headers['Authorization'] = `Bearer ${this.state.user.token}`;
+    }
+    return headers;
+  }
+
   // --- COMPROBACIÓN DE CONEXIÓN CON EL SERVIDOR Y BASE DE DATOS ---
   async checkServerConnection() {
     try {
@@ -73,11 +126,68 @@ class AppController {
       if (res.ok) {
         const data = await res.json();
         this.isServerOnline = data.status === 'healthy' || data.database === 'connected';
-        console.log(`🛡️ Conexión segura con API y PostgreSQL: ${this.isServerOnline ? 'Activa' : 'Parcial'}`);
       }
     } catch (e) {
-      console.warn('⚡ Modo Offline / Sin conexión directa a la API. Usando almacenamiento local seguro.');
       this.isServerOnline = false;
+    }
+  }
+
+  async fetchAcademySettingsFromDB() {
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/settings/phase`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          this.academyConfig = { ...this.academyConfig, ...json.data };
+        }
+      }
+    } catch (e) {
+      console.warn('Usando configuración de fase local:', e);
+    }
+  }
+
+  async fetchCustomScenariosFromDB() {
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/settings/scenarios`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && window.customizer) {
+          window.customizer.applyFullConfigObject(json.data);
+        }
+      }
+    } catch (e) {
+      // Fallback a escenarios por defecto
+    }
+  }
+
+  async refreshUserProfileFromServer() {
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/users/${this.state.user.id}`, {
+        headers: this.getAuthHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          this.state.user.score = json.data.score || 0;
+          this.state.user.correctAnswers = json.data.correctAnswers || 0;
+          this.state.user.totalQuestions = json.data.totalQuestions || 0;
+          if (json.data.completedModules) {
+            this.state.user.completedModules = {
+              ...this.state.user.completedModules,
+              ...json.data.completedModules
+            };
+          }
+          if (json.data.certificates) {
+            this.state.user.certificates = json.data.certificates;
+          }
+          if (json.data.academyConfig) {
+            this.academyConfig = { ...this.academyConfig, ...json.data.academyConfig };
+          }
+          this.saveState();
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo refrescar perfil desde el servidor:', e);
     }
   }
 
@@ -86,17 +196,14 @@ class AppController {
     this.currentView = viewId;
     document.body.setAttribute('data-view', viewId);
 
-    // Ocultar todas las secciones
     const sections = document.querySelectorAll('.view-section');
     sections.forEach(sec => sec.classList.remove('active'));
 
-    // Mostrar sección seleccionada
     const activeSection = document.getElementById(`${viewId}-view`);
     if (activeSection) {
       activeSection.classList.add('active');
     }
 
-    // Actualizar estado de enlaces de navegación
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
       const onclickAttr = link.getAttribute('onclick') || '';
@@ -107,7 +214,6 @@ class AppController {
       }
     });
 
-    // Reproducir un sonido sutil de clic de interfaz
     this.playAudio('click');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -133,9 +239,7 @@ class AppController {
       return;
     }
 
-    // Intentar sincronizar con la Base de Datos vía API REST
     try {
-      // Mostrar estado de carga temporal
       const submitBtn = document.querySelector('#register-form button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.innerHTML = 'Conectando ...';
@@ -160,16 +264,17 @@ class AppController {
 
       if (response.ok && result.success && result.data) {
         this.state.user.id = result.data.id;
-        this.state.user.name = result.data.name; 
-        this.state.user.department = result.data.department; 
+        this.state.user.name = result.data.name;
+        this.state.user.department = result.data.department;
         this.state.user.score = result.data.score || 0;
         this.state.user.correctAnswers = result.data.correctAnswers || 0;
         this.state.user.totalQuestions = result.data.totalQuestions || 0;
-        
-        // Atributos de administrador
-        if (result.data.isAdmin) {
-          this.state.user.isAdmin = true;
-          this.state.user.token = result.data.token;
+        this.state.user.token = result.data.token || null;
+        this.state.user.isAdmin = Boolean(result.data.isAdmin);
+        this.state.user.certificates = result.data.certificates || {};
+
+        if (result.data.academyConfig) {
+          this.academyConfig = { ...this.academyConfig, ...result.data.academyConfig };
         }
 
         if (result.data.completedModules) {
@@ -196,17 +301,17 @@ class AppController {
     }
 
     this.saveState();
-    this.playAudio('success');
+    this.playAudio('complete');
     this.showMainLayout();
     this.updateUI();
-    
+
     try {
       await this.fetchLeaderboardFromDB();
       this.renderLeaderboard();
     } catch (e) {
-      console.warn("No se pudo cargar el leaderboard");
+      console.warn('No se pudo cargar el leaderboard');
     }
-    
+
     if (this.state.user.isAdmin) {
       this.navigateTo('admin-dashboard');
       this.loadAdminDashboard();
@@ -221,35 +326,237 @@ class AppController {
     location.reload();
   }
 
+  // --- CONTROL DE FASES DESDE EL PANEL ADMIN ---
+  updateAdminPhaseButtonsUI() {
+    const mode = this.academyConfig.activePhaseMode || 'both';
+    ['phase1', 'phase2', 'both'].forEach(m => {
+      const btn = document.getElementById(`mode-btn-${m}`);
+      if (btn) {
+        if (m === mode) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+
+    const indicator = document.getElementById('admin-current-phase-indicator');
+    if (indicator) {
+      const labels = {
+        phase1: 'Modo Actual: Solo Fase 1 (Básico - 5 Módulos)',
+        phase2: 'Modo Actual: Solo Fase 2 (Avanzado - 5 Módulos)',
+        both: 'Modo Actual: Ambas Fases (10 Módulos)'
+      };
+      indicator.textContent = labels[mode] || labels.both;
+    }
+
+    const campaignInput = document.getElementById('admin-campaign-input');
+    if (campaignInput && this.academyConfig.campaignName) {
+      campaignInput.value = this.academyConfig.campaignName;
+    }
+
+    const reqCheckbox = document.getElementById('admin-require-p1-checkbox');
+    if (reqCheckbox) {
+      reqCheckbox.checked = Boolean(this.academyConfig.requirePhase1ForPhase2);
+    }
+  }
+
+  async saveAdminPhaseMode(newMode) {
+    this.academyConfig.activePhaseMode = newMode;
+    this.updateAdminPhaseButtonsUI();
+    await this.persistAdminPhaseSettings(true);
+  }
+
+  async saveAdminCampaignDetails() {
+    const campaignInput = document.getElementById('admin-campaign-input');
+    const reqCheckbox = document.getElementById('admin-require-p1-checkbox');
+
+    if (campaignInput) {
+      this.academyConfig.campaignName = campaignInput.value.trim() || 'Programa Anual de Concientización 2026';
+    }
+    if (reqCheckbox) {
+      this.academyConfig.requirePhase1ForPhase2 = Boolean(reqCheckbox.checked);
+    }
+
+    await this.persistAdminPhaseSettings(true);
+  }
+
+  async persistAdminPhaseSettings(showNotification = true) {
+    this.saveState();
+    this.updateUI();
+
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/settings/phase`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(this.academyConfig)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        this.academyConfig = { ...this.academyConfig, ...data.data };
+        this.updateAdminPhaseButtonsUI();
+        this.updateUI();
+        if (showNotification) {
+          const modeNames = {
+            phase1: 'Solo Fase 1 (5 Módulos Básicos)',
+            phase2: 'Solo Fase 2 (5 Módulos Avanzados)',
+            both: 'Ambas Fases Activas (10 Módulos)'
+          };
+          this.showModalAlert({
+            title: '⚙️ Configuración de Fases Actualizada',
+            message: `Se ha activado exitosamente el modo: <strong>${modeNames[this.academyConfig.activePhaseMode]}</strong> para todos los colaboradores de Corporación Suiche 7B.`,
+            type: 'success'
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error guardando configuración de fase:', e);
+    }
+  }
+
+  // --- FILTRO DE PESTAÑAS DE FASE EN DASHBOARD DE COLABORADOR ---
+  setUserPhaseFilter(filter) {
+    this.userPhaseFilter = filter;
+    ['all', 'phase1', 'phase2'].forEach(f => {
+      const btn = document.getElementById(`tab-btn-${f}`);
+      if (btn) {
+        if (f === filter) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+    this.playAudio('click');
+    this.updatePhaseVisibilityUI();
+  }
+
+  updatePhaseVisibilityUI() {
+    const mode = this.academyConfig.activePhaseMode || 'both';
+    const p1Block = document.getElementById('phase1-section-block');
+    const p2Block = document.getElementById('phase2-section-block');
+    const tabsBar = document.getElementById('user-phase-tabs');
+    const phaseBadge = document.getElementById('dash-active-phase-badge');
+    const campaignBadge = document.getElementById('dash-campaign-badge');
+
+    if (campaignBadge) {
+      campaignBadge.textContent = this.academyConfig.campaignName || 'Programa Anual de Concientización 2026';
+    }
+
+    if (mode === 'phase1') {
+      if (tabsBar) tabsBar.style.display = 'none';
+      if (p1Block) p1Block.style.display = 'block';
+      if (p2Block) p2Block.style.display = 'none';
+      if (phaseBadge) phaseBadge.textContent = '🛡️ Fase 1 Activa (Nivel Básico)';
+    } else if (mode === 'phase2') {
+      if (tabsBar) tabsBar.style.display = 'none';
+      if (p1Block) p1Block.style.display = 'none';
+      if (p2Block) p2Block.style.display = 'block';
+      if (phaseBadge) phaseBadge.textContent = '🚀 Fase 2 Activa (Nivel Especialista)';
+    } else {
+      // mode === 'both'
+      if (tabsBar) tabsBar.style.display = 'flex';
+      if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1 y Fase 2 Activas';
+
+      if (this.userPhaseFilter === 'phase1') {
+        if (p1Block) p1Block.style.display = 'block';
+        if (p2Block) p2Block.style.display = 'none';
+      } else if (this.userPhaseFilter === 'phase2') {
+        if (p1Block) p1Block.style.display = 'none';
+        if (p2Block) p2Block.style.display = 'block';
+      } else {
+        if (p1Block) p1Block.style.display = 'block';
+        if (p2Block) p2Block.style.display = 'block';
+      }
+    }
+
+    // Verificar si Fase 2 requiere Fase 1 completada
+    const p1DoneCount = PHASE1_KEYS.filter(k => this.state.user.completedModules[k]).length;
+    const isPhase2Locked = (mode === 'both' && this.academyConfig.requirePhase1ForPhase2 && p1DoneCount < 5 && !this.state.user.isAdmin);
+    const lockedBanner = document.getElementById('phase2-locked-banner');
+    const p2CardsGrid = document.getElementById('phase2-cards-grid');
+
+    if (lockedBanner) {
+      lockedBanner.style.display = isPhase2Locked ? 'block' : 'none';
+    }
+    if (p2CardsGrid) {
+      p2CardsGrid.style.opacity = isPhase2Locked ? '0.45' : '1';
+      p2CardsGrid.style.pointerEvents = isPhase2Locked ? 'none' : 'auto';
+    }
+  }
+
   // --- CARGA DEL DASHBOARD ADMIN ---
   async loadAdminDashboard() {
     if (!this.state.user.isAdmin) return;
+    this.updateAdminPhaseButtonsUI();
 
     try {
       const summaryRes = await fetch(`${this.apiBaseUrl}/stats/summary`, {
-        headers: { 'Authorization': `Bearer ${this.state.user.token}` }
+        headers: this.getAuthHeaders()
       });
       const summaryData = await summaryRes.json();
-      
-      if (summaryData.success) {
-        document.getElementById('admin-total-score').innerText = `${summaryData.data.totalScore} PTS`;
-        document.getElementById('admin-total-modules').innerText = summaryData.data.totalModulesCompleted;
-        document.getElementById('admin-success-rate').innerText = `${summaryData.data.successRate}%`;
-        document.getElementById('admin-user-count').innerText = `${summaryData.data.totalUsers} usuarios registrados`;
+
+      if (summaryData.success && summaryData.data) {
+        const d = summaryData.data;
+        if (d.academyConfig) {
+          this.academyConfig = { ...this.academyConfig, ...d.academyConfig };
+          this.updateAdminPhaseButtonsUI();
+        }
+        document.getElementById('admin-total-score').innerText = `${d.totalScore || 0} PTS`;
+        document.getElementById('admin-total-modules').innerText = d.totalModulesCompleted || 0;
+        const p1El = document.getElementById('admin-p1-modules');
+        const p2El = document.getElementById('admin-p2-modules');
+        if (p1El) p1El.innerText = d.phase1ModulesCompleted || 0;
+        if (p2El) p2El.innerText = d.phase2ModulesCompleted || 0;
+        document.getElementById('admin-success-rate').innerText = `${d.successRate || 0}%`;
+        document.getElementById('admin-user-count').innerText = `${d.totalUsers || 0} colaboradores registrados`;
       }
 
       const usersRes = await fetch(`${this.apiBaseUrl}/stats/users`, {
-        headers: { 'Authorization': `Bearer ${this.state.user.token}` }
+        headers: this.getAuthHeaders()
       });
       const usersData = await usersRes.json();
 
       if (usersData.success) {
         this.adminUsers = usersData.data;
         this.renderAdminUsers(this.adminUsers);
+        this.renderAdminDeptBreakdown(this.adminUsers);
       }
     } catch (e) {
       console.error('Error al cargar panel de auditoría:', e);
     }
+  }
+
+  renderAdminDeptBreakdown(users) {
+    const container = document.getElementById('admin-dept-breakdown');
+    if (!container) return;
+
+    const deptMap = {};
+    users.forEach(u => {
+      const dept = u.department || 'Área General';
+      if (!deptMap[dept]) {
+        deptMap[dept] = { count: 0, totalScore: 0, completedMods: 0 };
+      }
+      deptMap[dept].count++;
+      deptMap[dept].totalScore += parseInt(u.total_score || 0, 10);
+      deptMap[dept].completedMods += parseInt(u.modules_completed || 0, 10);
+    });
+
+    const entries = Object.entries(deptMap).sort((a, b) => b[1].totalScore - a[1].totalScore);
+    if (entries.length === 0) {
+      container.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Sin registros aún.</span>';
+      return;
+    }
+
+    container.innerHTML = entries.map(([dept, info]) => {
+      const targetPerUser = this.academyConfig.activePhaseMode === 'both' ? 10 : 5;
+      const pct = Math.min(100, Math.round((info.completedMods / (info.count * targetPerUser)) * 100));
+      return `
+        <div style="font-size:0.78rem; background:rgba(255,255,255,0.02); padding:0.45rem 0.65rem; border-radius:6px; border:1px solid rgba(255,255,255,0.04);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+            <strong>${dept} <span style="color:var(--text-muted); font-weight:400;">(${info.count} colab.)</span></strong>
+            <span style="color:var(--accent-cyan); font-family:var(--font-mono);">${pct}% avance · ${info.totalScore} PTS</span>
+          </div>
+          <div style="height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
+            <div style="height:100%; width:${pct}%; background:linear-gradient(90deg, var(--primary-blue), var(--accent-cyan));"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   filterAdminUsers(searchTerm) {
@@ -263,30 +570,118 @@ class AppController {
 
   renderAdminUsers(users) {
     const tbody = document.getElementById('admin-users-table');
+    if (!tbody) return;
     tbody.innerHTML = '';
+
     users.forEach(u => {
-          const row = document.createElement('tr');
-          row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-          const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
-          
-          row.innerHTML = `
-            <td style="padding:1rem;">${u.full_name}</td>
-            <td style="padding:1rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
-            <td style="padding:1rem; color:var(--accent-cyan); font-weight:bold;">${u.total_score}</td>
-            <td style="padding:1rem;">${u.modules_completed} / 5</td>
-            <td style="padding:1rem; font-size:0.8rem;">${lastActivityDate}</td>
-          `;
-          tbody.appendChild(row);
+      const row = document.createElement('tr');
+      row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+      const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
+      const p1Count = u.phase1_completed !== undefined ? u.phase1_completed : u.modules_completed;
+      const p2Count = u.phase2_completed !== undefined ? u.phase2_completed : 0;
+
+      row.innerHTML = `
+        <td style="padding:0.85rem; font-weight:600;">${u.full_name}</td>
+        <td style="padding:0.85rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
+        <td style="padding:0.85rem; color:var(--accent-cyan); font-weight:bold; font-family:var(--font-mono);">${u.total_score} PTS</td>
+        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p1Count) >= 5 ? 'status-completed' : 'status-pending'}">${p1Count} / 5</span></td>
+        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p2Count) >= 5 ? 'status-completed' : 'status-pending'}">${p2Count} / 5</span></td>
+        <td style="padding:0.85rem; font-weight:600;">${u.modules_completed} / 10</td>
+        <td style="padding:0.85rem; font-size:0.78rem; color:var(--text-muted);">${lastActivityDate}</td>
+        <td style="padding:0.85rem;">
+          <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="app.showAdminUserDetail(${u.id})">
+            🔍 Ver Módulos
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
     });
+  }
+
+  showAdminUserDetail(userId) {
+    const user = this.adminUsers.find(u => Number(u.id) === Number(userId));
+    if (!user) return;
+
+    const completedSet = new Set(Array.isArray(user.completed_keys) ? user.completed_keys : []);
+    const p1Html = PHASE1_KEYS.map(k => {
+      const done = completedSet.has(k);
+      return `<div style="margin-bottom:0.25rem;">${done ? '✅' : '⏳'} ${MODULE_LABELS[k]}</div>`;
+    }).join('');
+    const p2Html = PHASE2_KEYS.map(k => {
+      const done = completedSet.has(k);
+      return `<div style="margin-bottom:0.25rem;">${done ? '✅' : '⏳'} ${MODULE_LABELS[k]}</div>`;
+    }).join('');
+
+    this.showModalAlert({
+      title: `👤 Expediente de Auditoría: ${user.full_name}`,
+      message: `
+        <div style="text-align:left; font-size:0.84rem; line-height:1.5;">
+          <p><strong>Departamento:</strong> ${user.department || 'Área General'} | <strong>Puntaje:</strong> ${user.total_score} PTS</p>
+          <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:0.6rem 0;">
+          <strong style="color:var(--accent-green);">Fase 1: Nivel Básico (${user.phase1_completed || 0}/5)</strong>
+          <div style="margin:0.4rem 0 0.8rem;">${p1Html}</div>
+          <strong style="color:var(--accent-cyan);">Fase 2: Nivel Especialista (${user.phase2_completed || 0}/5)</strong>
+          <div style="margin-top:0.4rem;">${p2Html}</div>
+        </div>
+      `,
+      type: 'info'
+    });
+  }
+
+  async verifyCertificateFromAdmin() {
+    const input = document.getElementById('admin-verify-cert-input');
+    const resultBox = document.getElementById('admin-verify-cert-result');
+    if (!input || !resultBox) return;
+
+    const code = input.value.trim().toUpperCase();
+    if (!code) {
+      resultBox.innerHTML = '<span style="color:var(--accent-cyan);">Ingresa un código para consultar.</span>';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${this.apiBaseUrl}/certificates/verify/${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if (res.ok && data.valid && data.data) {
+        const c = data.data;
+        const phaseLabel = c.phase === 'phase1' ? 'Fase 1 (Básico)' : c.phase === 'phase2' ? 'Fase 2 (Especialista)' : 'Maestro Integral';
+        resultBox.innerHTML = `
+          <div style="padding:0.6rem; border-radius:6px; background:rgba(53,126,50,0.18); border:1px solid var(--accent-green); color:#bbf7d0;">
+            ✅ <strong>Certificado Válido:</strong> ${c.certificate_code}<br>
+            👤 <strong>Colaborador:</strong> ${c.full_name} (${c.department || 'Suiche 7B'})<br>
+            🏅 <strong>Nivel:</strong> ${phaseLabel} | <strong>Puntaje:</strong> ${c.score_at_issue} PTS | <strong>Fecha:</strong> ${new Date(c.issued_at).toLocaleDateString('es-VE')}
+          </div>
+        `;
+      } else {
+        resultBox.innerHTML = `
+          <div style="padding:0.6rem; border-radius:6px; background:rgba(182,14,128,0.18); border:1px solid var(--accent-red); color:#fecdd3;">
+            ❌ ${data.message || 'Código no encontrado en los registros oficiales.'}
+          </div>
+        `;
+      }
+    } catch (e) {
+      resultBox.innerHTML = '<span style="color:var(--accent-red);">Error al verificar certificado.</span>';
+    }
   }
 
   showMainLayout() {
     const mainNav = document.getElementById('main-nav');
     const userWidget = document.getElementById('user-widget');
     const logoutBtn = document.getElementById('logout-btn');
+    const adminLink = document.getElementById('nav-admin-link');
+    const customizerLink = document.getElementById('nav-customizer-link');
+
     if (mainNav) mainNav.style.display = 'flex';
     if (userWidget) userWidget.style.display = 'flex';
     if (logoutBtn) logoutBtn.style.display = 'block';
+
+    if (this.state.user.isAdmin) {
+      if (adminLink) adminLink.style.display = 'flex';
+      if (customizerLink) customizerLink.style.display = 'flex';
+    } else {
+      if (adminLink) adminLink.style.display = 'none';
+      if (customizerLink) customizerLink.style.display = 'none';
+    }
   }
 
   // --- MANEJO DE ESTADO LOCAL ---
@@ -307,8 +702,18 @@ class AppController {
           this.state = {
             ...this.state,
             ...parsed,
-            user: { ...this.state.user, ...parsed.user }
+            user: {
+              ...this.state.user,
+              ...parsed.user,
+              completedModules: {
+                ...this.state.user.completedModules,
+                ...(parsed.user.completedModules || {})
+              }
+            }
           };
+        }
+        if (parsed.customGamesConfig && window.customizer) {
+          window.customizer.applyFullConfigObject(parsed.customGamesConfig);
         }
       } catch (e) {
         console.error('Error cargando el progreso guardado:', e);
@@ -324,11 +729,11 @@ class AppController {
     });
 
     if (confirmed) {
-      // Reiniciar en base de datos si tenemos ID
       if (this.state.user.id) {
         try {
           await fetch(`${this.apiBaseUrl}/progress/reset/${this.state.user.id}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: this.getAuthHeaders()
           });
         } catch (e) {
           console.warn('Error reiniciando en servidor:', e);
@@ -336,35 +741,7 @@ class AppController {
       }
 
       localStorage.removeItem('s7b_cybershield_state');
-      this.state.user = {
-        id: null,
-        name: '',
-        department: '',
-        score: 0,
-        completedModules: {
-          phishing: false,
-          pci: false,
-          incident: false,
-          password: false,
-          usb: false
-        },
-        attempts: 0,
-        correctAnswers: 0,
-        totalQuestions: 0
-      };
-
-      const mainNav = document.getElementById('main-nav');
-      const userWidget = document.getElementById('user-widget');
-      if (mainNav) mainNav.style.display = 'none';
-      if (userWidget) userWidget.style.display = 'none';
-
-      const nameInput = document.getElementById('user-name');
-      const deptInput = document.getElementById('user-dept');
-      if (nameInput) nameInput.value = '';
-      if (deptInput) deptInput.value = '';
-
-      await this.fetchLeaderboardFromDB();
-      this.navigateTo('welcome');
+      location.reload();
     }
   }
 
@@ -372,57 +749,94 @@ class AppController {
   updateUI() {
     if (!this.state.user.name) return;
 
-    // Nombre en Dashboard
     const nameEl = document.getElementById('dash-user-name');
     if (nameEl) nameEl.textContent = this.state.user.name;
 
-    // Estado en el Widget de la cabecera
     const widgetScore = document.getElementById('widget-score');
     if (widgetScore) widgetScore.textContent = this.state.user.score;
     const level = this.getSecurityLevel(this.state.user.score);
     const widgetLevel = document.getElementById('widget-level');
     if (widgetLevel) widgetLevel.textContent = level;
 
-    // Estado en el Sidebar
     const statsScore = document.getElementById('stats-score');
     if (statsScore) statsScore.textContent = `${this.state.user.score} PTS`;
     const statsLevel = document.getElementById('stats-level-text');
     if (statsLevel) statsLevel.textContent = level;
 
-    // Calcular completados
-    let completedCount = 0;
-    if (this.state.user.completedModules.phishing) completedCount++;
-    if (this.state.user.completedModules.pci) completedCount++;
-    if (this.state.user.completedModules.incident) completedCount++;
-    if (this.state.user.completedModules.password) completedCount++;
-    if (this.state.user.completedModules.usb) completedCount++;
+    const p1Completed = PHASE1_KEYS.filter(k => this.state.user.completedModules[k]).length;
+    const p2Completed = PHASE2_KEYS.filter(k => this.state.user.completedModules[k]).length;
+    const totalCompleted = p1Completed + p2Completed;
+
+    const statsP1 = document.getElementById('stats-modules-p1');
+    if (statsP1) statsP1.textContent = `${p1Completed} / 5`;
+
+    const statsP2 = document.getElementById('stats-modules-p2');
+    if (statsP2) statsP2.textContent = `${p2Completed} / 5`;
+
+    const mode = this.academyConfig.activePhaseMode || 'both';
+    const activeTarget = mode === 'phase1' ? 5 : mode === 'phase2' ? 5 : 10;
+    const activeDone = mode === 'phase1' ? p1Completed : mode === 'phase2' ? p2Completed : totalCompleted;
 
     const statsModules = document.getElementById('stats-modules');
-    if (statsModules) statsModules.textContent = `${completedCount} / 5`;
+    if (statsModules) statsModules.textContent = `${activeDone} / ${activeTarget}`;
 
-    // Porcentaje de acierto
+    const p1Pill = document.getElementById('phase1-progress-pill');
+    if (p1Pill) {
+      p1Pill.textContent = `${p1Completed} / 5 Completados`;
+      p1Pill.className = `game-status-badge ${p1Completed === 5 ? 'status-completed' : 'status-pending'}`;
+    }
+
+    const p2Pill = document.getElementById('phase2-progress-pill');
+    if (p2Pill) {
+      p2Pill.textContent = `${p2Completed} / 5 Completados`;
+      p2Pill.className = `game-status-badge ${p2Completed === 5 ? 'status-completed' : 'status-pending'}`;
+    }
+
     const accuracy = this.state.user.totalQuestions > 0
-      ? Math.round((this.state.user.correctAnswers / this.state.user.totalQuestions) * 100)
+      ? Math.min(100, Math.round((this.state.user.correctAnswers / this.state.user.totalQuestions) * 100))
       : 0;
     const statsAccuracy = document.getElementById('stats-accuracy');
     if (statsAccuracy) statsAccuracy.textContent = `${accuracy}%`;
 
-    // Actualizar badges de estado de tarjetas del dashboard
-    this.updateStatusBadge('phishing', this.state.user.completedModules.phishing);
-    this.updateStatusBadge('pci', this.state.user.completedModules.pci);
-    this.updateStatusBadge('incident', this.state.user.completedModules.incident);
-    this.updateStatusBadge('password', this.state.user.completedModules.password);
-    this.updateStatusBadge('usb', this.state.user.completedModules.usb);
+    // Actualizar badges de estado de los 10 módulos
+    ALL_MODULE_KEYS.forEach(modKey => {
+      this.updateStatusBadge(modKey, Boolean(this.state.user.completedModules[modKey]));
+    });
 
-    // Si completó todos los módulos, habilitar botón de certificado
-    const certGrant = document.getElementById('cert-grant-container');
-    if (certGrant) {
-      if (completedCount === 5) {
-        certGrant.style.display = 'block';
-      } else {
-        certGrant.style.display = 'none';
-      }
+    // Botones de certificados por Fase
+    const certP1 = document.getElementById('cert-grant-phase1');
+    const certP2 = document.getElementById('cert-grant-phase2');
+    if (certP1) {
+      certP1.style.display = (p1Completed === 5 && (mode === 'phase1' || mode === 'both')) ? 'block' : 'none';
     }
+    if (certP2) {
+      certP2.style.display = (p2Completed === 5 && (mode === 'phase2' || mode === 'both')) ? 'block' : 'none';
+    }
+
+    this.updatePhaseVisibilityUI();
+    this.renderUserBadges(p1Completed, p2Completed);
+  }
+
+  renderUserBadges(p1Completed, p2Completed) {
+    const container = document.getElementById('user-badges-container');
+    if (!container) return;
+
+    const cm = this.state.user.completedModules;
+    const badges = [
+      { icon: '🕵️', name: 'Cazador de Phishing', unlocked: cm.phishing, desc: 'Módulo Phishing superado' },
+      { icon: '🧹', name: 'Escritorio Blindado', unlocked: cm.pci, desc: 'Política Clean Desk' },
+      { icon: '💳', name: 'Guardián PCI-DSS 4.0', unlocked: cm.pci_dss, desc: 'Protección de Tarjetas' },
+      { icon: '🤖', name: 'Centinela IA / DLP', unlocked: cm.ai_sec, desc: 'Prevención Shadow AI' },
+      { icon: '🏅', name: 'Graduado Fase 1', unlocked: p1Completed === 5, desc: '5/5 Módulos Básicos' },
+      { icon: '👑', name: 'Maestro CiberSeguro', unlocked: p1Completed === 5 && p2Completed === 5, desc: '10/10 Fase 1 + Fase 2' }
+    ];
+
+    container.innerHTML = badges.map(b => `
+      <div class="badge-chip ${b.unlocked ? 'unlocked' : 'locked'}" title="${b.desc}">
+        <span class="badge-chip-icon">${b.icon}</span>
+        <span class="badge-chip-name">${b.name}</span>
+      </div>
+    `).join('');
   }
 
   updateStatusBadge(gameId, isCompleted) {
@@ -439,40 +853,54 @@ class AppController {
   }
 
   getSecurityLevel(score) {
-    if (score >= 450) return 'Centinela de La Corporación Suiche 7B (Leyenda)';
-    if (score >= 350) return 'Guardián de Datos Élite';
+    if (score >= 1000) return 'Maestro CiberSeguro Suiche 7B (Élite F1+F2)';
+    if (score >= 600) return 'Centinela de La Corporación Suiche 7B';
+    if (score >= 380) return 'Guardián de Datos Transaccionales';
     if (score >= 220) return 'Analista de Defensa';
     if (score >= 100) return 'Operador Alerta';
     return 'Novicio de Seguridad';
   }
 
-  // Agregar puntuación al usuario y sincronizar con base de datos
+  // Agregar puntuación al usuario y sincronizar con base de datos (Con control Anti-Farming)
   async addPoints(points, isCorrectAnswer = true, moduleKey = null) {
-    this.state.user.score += points;
-    this.state.user.totalQuestions++;
-    if (isCorrectAnswer) {
-      this.state.user.correctAnswers++;
+    const activeModule = moduleKey || this.currentView;
+    const alreadyCompleted = Boolean(this.state.user.completedModules[activeModule]);
+
+    // Si el módulo no había sido completado aún, sumar localmente de forma inmediata
+    if (!alreadyCompleted) {
+      this.state.user.score += points;
+      this.state.user.totalQuestions++;
+      if (isCorrectAnswer) {
+        this.state.user.correctAnswers++;
+      }
     }
+
     this.saveState();
     this.updateUI();
 
-    // Sincronizar con backend si hay sesión
-    const activeModule = moduleKey || this.currentView;
-    if (this.state.user.id && ['phishing', 'pci', 'incident', 'password', 'usb'].includes(activeModule)) {
+    if (this.state.user.id && ALL_MODULE_KEYS.includes(activeModule)) {
       try {
         const response = await fetch(`${this.apiBaseUrl}/progress/update`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({
             userId: this.state.user.id,
             moduleKey: activeModule,
             scoreEarned: points,
-            isCompleted: this.state.user.completedModules[activeModule] || false,
+            isCompleted: alreadyCompleted,
             isCorrectAnswer: isCorrectAnswer
           })
         });
-        if (!response.ok) {
-          throw new Error(`La API rechazó la actualización de puntos (${response.status}).`);
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson.success && resJson.data) {
+            // Sincronizar con el valor autoritativo anti-farming de PostgreSQL
+            this.state.user.score = resJson.data.score;
+            this.state.user.correctAnswers = resJson.data.correctAnswers;
+            this.state.user.totalQuestions = resJson.data.totalQuestions;
+            this.saveState();
+            this.updateUI();
+          }
         }
       } catch (err) {
         console.warn('Error sincronizando puntos con backend:', err);
@@ -481,19 +909,19 @@ class AppController {
   }
 
   async markModuleCompleted(moduleId, scoreBonus = 0) {
+    const wasAlreadyCompleted = Boolean(this.state.user.completedModules[moduleId]);
     this.state.user.completedModules[moduleId] = true;
-    if (scoreBonus > 0) {
+    if (!wasAlreadyCompleted && scoreBonus > 0) {
       this.state.user.score += scoreBonus;
     }
     this.saveState();
     this.updateUI();
 
-    // Sincronizar módulo completado en PostgreSQL
     if (this.state.user.id) {
       try {
-        await fetch(`${this.apiBaseUrl}/progress/update`, {
+        const res = await fetch(`${this.apiBaseUrl}/progress/update`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({
             userId: this.state.user.id,
             moduleKey: moduleId,
@@ -502,6 +930,17 @@ class AppController {
             isCorrectAnswer: true
           })
         });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            this.state.user.score = json.data.score;
+            if (json.data.certificates) {
+              this.state.user.certificates = json.data.certificates;
+            }
+            this.saveState();
+            this.updateUI();
+          }
+        }
       } catch (err) {
         console.warn('Error sincronizando módulo completado con PostgreSQL:', err);
       }
@@ -533,24 +972,19 @@ class AppController {
 
     let leaderboard = [...this.leaderboardData];
 
-    // Marcar el departamento del usuario
     if (this.state.user.name && this.state.user.department) {
       const userDeptName = this.state.user.department.toLowerCase();
       leaderboard.forEach(d => {
-        if (d.dept && d.dept.toLowerCase().includes(userDeptName.substring(0, 5))) {
-          d.isUserDept = true;
-        }
+        d.isUserDept = Boolean(d.dept && d.dept.toLowerCase().includes(userDeptName.substring(0, 5)));
       });
     }
 
-    // Ordenar por porcentaje de acierto descendente
-    leaderboard.sort((a, b) => (b.correctPercent || 0) - (a.correctPercent || 0));
+    leaderboard.sort((a, b) => (b.totalScore || b.correctPercent || 0) - (a.totalScore || a.correctPercent || 0));
 
-    // Renderizar filas de forma segura
     container.innerHTML = '';
-    leaderboard.forEach((item, index) => {
+    leaderboard.slice(0, 8).forEach((item, index) => {
       const rank = index + 1;
-      let rankClass = rank <= 3 ? `rank-${rank}` : '';
+      const rankClass = rank <= 3 ? `rank-${rank}` : '';
       const isHighlight = item.isUserDept ? 'highlight' : '';
 
       const itemDiv = document.createElement('div');
@@ -579,7 +1013,9 @@ class AppController {
 
       const scoreSpan = document.createElement('span');
       scoreSpan.className = 'leaderboard-score';
-      scoreSpan.textContent = `${item.correctPercent || 0}%`;
+      scoreSpan.textContent = item.totalScore !== undefined
+        ? `${item.totalScore} PTS (${item.correctPercent || 0}%)`
+        : `${item.correctPercent || 0}%`;
 
       itemDiv.appendChild(leftDiv);
       itemDiv.appendChild(scoreSpan);
@@ -709,25 +1145,36 @@ class AppController {
     }
   }
 
-  // --- MODAL DE CERTIFICADOS ---
-  showCertificate() {
+  // --- MODAL DE CERTIFICADOS (SOPORTA FASE 1 Y FASE 2 VERIFICABLES EN BD) ---
+  showCertificate(phase = 'phase1') {
     this.playAudio('complete');
 
     const recipient = document.getElementById('cert-recipient');
     if (recipient) recipient.textContent = this.state.user.name;
 
-    const hash = btoa(encodeURIComponent(this.state.user.name + (this.state.user.score || 0))).substring(0, 8).toUpperCase();
-    const valCode = document.getElementById('cert-val-code');
-    if (valCode) valCode.textContent = `S7B-${hash}-SEC`;
-
-    // Fecha dinámica en español
-    const dateDisplay = document.getElementById('cert-date-display');
-    if (dateDisplay) {
-      const now = new Date();
-      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      dateDisplay.textContent = `${meses[now.getMonth()]} de ${now.getFullYear()}`;
+    const phaseLabel = document.getElementById('cert-phase-label');
+    if (phaseLabel) {
+      if (phase === 'phase2') {
+        phaseLabel.textContent = 'CERTIFICACIÓN FASE 2: ESPECIALISTA EN SEGURIDAD TRANSACCIONAL E IA';
+      } else {
+        phaseLabel.textContent = 'CERTIFICACIÓN FASE 1: FUNDAMENTOS DE CIBERSEGURIDAD CORPORATIVA';
+      }
     }
+
+    // Usar el código oficial emitido por PostgreSQL si está disponible, o generar código determinístico compatible
+    const serverCert = this.state.user.certificates && this.state.user.certificates[phase];
+    let codeText;
+    if (serverCert && serverCert.code) {
+      codeText = serverCert.code;
+    } else {
+      const prefix = phase === 'phase2' ? 'F2' : 'F1';
+      const hash = btoa(encodeURIComponent(this.state.user.name + phase)).replace(/[^A-Z0-9]/gi, '').substring(0, 6).toUpperCase();
+      const uid = String(this.state.user.id || 1).padStart(3, '0');
+      codeText = `S7B-${prefix}-${uid}-${hash}`;
+    }
+
+    const valCode = document.getElementById('cert-val-code');
+    if (valCode) valCode.textContent = codeText;
 
     const modal = document.getElementById('certificate-modal');
     if (modal) modal.classList.add('active');
@@ -739,7 +1186,7 @@ class AppController {
     if (modal) modal.classList.remove('active');
   }
 
-  // --- INICIALIZACIÓN DE JUEGOS ---
+  // --- INICIALIZACIÓN DE JUEGOS (FASE 1 Y FASE 2) ---
   startPhishingGame() {
     this.navigateTo('phishing');
     if (window.games && games.phishing) games.phishing.init();
@@ -763,6 +1210,32 @@ class AppController {
   startUsbGame() {
     this.navigateTo('usb');
     if (window.games && games.usb) games.usb.init();
+  }
+
+  // Inicializadores Fase 2
+  startAiSecGame() {
+    this.navigateTo('ai_sec');
+    if (window.games && games.ai_sec) games.ai_sec.init();
+  }
+
+  startPciDssGame() {
+    this.navigateTo('pci_dss');
+    if (window.games && games.pci_dss) games.pci_dss.init();
+  }
+
+  startQuishingMfaGame() {
+    this.navigateTo('quishing_mfa');
+    if (window.games && games.quishing_mfa) games.quishing_mfa.init();
+  }
+
+  startBecFraudGame() {
+    this.navigateTo('bec_fraud');
+    if (window.games && games.bec_fraud) games.bec_fraud.init();
+  }
+
+  startRemoteVpnGame() {
+    this.navigateTo('remote_vpn');
+    if (window.games && games.remote_vpn) games.remote_vpn.init();
   }
 
   // --- SISTEMA DE DIÁLOGOS DE SEGURIDAD PERSONALIZADOS ---
@@ -879,26 +1352,27 @@ class AppController {
 
   // --- EXPORTAR REPORTES (CSV/PDF) ---
   exportTableToCSV() {
-    const table = document.querySelector("#admin-dashboard-view table");
+    const table = document.querySelector('#admin-dashboard-view table');
     if (!table) return;
-    
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel
-    const rows = table.querySelectorAll("tr");
-    
+
+    let csvContent = 'data:text/csv;charset=utf-8,\uFEFF';
+    const rows = table.querySelectorAll('tr');
+
     rows.forEach(row => {
-      let rowData = [];
-      const cols = row.querySelectorAll("th, td");
-      cols.forEach(col => {
-        let text = col.innerText.replace(/"/g, '""'); // Escapar comillas
+      const rowData = [];
+      const cols = row.querySelectorAll('th, td');
+      // Omitir la última columna de botón "Detalle"
+      for (let i = 0; i < cols.length - 1; i++) {
+        const text = cols[i].innerText.replace(/"/g, '""');
         rowData.push(`"${text}"`);
-      });
-      csvContent += rowData.join(";") + "\r\n"; // Punto y coma para separar (mejor en español)
+      }
+      csvContent += rowData.join(';') + '\r\n';
     });
-    
+
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "auditoria_suiche7b_" + new Date().toISOString().split('T')[0] + ".csv");
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'auditoria_suiche7b_' + new Date().toISOString().split('T')[0] + '.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -906,7 +1380,7 @@ class AppController {
 
   exportTableToPDF() {
     if (typeof html2pdf === 'undefined') {
-      this.showModalAlert({ title: 'Exportación no disponible', message: 'No se pudo cargar el componente de PDF. Actualiza la página e intenta nuevamente.', type: 'danger' });
+      this.showModalAlert({ title: 'Exportación no disponible', message: 'No se pudo cargar el componente de PDF.', type: 'danger' });
       return;
     }
 
@@ -918,46 +1392,52 @@ class AppController {
 
     const generatedAt = new Date().toLocaleString('es-VE', { dateStyle: 'long', timeStyle: 'short' });
     const totalScore = document.getElementById('admin-total-score')?.textContent || '0 PTS';
+    const p1Modules = document.getElementById('admin-p1-modules')?.textContent || '0';
+    const p2Modules = document.getElementById('admin-p2-modules')?.textContent || '0';
     const completedModules = document.getElementById('admin-total-modules')?.textContent || '0';
     const successRate = document.getElementById('admin-success-rate')?.textContent || '0%';
+
     const element = document.createElement('div');
-    element.style.cssText = 'width:100%; padding:28px 32px; color:#172033; background:#ffffff; font-family:Arial,sans-serif;';
+    element.style.cssText = 'width:100%; padding:24px 28px; color:#172033; background:#ffffff; font-family:Arial,sans-serif;';
     element.innerHTML = `
-      <header style="display:flex; align-items:center; justify-content:space-between; padding-bottom:16px; border-bottom:3px solid #005e9c;">
+      <header style="display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:3px solid #005e9c;">
         <div style="display:flex; align-items:center; gap:14px;">
           <img src="img/logo-suiche7b.png" alt="Suiche 7B" style="height:38px; width:auto;">
           <div>
-            <div style="font-size:18px; font-weight:700; color:#005e9c;">Reporte de Auditoría de Entrenamiento</div>
-            <div style="font-size:10px; color:#536175; margin-top:3px;">Academia CiberSegura - Corporación Suiche 7B</div>
+            <div style="font-size:17px; font-weight:700; color:#005e9c;">Reporte Ejecutivo de Auditoría — Fase 1 y Fase 2</div>
+            <div style="font-size:10px; color:#536175; margin-top:3px;">Academia CiberSegura - Corporación Suiche 7B (${this.academyConfig.campaignName})</div>
           </div>
         </div>
         <div style="text-align:right; font-size:10px; color:#536175; line-height:1.5;">Generado el<br><strong style="color:#172033;">${generatedAt}</strong></div>
       </header>
-      <section style="display:flex; gap:12px; margin:18px 0;">
-        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #fbba0a; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Puntaje total</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${totalScore}</div></div>
-        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #b60e80; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Módulos completados</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${completedModules}</div></div>
-        <div style="flex:1; padding:10px 12px; border:1px solid #dbe3ee; border-left:4px solid #005e9c; background:#f8fafc;"><div style="font-size:9px; color:#536175; text-transform:uppercase;">Porcentaje de éxito</div><div style="font-size:19px; font-weight:700; margin-top:3px;">${successRate}</div></div>
+      <section style="display:flex; gap:10px; margin:16px 0;">
+        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #fbba0a; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Puntaje total</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${totalScore}</div></div>
+        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #357e32; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 1</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p1Modules}</div></div>
+        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #b60e80; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 2</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p2Modules}</div></div>
+        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #005e9c; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Total / Precisión</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${completedModules} (${successRate})</div></div>
       </section>
-      <h2 style="margin:0 0 10px; font-size:14px;">Detalle de usuarios</h2>
+      <h2 style="margin:0 0 8px; font-size:13px;">Detalle de avance por colaborador</h2>
     `;
-    const table = document.querySelector("#admin-dashboard-view table").cloneNode(true);
-    
-    // Aplicar estilos básicos para el PDF
+
+    const table = document.querySelector('#admin-dashboard-view table').cloneNode(true);
+    // Eliminar última columna de botón de acción en el clon para PDF limpio
+    table.querySelectorAll('tr').forEach(tr => {
+      if (tr.lastElementChild) tr.removeChild(tr.lastElementChild);
+    });
+
     table.style.width = '100%';
     table.style.borderCollapse = 'collapse';
     table.style.fontFamily = 'Arial, sans-serif';
-    table.style.fontSize = '9px';
-    
-    const cells = table.querySelectorAll('th, td');
-    cells.forEach(cell => {
+    table.style.fontSize = '8.5px';
+
+    table.querySelectorAll('th, td').forEach(cell => {
       cell.style.border = '1px solid #dbe3ee';
-      cell.style.padding = '7px';
+      cell.style.padding = '6px';
       cell.style.textAlign = 'left';
       cell.style.color = '#172033';
     });
-    
-    const headers = table.querySelectorAll('th');
-    headers.forEach(th => {
+
+    table.querySelectorAll('th').forEach(th => {
       th.style.backgroundColor = '#005e9c';
       th.style.color = '#ffffff';
       th.style.fontWeight = 'bold';
@@ -965,32 +1445,31 @@ class AppController {
 
     element.appendChild(table);
     element.insertAdjacentHTML('beforeend', `
-      <footer style="display:flex; justify-content:space-between; margin-top:18px; padding-top:10px; border-top:1px solid #dbe3ee; color:#536175; font-size:8px;">
-        <span>Uso interno - Información de auditoría y entrenamiento</span>
+      <footer style="display:flex; justify-content:space-between; margin-top:16px; padding-top:8px; border-top:1px solid #dbe3ee; color:#536175; font-size:8px;">
+        <span>Uso interno - Evidencia de Concientización y Cumplimiento (SUDEBAN / PCI-DSS)</span>
         <span>Corporación Suiche 7B</span>
       </footer>
     `);
 
     const opt = {
-      margin:       0.35,
-      filename:     `auditoria_suiche7b_${new Date().toISOString().slice(0, 10)}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      margin: 0.35,
+      filename: `auditoria_suiche7b_${new Date().toISOString().slice(0, 10)}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
     };
 
     html2pdf().set(opt).from(element).save().catch(() => {
-      this.showModalAlert({ title: 'Error de exportación', message: 'No fue posible generar el PDF. Intenta nuevamente.', type: 'danger' });
+      this.showModalAlert({ title: 'Error de exportación', message: 'No fue posible generar el PDF.', type: 'danger' });
     }).finally(() => {
       if (originalBtn) {
         originalBtn.disabled = false;
-        originalBtn.textContent = 'PDF';
+        originalBtn.textContent = '📄 Reporte Ejecutivo PDF';
       }
     });
   }
 }
 
-// Declarar variable global de instancia
 let app = new AppController();
 window.app = app;
 
@@ -1001,4 +1480,3 @@ window.addEventListener('DOMContentLoaded', () => {
     app.handleRegistration(e);
   });
 });
-

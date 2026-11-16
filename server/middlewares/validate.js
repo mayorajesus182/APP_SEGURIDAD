@@ -1,7 +1,8 @@
 /**
  * Middleware de Validación y Sanitización de Entradas
- * Previene XSS y datos malformados.
+ * Previene XSS, manipulación de IDs y datos malformados.
  */
+const { ALL_MODULES } = require('../config/db');
 
 // Función auxiliar para escapar caracteres HTML peligrosos
 const sanitizeString = (str) => {
@@ -49,31 +50,34 @@ const validateUserRegistration = (req, res, next) => {
   next();
 };
 
-// Validación para actualización de progreso
+// Validación para actualización de progreso (Soporta los 10 módulos de Fase 1 y Fase 2)
 const validateProgressUpdate = (req, res, next) => {
   const { userId, moduleKey, scoreEarned, isCompleted, isCorrectAnswer } = req.body;
 
-  const parsedUserId = parseInt(userId, 10);
-  if (isNaN(parsedUserId) || parsedUserId <= 0) {
+  // Si existe sesión JWT de usuario no-admin, forzar que el userId coincida con el token autenticado
+  const effectiveUserId = (req.auth && !req.auth.isAdmin && req.auth.id)
+    ? parseInt(req.auth.id, 10)
+    : parseInt(userId, 10);
+
+  if (isNaN(effectiveUserId) || effectiveUserId <= 0) {
     return res.status(400).json({
       success: false,
       error: 'ID de usuario inválido.'
     });
   }
 
-  const validModules = ['phishing', 'pci', 'incident', 'password', 'usb'];
-  if (!moduleKey || !validModules.includes(moduleKey)) {
+  if (!moduleKey || !ALL_MODULES.includes(moduleKey)) {
     return res.status(400).json({
       success: false,
-      error: 'Módulo de entrenamiento no reconocido.'
+      error: `Módulo de entrenamiento no reconocido (${moduleKey}).`
     });
   }
 
   const points = parseInt(scoreEarned, 10);
   req.sanitizedProgress = {
-    userId: parsedUserId,
+    userId: effectiveUserId,
     moduleKey,
-    scoreEarned: isNaN(points) ? 0 : Math.max(0, Math.min(points, 200)), // Límite razonable de puntos por módulo
+    scoreEarned: isNaN(points) ? 0 : Math.max(0, Math.min(points, 200)), // Límite razonable de puntos por acción
     isCompleted: Boolean(isCompleted),
     isCorrectAnswer: Boolean(isCorrectAnswer)
   };

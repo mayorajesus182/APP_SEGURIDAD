@@ -1,10 +1,11 @@
 /**
- * Rutas de la API REST Segura (/api/v1)
+ * Rutas de la API REST Segura (/api/v1) - Soporte Fase 1 + Fase 2
  */
 const express = require('express');
 const router = express.Router();
 
 const { authLimiter } = require('../config/security');
+const { requireAdmin, verifyUserOrOptional } = require('../config/jwt');
 const { validateUserRegistration, validateProgressUpdate } = require('../middlewares/validate');
 
 const {
@@ -21,33 +22,34 @@ const {
 const {
   getLeaderboard,
   getGeneralStats,
-  getUsersAudit
+  getUsersAudit,
+  getAcademySettings,
+  updateAcademySettings,
+  getCustomScenarios,
+  saveCustomScenarios,
+  verifyCertificate
 } = require('../controllers/statsController');
 
 const authController = require('../controllers/authController');
 
-// Middleware para verificar token de admin
-const requireAdmin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'No autorizado' });
-  }
-  const token = authHeader.split(' ')[1];
-  if (token !== process.env.ADMIN_TOKEN) {
-    return res.status(403).json({ success: false, message: 'Token inválido' });
-  }
-  next();
-};
-
 // --- Rutas de Usuarios y Autenticación ---
 router.get('/departments', getDepartments);
 router.post('/auth/login', authLimiter, authController.loginWithAD);
-// router.post('/users/register', authLimiter, validateUserRegistration, registerUser); // Deprecated
-router.get('/users/:id', getUserProfile);
+router.post('/users/register', authLimiter, validateUserRegistration, registerUser);
+router.get('/users/:id', verifyUserOrOptional, getUserProfile);
 
 // --- Rutas de Progreso de Entrenamiento ---
-router.post('/progress/update', validateProgressUpdate, updateProgress);
-router.post('/progress/reset/:userId', resetProgress);
+router.post('/progress/update', verifyUserOrOptional, validateProgressUpdate, updateProgress);
+router.post('/progress/reset/:userId', verifyUserOrOptional, resetProgress);
+
+// --- Rutas de Configuración de Fases y Escenarios (Fase 1 / Fase 2 / Ambas) ---
+router.get('/settings/phase', getAcademySettings);
+router.post('/settings/phase', requireAdmin, updateAcademySettings);
+router.get('/settings/scenarios', getCustomScenarios);
+router.post('/settings/scenarios', requireAdmin, saveCustomScenarios);
+
+// --- Rutas de Certificados Verificables ---
+router.get('/certificates/verify/:code', verifyCertificate);
 
 // --- Rutas de Leaderboard y Métricas ---
 router.get('/stats/leaderboard', getLeaderboard);
