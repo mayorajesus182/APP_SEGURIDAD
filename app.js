@@ -6,7 +6,8 @@
 
 const PHASE1_KEYS = ['phishing', 'pci', 'incident', 'password', 'usb'];
 const PHASE2_KEYS = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
-const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_KEYS];
+const ARCADE_KEYS = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'];
+const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_KEYS, ...ARCADE_KEYS];
 
 const MODULE_LABELS = {
   phishing: '1. Phishing Detective (F1)',
@@ -18,7 +19,11 @@ const MODULE_LABELS = {
   pci_dss: '7. PCI-DSS 4.0 Transaccional (F2)',
   quishing_mfa: '8. Quishing QR y Fatiga MFA (F2)',
   bec_fraud: '9. Fraude Ejecutivo BEC (F2)',
-  remote_vpn: '10. Teletrabajo, VPN y Wi-Fi (F2)'
+  remote_vpn: '10. Teletrabajo, VPN y Wi-Fi (F2)',
+  arcade_jornada: 'A. Jornada Crítica 3D (Arcade)',
+  arcade_bandeja: 'B. Bandeja Blindada 3D (Arcade)',
+  arcade_cartas: 'C. Caza-Fraudes Duelo Cartas (Arcade)',
+  arcade_boveda: 'D. La Bóveda Digital 3D (Arcade)'
 };
 
 class AppController {
@@ -51,7 +56,11 @@ class AppController {
           pci_dss: false,
           quishing_mfa: false,
           bec_fraud: false,
-          remote_vpn: false
+          remote_vpn: false,
+          arcade_jornada: false,
+          arcade_bandeja: false,
+          arcade_cartas: false,
+          arcade_boveda: false
         },
         certificates: {},
         attempts: 0,
@@ -82,6 +91,10 @@ class AppController {
     await this.fetchAcademySettingsFromDB();
     await this.fetchCustomScenariosFromDB();
     await this.fetchLeaderboardFromDB();
+
+    // Inicializar Motor 3D de Red Interbancaria y Física 3D Tilt en Tarjetas
+    this.init3DGlobeEngine();
+    this.init3DTiltCards();
 
     const audioBtn = document.getElementById('audio-toggle-btn');
     if (audioBtn) {
@@ -216,6 +229,7 @@ class AppController {
 
     this.playAudio('click');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.arcade && typeof window.arcade.onNavigate === 'function') window.arcade.onNavigate(viewId);
   }
 
   // --- REGISTRO / AUTENTICACIÓN SEGURA ---
@@ -414,7 +428,7 @@ class AppController {
   // --- FILTRO DE PESTAÑAS DE FASE EN DASHBOARD DE COLABORADOR ---
   setUserPhaseFilter(filter) {
     this.userPhaseFilter = filter;
-    ['all', 'phase1', 'phase2'].forEach(f => {
+    ['all', 'phase1', 'phase2', 'arcade'].forEach(f => {
       const btn = document.getElementById(`tab-btn-${f}`);
       if (btn) {
         if (f === filter) btn.classList.add('active');
@@ -429,6 +443,7 @@ class AppController {
     const mode = this.academyConfig.activePhaseMode || 'both';
     const p1Block = document.getElementById('phase1-section-block');
     const p2Block = document.getElementById('phase2-section-block');
+    const arcBlock = document.getElementById('arcade-section-block');
     const tabsBar = document.getElementById('user-phase-tabs');
     const phaseBadge = document.getElementById('dash-active-phase-badge');
     const campaignBadge = document.getElementById('dash-campaign-badge');
@@ -441,26 +456,35 @@ class AppController {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'block';
       if (p2Block) p2Block.style.display = 'none';
+      if (arcBlock) arcBlock.style.display = 'block';
       if (phaseBadge) phaseBadge.textContent = '🛡️ Fase 1 Activa (Nivel Básico)';
     } else if (mode === 'phase2') {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'none';
       if (p2Block) p2Block.style.display = 'block';
+      if (arcBlock) arcBlock.style.display = 'block';
       if (phaseBadge) phaseBadge.textContent = '🚀 Fase 2 Activa (Nivel Especialista)';
     } else {
       // mode === 'both'
       if (tabsBar) tabsBar.style.display = 'flex';
-      if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1 y Fase 2 Activas';
+      if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1, Fase 2 y Arcade 3D Activos';
 
       if (this.userPhaseFilter === 'phase1') {
         if (p1Block) p1Block.style.display = 'block';
         if (p2Block) p2Block.style.display = 'none';
+        if (arcBlock) arcBlock.style.display = 'none';
       } else if (this.userPhaseFilter === 'phase2') {
         if (p1Block) p1Block.style.display = 'none';
         if (p2Block) p2Block.style.display = 'block';
+        if (arcBlock) arcBlock.style.display = 'none';
+      } else if (this.userPhaseFilter === 'arcade') {
+        if (p1Block) p1Block.style.display = 'none';
+        if (p2Block) p2Block.style.display = 'none';
+        if (arcBlock) arcBlock.style.display = 'block';
       } else {
         if (p1Block) p1Block.style.display = 'block';
         if (p2Block) p2Block.style.display = 'block';
+        if (arcBlock) arcBlock.style.display = 'block';
       }
     }
 
@@ -792,6 +816,13 @@ class AppController {
       p2Pill.className = `game-status-badge ${p2Completed === 5 ? 'status-completed' : 'status-pending'}`;
     }
 
+    const arcCompleted = ARCADE_KEYS.filter(k => this.state.user.completedModules[k]).length;
+    const arcPill = document.getElementById('arcade-progress-pill');
+    if (arcPill) {
+      arcPill.textContent = `${arcCompleted} / 4 Jugados`;
+      arcPill.className = `game-status-badge ${arcCompleted === 4 ? 'status-completed' : 'status-pending'}`;
+    }
+
     const accuracy = this.state.user.totalQuestions > 0
       ? Math.min(100, Math.round((this.state.user.correctAnswers / this.state.user.totalQuestions) * 100))
       : 0;
@@ -815,6 +846,261 @@ class AppController {
 
     this.updatePhaseVisibilityUI();
     this.renderUserBadges(p1Completed, p2Completed);
+    this.renderSkillsRadar();
+  }
+
+  // --- GRÁFICO DE RADAR HEXAGONAL DE COMPETENCIAS CIBERSEGURAS (SVG DINÁMICO) ---
+  renderSkillsRadar() {
+    const container = document.getElementById('skills-radar-container');
+    if (!container) return;
+
+    const cm = this.state.user.completedModules;
+    const axes = [
+      { label: 'Phishing', val: cm.phishing ? 100 : 25 },
+      { label: 'Física/USB', val: (cm.pci ? 50 : 12) + (cm.usb ? 50 : 13) },
+      { label: 'Vishing/BEC', val: (cm.incident ? 50 : 12) + (cm.bec_fraud ? 50 : 13) },
+      { label: 'Claves/MFA', val: (cm.password ? 50 : 12) + (cm.quishing_mfa ? 50 : 13) },
+      { label: 'PCI-DSS 4.0', val: cm.pci_dss ? 100 : 25 },
+      { label: 'IA / VPN', val: (cm.ai_sec ? 50 : 12) + (cm.remote_vpn ? 50 : 13) }
+    ];
+
+    const size = 210;
+    const cx = size / 2;
+    const cy = size / 2;
+    const maxR = 68;
+
+    const getPoint = (idx, radiusRatio) => {
+      const angle = (Math.PI * 2 * idx) / axes.length - Math.PI / 2;
+      const r = maxR * radiusRatio;
+      return {
+        x: (cx + r * Math.cos(angle)).toFixed(1),
+        y: (cy + r * Math.sin(angle)).toFixed(1)
+      };
+    };
+
+    const ringsHtml = [0.33, 0.66, 1.0].map(ratio => {
+      const pts = axes.map((_, i) => {
+        const p = getPoint(i, ratio);
+        return `${p.x},${p.y}`;
+      }).join(' ');
+      return `<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>`;
+    }).join('');
+
+    const spokesHtml = axes.map((axis, i) => {
+      const end = getPoint(i, 1.0);
+      const lbl = getPoint(i, 1.26);
+      return `
+        <line x1="${cx}" y1="${cy}" x2="${end.x}" y2="${end.y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <text x="${lbl.x}" y="${lbl.y}" fill="#94a3b8" font-size="8.5" font-weight="600" text-anchor="middle" dominant-baseline="middle">${axis.label}</text>
+      `;
+    }).join('');
+
+    const dataPoints = axes.map((axis, i) => {
+      const p = getPoint(i, axis.val / 100);
+      return `${p.x},${p.y}`;
+    }).join(' ');
+
+    const dotsHtml = axes.map((axis, i) => {
+      const p = getPoint(i, axis.val / 100);
+      return `<circle cx="${p.x}" cy="${p.y}" r="3.2" fill="#fbba0a" stroke="#060913" stroke-width="1.2"/>`;
+    }).join('');
+
+    container.innerHTML = `
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible;">
+        <defs>
+          <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="rgba(0, 94, 156, 0.65)"/>
+            <stop offset="100%" stop-color="rgba(251, 186, 10, 0.55)"/>
+          </linearGradient>
+        </defs>
+        ${ringsHtml}
+        ${spokesHtml}
+        <polygon points="${dataPoints}" fill="url(#radarGrad)" stroke="#fbba0a" stroke-width="2" style="transition: all 0.5s ease;"/>
+        ${dotsHtml}
+      </svg>
+    `;
+  }
+
+  // --- MOTOR 3D ULTRALIGERO: ESFERA INTERBANCARIA Y RED DE NODOS EN TIEMPO REAL ---
+  init3DGlobeEngine() {
+    const canvas = document.getElementById('cyber-globe-3d-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    // Crear 42 nodos distribuidos en una esfera 3D (Fibonacci Sphere)
+    const numNodes = 42;
+    const nodes = [];
+    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+    for (let i = 0; i < numNodes; i++) {
+      const theta = (2 * Math.PI * i) / goldenRatio;
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / numNodes);
+      nodes.push({
+        x: Math.cos(theta) * Math.sin(phi),
+        y: Math.sin(theta) * Math.sin(phi),
+        z: Math.cos(phi),
+        color: i % 5 === 0 ? '#fbba0a' : i % 3 === 0 ? '#b60e80' : '#0088ff'
+      });
+    }
+
+    let rotY = 0;
+    let rotX = 0.25;
+    let targetRotX = 0.25;
+    let targetRotYSpeed = 0.003;
+
+    window.addEventListener('mousemove', (e) => {
+      const nx = (e.clientX / width) - 0.5;
+      const ny = (e.clientY / height) - 0.5;
+      targetRotX = 0.25 + ny * 0.5;
+      targetRotYSpeed = 0.003 + nx * 0.006;
+    }, { passive: true });
+
+    const renderFrame = () => {
+      if (!document.hidden) {
+        ctx.clearRect(0, 0, width, height);
+
+        rotY += targetRotYSpeed;
+        rotX += (targetRotX - rotX) * 0.05;
+
+        const radius = Math.min(width, height) * 0.36;
+        const fov = 550;
+        const cx = width * 0.5;
+        const cy = height * 0.5;
+
+        const cosY = Math.cos(rotY);
+        const sinY = Math.sin(rotY);
+        const cosX = Math.cos(rotX);
+        const sinX = Math.sin(rotX);
+
+        const projected = nodes.map(n => {
+          // Rotación 3D en eje Y y eje X
+          const x1 = n.x * radius * cosY - n.z * radius * sinY;
+          const z1 = n.z * radius * cosY + n.x * radius * sinY;
+          const y2 = n.y * radius * cosX - z1 * sinX;
+          const z2 = z1 * cosX + n.y * radius * sinX;
+
+          const scale = fov / (fov + z2 + 220);
+          return {
+            px: cx + x1 * scale,
+            py: cy + y2 * scale,
+            z: z2,
+            scale,
+            color: n.color
+          };
+        });
+
+        // Dibujar conexiones 3D cercanas
+        ctx.lineWidth = 1;
+        for (let i = 0; i < projected.length; i++) {
+          for (let j = i + 1; j < projected.length; j++) {
+            const a = projected[i];
+            const b = projected[j];
+            const dx = a.px - b.px;
+            const dy = a.py - b.py;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 18500) {
+              const alpha = (1 - distSq / 18500) * 0.22;
+              ctx.strokeStyle = `rgba(0, 150, 255, ${alpha.toFixed(3)})`;
+              ctx.beginPath();
+              ctx.moveTo(a.px, a.py);
+              ctx.lineTo(b.px, b.py);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Dibujar nodos con profundidad 3D
+        projected.forEach(p => {
+          const r = Math.max(1.5, 3.6 * p.scale);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0.2, Math.min(0.85, p.scale));
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+      }
+      requestAnimationFrame(renderFrame);
+    };
+
+    requestAnimationFrame(renderFrame);
+  }
+
+  // --- FÍSICA 3D TILT & HOLOGRAPHIC GLARE EN TARJETAS Y DIPLOMA ---
+  init3DTiltCards() {
+    const attachTilt = (card, maxDeg = 8) => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const pctX = (x / rect.width) - 0.5;
+        const pctY = (y / rect.height) - 0.5;
+
+        const rotX = (-pctY * maxDeg * 2).toFixed(2);
+        const rotY = (pctX * maxDeg * 2).toFixed(2);
+
+        card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+        card.style.setProperty('--glare-x', `${(x / rect.width) * 100}%`);
+        card.style.setProperty('--glare-y', `${(y / rect.height) * 100}%`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
+    };
+
+    document.querySelectorAll('.game-card, .phase-mode-card, .certificate-frame').forEach(el => {
+      attachTilt(el, 7);
+    });
+  }
+
+  // --- EXPLOSIÓN DE PARTÍCULAS 3D AL MOSTRAR CERTIFICADO ---
+  launchCertificateParticles() {
+    const canvas = document.getElementById('cert-particles-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 65 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 0.7) * 14,
+      size: 3 + Math.random() * 5,
+      color: ['#fbba0a', '#0088ff', '#b60e80', '#4ade80'][Math.floor(Math.random() * 4)],
+      alpha: 1
+    }));
+
+    let frame = 0;
+    const animate = () => {
+      frame++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.22; // gravedad
+        p.alpha = Math.max(0, 1 - frame / 95);
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      });
+      ctx.globalAlpha = 1;
+      if (frame < 95) {
+        requestAnimationFrame(animate);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    };
+    requestAnimationFrame(animate);
   }
 
   renderUserBadges(p1Completed, p2Completed) {
@@ -828,6 +1114,7 @@ class AppController {
       { icon: '💳', name: 'Guardián PCI-DSS 4.0', unlocked: cm.pci_dss, desc: 'Protección de Tarjetas' },
       { icon: '🤖', name: 'Centinela IA / DLP', unlocked: cm.ai_sec, desc: 'Prevención Shadow AI' },
       { icon: '🏅', name: 'Graduado Fase 1', unlocked: p1Completed === 5, desc: '5/5 Módulos Básicos' },
+      { icon: '🕹️', name: 'Campeón Arcade 3D', unlocked: ARCADE_KEYS.some(k => cm[k]), desc: 'Superó un Juego de la Zona Arcade 3D' },
       { icon: '👑', name: 'Maestro CiberSeguro', unlocked: p1Completed === 5 && p2Completed === 5, desc: '10/10 Fase 1 + Fase 2' }
     ];
 
@@ -1155,9 +1442,9 @@ class AppController {
     const phaseLabel = document.getElementById('cert-phase-label');
     if (phaseLabel) {
       if (phase === 'phase2') {
-        phaseLabel.textContent = 'CERTIFICACIÓN FASE 2: ESPECIALISTA EN SEGURIDAD TRANSACCIONAL E IA';
+        phaseLabel.textContent = '(Fase 2: Seguridad Transaccional e IA)';
       } else {
-        phaseLabel.textContent = 'CERTIFICACIÓN FASE 1: FUNDAMENTOS DE CIBERSEGURIDAD CORPORATIVA';
+        phaseLabel.textContent = '(Fase 1: Ciberseguridad Corporativa)';
       }
     }
 
@@ -1178,6 +1465,7 @@ class AppController {
 
     const modal = document.getElementById('certificate-modal');
     if (modal) modal.classList.add('active');
+    this.launchCertificateParticles();
   }
 
   hideCertificate() {
@@ -1236,6 +1524,12 @@ class AppController {
   startRemoteVpnGame() {
     this.navigateTo('remote_vpn');
     if (window.games && games.remote_vpn) games.remote_vpn.init();
+  }
+
+  // Juegos Arcade (extra, no afectan certificados)
+  startArcadeGame(key) {
+    this.navigateTo(key);
+    if (window.arcade) window.arcade.open(key);
   }
 
   // --- SISTEMA DE DIÁLOGOS DE SEGURIDAD PERSONALIZADOS ---

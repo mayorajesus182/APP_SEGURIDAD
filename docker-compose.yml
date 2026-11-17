@@ -1,12 +1,26 @@
 services:
 
   db:
-    # Última versión estable: postgres:18-alpine (Nota: si tu volumen postgres_data ya fue creado con PG 16, haz backup antes de cambiar de 16 a 18 o usa postgres:16-alpine)
+    # Nota: Si tu volumen postgres_data actual en serpensv4 ya fue inicializado con PostgreSQL 16,
+    # mantén postgres:16-alpine (o haz pg_dump antes de pasar a postgres:18-alpine).
     image: postgres:18-alpine
     container_name: suiche7b_postgres_db
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    shm_size: 256mb
+    deploy:
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 768M
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       POSTGRES_DB: ${DB_NAME:-ciberseguridad_db}
       POSTGRES_USER: ${DB_USER:-s7b_security_admin}
@@ -17,7 +31,7 @@ services:
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: [ 'CMD-SHELL', 'pg_isready -U ${DB_USER:-s7b_security_admin} -d ${DB_NAME:-ciberseguridad_db}' ]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
@@ -34,6 +48,18 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+        reservations:
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     expose:
       - '8085'
     environment:

@@ -13,14 +13,14 @@ const configureHelmet = () => {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrcAttr: ["'unsafe-inline'"], // Permite onclick/onload inline (Helmet pone 'none' por defecto)
+        scriptSrcAttr: ["'unsafe-inline'"], // Permite onclick/onload inline
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'", "https://academiasi.suiche7b.com"],
+        connectSrc: ["'self'", "https://academiasi.suiche7b.com", "http://localhost:8085", "http://127.0.0.1:8085"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
+        upgradeInsecureRequests: null, // Gestionado por Nginx en producción; permite pruebas locales HTTP sin bloqueo TLS
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -59,12 +59,15 @@ const authLimiter = rateLimit({
   },
 });
 
-// 4. Configuración CORS
+// 4. Configuración CORS (Soporta dominio corporativo e instancias locales de prueba)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Permitir solicitudes del mismo origen o localhost/servidor web interno
-    const allowed = process.env.CORS_ORIGIN || 'https://academiasi.suiche7b.com';
-    if (allowed === '*' || !origin || allowed.split(',').includes(origin)) {
+    if (!origin) return callback(null, true);
+    const allowedEnv = (process.env.CORS_ORIGIN || 'https://academiasi.suiche7b.com').toLowerCase();
+    const normalizedOrigin = origin.toLowerCase();
+    const isLocalhost = normalizedOrigin.startsWith('http://localhost:') || normalizedOrigin.startsWith('http://127.0.0.1:');
+
+    if (allowedEnv === '*' || isLocalhost || allowedEnv.split(',').map(s => s.trim()).includes(normalizedOrigin)) {
       callback(null, true);
     } else {
       callback(new Error('Acceso bloqueado por política de CORS'));

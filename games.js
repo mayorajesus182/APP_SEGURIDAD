@@ -5,6 +5,44 @@
  * Quishing & Fatiga MFA, Fraude Ejecutivo (BEC), Teletrabajo & Redes Wi-Fi (Evil Twin).
  */
 
+/**
+ * Baraja un arreglo de opciones de respuesta (Fisher-Yates) y garantiza que la posición
+ * de la respuesta correcta cambie dinámicamente en cada pregunta (nunca fija en la primera opción).
+ */
+function shuffleOptions(options, gameInstance = null) {
+  if (!Array.isArray(options) || options.length <= 1) return options ? [...options] : [];
+  const cloned = options.map(opt => ({ ...opt }));
+
+  const getCorrectIdx = (arr) =>
+    arr.findIndex(o => o.isCorrect === true || (typeof o.points === 'number' && o.points > 0));
+
+  const lastIdx = (gameInstance && typeof gameInstance._lastCorrectIdx === 'number')
+    ? gameInstance._lastCorrectIdx
+    : (typeof window !== 'undefined' && typeof window._lastGlobalCorrectIdx === 'number'
+      ? window._lastGlobalCorrectIdx
+      : 0);
+
+  for (let attempt = 0; attempt < 12; attempt++) {
+    for (let i = cloned.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+    }
+    const cIdx = getCorrectIdx(cloned);
+    if (cIdx !== -1 && cIdx !== lastIdx) {
+      break;
+    }
+  }
+
+  const finalIdx = getCorrectIdx(cloned);
+  if (finalIdx !== -1) {
+    if (gameInstance) gameInstance._lastCorrectIdx = finalIdx;
+    if (typeof window !== 'undefined') window._lastGlobalCorrectIdx = finalIdx;
+  }
+
+  return cloned;
+}
+window.shuffleOptions = shuffleOptions;
+
 // ============================================================================
 // FASE 1 — MÓDULO 1: PHISHING DETECTIVE
 // ============================================================================
@@ -331,7 +369,13 @@ class PciGame {
     const list = document.getElementById('pci-items-list');
     list.innerHTML = '';
 
-    this.dataItems.forEach(item => {
+    const shuffledItems = [...this.dataItems];
+    for (let i = shuffledItems.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledItems[i], shuffledItems[j]] = [shuffledItems[j], shuffledItems[i]];
+    }
+
+    shuffledItems.forEach(item => {
       list.innerHTML += `
         <div class="pci-data-card" id="pci-card-${item.id}" draggable="true" ondragstart="games.pci.handleDragStart(event, '${item.id}')">
           <div class="pci-data-desc">
@@ -662,7 +706,8 @@ class IncidentGame {
     const optionsContainer = document.getElementById('incident-options-list');
     optionsContainer.innerHTML = '';
 
-    node.options.forEach((opt, idx) => {
+    this.currentOptions = shuffleOptions(node.options, this);
+    this.currentOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'story-option-btn';
       btn.innerHTML = `
@@ -830,7 +875,25 @@ class PasswordGame {
     this.updateRuleUI('rule-number', rules.number);
     this.updateRuleUI('rule-symbol', rules.symbol);
 
+    // Actualizar anillos 3D de la Bóveda Criptográfica
+    const ringMap = [
+      { id: 'vault-ring-1', ok: rules.length },
+      { id: 'vault-ring-2', ok: rules.upper },
+      { id: 'vault-ring-3', ok: rules.number },
+      { id: 'vault-ring-4', ok: rules.symbol }
+    ];
+    ringMap.forEach(r => {
+      const rEl = document.getElementById(r.id);
+      if (rEl) {
+        if (r.ok) rEl.classList.add('ring-locked');
+        else rEl.classList.remove('ring-locked');
+      }
+    });
+    const lockIcon = document.getElementById('vault-lock-icon');
     const metCount = Object.values(rules).filter(Boolean).length;
+    if (lockIcon) {
+      lockIcon.textContent = metCount === 4 ? '🔒' : '🔓';
+    }
 
     const strengthText = document.getElementById('password-strength-text');
     const bars = [
@@ -952,9 +1015,9 @@ class UsbGame {
           location: "Pasillo Principal / Ascensores"
         },
         options: [
-          { text: "🟢 Entregarla de inmediato a la Gerencia de Seguridad de la Información sin conectarla", isCorrect: true },
-          { text: "🟡 Insertarla en tu computador Corporativo para abrir el archivo y buscar el dueño", isCorrect: false },
-          { text: "🔴 Formatear la memoria USB en tu computador Corporativo para usarla como almacenamiento personal", isCorrect: false }
+          { text: "Entregarla de inmediato a la Gerencia de Seguridad de la Información sin conectarla", isCorrect: true },
+          { text: "Insertarla en tu computador Corporativo para abrir el archivo y buscar el dueño", isCorrect: false },
+          { text: "Formatear la memoria USB en tu computador Corporativo para usarla como almacenamiento personal", isCorrect: false }
         ],
         explanation: "Las memorias USB caídas en pasillos, estacionamientos o baños suelen ser un ataque de <strong>Ingeniería Social llamado Baiting (Cebado)</strong>. Al insertar el pendrive, scripts maliciosos automáticos (BadUSB) infectan la computadora y la red corporativa de La Corporación Suiche 7B sin que te des cuenta."
       },
@@ -967,9 +1030,9 @@ class UsbGame {
           location: "Sala de Reuniones"
         },
         options: [
-          { text: "🟢 Indicarle amablemente un tomacorriente de pared y negarle la conexión a tu puerto USB", isCorrect: true },
-          { text: "🟡 Permitirle conectar su celular en tu computador Corporativo mientras vigilas la pantalla", isCorrect: false },
-          { text: "🔴 Prestarle tu computador Corporativo para que transfiera fotos de su trabajo", isCorrect: false }
+          { text: "Indicarle amablemente un tomacorriente de pared y negarle la conexión a tu puerto USB", isCorrect: true },
+          { text: "Permitirle conectar su celular en tu computador Corporativo mientras vigilas la pantalla", isCorrect: false },
+          { text: "Prestarle tu computador Corporativo para que transfiera fotos de su trabajo", isCorrect: false }
         ],
         explanation: "Los teléfonos inteligentes y cables USB modificados (O.MG Cables) pueden ejecutar transferencia de archivos y scripts de exfiltración de datos en el momento en que se conectan a un puerto USB corporativo."
       },
@@ -982,9 +1045,9 @@ class UsbGame {
           location: "Mesa de Reuniones"
         },
         options: [
-          { text: "🟢 Notificar a la Gerencia de Seguridad de la Información / Plataforma TI para su resguardo", isCorrect: true },
-          { text: "🟡 Conectarlo en tu computador Corporativo para explorar sus carpetas e identificar a quién pertenece", isCorrect: false },
-          { text: "🔴 Llevarte el disco duro a tu casa para probarlo en tu computadora personal", isCorrect: false }
+          { text: "Notificar a la Gerencia de Seguridad de la Información / Plataforma TI para su resguardo", isCorrect: true },
+          { text: "Conectarlo en tu computador Corporativo para explorar sus carpetas e identificar a quién pertenece", isCorrect: false },
+          { text: "Llevarte el disco duro a tu casa para probarlo en tu computadora personal", isCorrect: false }
         ],
         explanation: "Nunca debemos inspeccionar archivos de dispositivos de almacenamiento desconocidos por nuestra cuenta. La Gerencia de Seguridad de la Información cuenta con entornos aislados (Sandbox) para analizar la integridad de estos dispositivos."
       }
@@ -1019,14 +1082,16 @@ class UsbGame {
     const container = document.getElementById('usb-options-container');
     container.innerHTML = '';
 
-    currentCase.options.forEach((opt, idx) => {
+    this.currentOptions = shuffleOptions(currentCase.options, this);
+    const letters = ['A', 'B', 'C'];
+    this.currentOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
       btn.style.textAlign = 'left';
       btn.style.padding = '0.75rem 1rem';
       btn.style.lineHeight = '1.4';
       btn.style.fontSize = '0.85rem';
-      btn.textContent = opt.text;
+      btn.textContent = `${letters[idx] || idx + 1}) ${opt.text}`;
       btn.onclick = () => this.makeDecision(idx);
       container.appendChild(btn);
     });
@@ -1039,8 +1104,9 @@ class UsbGame {
     this.hasAnswered = true;
 
     const currentCase = this.cases[this.currentCaseIndex];
-    const selectedOption = currentCase.options[optionIdx];
-    const isCorrect = selectedOption.isCorrect;
+    const optionsList = this.currentOptions || currentCase.options;
+    const selectedOption = optionsList[optionIdx];
+    const isCorrect = selectedOption ? selectedOption.isCorrect : false;
 
     const feedbackOverlay = document.getElementById('usb-feedback');
     feedbackOverlay.style.display = 'block';
@@ -1101,91 +1167,39 @@ class UsbGame {
 }
 
 // ============================================================================
-// FASE 2 — MÓDULO 6: IA GENERATIVA Y FUGA DE DATOS (SHADOW AI / DLP)
+// FASE 2 — MÓDULO 6: USO SEGURO DE CHATGPT E IA EN LA OFICINA (TAPA LOS DATOS)
 // ============================================================================
 class AiSecurityGame {
   constructor() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
+    this.brainAnimId = null;
+    this.redactedTokens = new Set();
 
     this.cases = [
       {
         id: 1,
-        context: "Depuración de Tramas del Switch Transaccional en ChatGPT Público",
-        department: "Dirección Tecnología / Operaciones",
-        promptText: `
-          Hola IA, necesito ayuda urgente para entender por qué falla esta transacción interbancaria de Corporación Suiche 7B. Aquí te pego el volcado real de producción:
-          <br><br>
-          <span class="inspectable" data-clue="pan_leak">MTI=0200 | DE2(PAN)=4509128839104421 | DE35(Track2)=4509128839104421=28102019938 | DE52(PINBlock)=A8F9012B9C881102</span>
-          <br><br>
-          Además, nos conectamos al nodo con <span class="inspectable" data-clue="ip_leak">Usuario: srv_switch_prod / Clave: S7B_ Core_9921$ en la IP 129.1.1.85</span>. ¿Qué campo ISO-8583 está causando el rechazo RC=96?
-        `,
-        isSafe: false,
-        clues: {
-          pan_leak: {
-            title: "Fuga Crítica de Datos PCI-DSS (PAN, Track2 y PIN Block)",
-            text: "Subir números de tarjeta reales (PAN), datos de banda magnética (Track 2) o bloques PIN a un modelo de IA público en la nube constituye una brecha grave de seguridad y violación directa de PCI-DSS.",
-            isHazard: true
-          },
-          ip_leak: {
-            title: "Exposición de Credenciales e Infraestructura Interna",
-            text: "Los prompts enviados a IAs públicas gratuitas pueden almacenarse para entrenar futuros modelos o ser revisados por terceros externos. Jamás incluyas IPs internas ni contraseñas de producción.",
-            isHazard: true
-          }
-        },
-        explanation: "<strong>¡Violación Crítica de DLP (Data Loss Prevention)!</strong> Nunca debes pegar datos reales de tarjetahabientes, tramas de producción sin anonimizar, código propietario crítico ni credenciales en chatbots de IA públicos (Shadow AI)."
+        context: "Carta de Trabajo y Aumento de Sueldo en Capital Humano",
+        department: "Gerencia Capital Humano / Administración",
+        template: `Hola ChatGPT, ayúdame a redactar una carta de felicitación con un <span class="dlp-token" data-token="t_rc" data-sensitive="false">[Tono Cordial y Motivador]</span> por <span class="dlp-token" data-token="t_mti" data-sensitive="false">[Buen Desempeño Anual]</span>.<br><br>Aquí están los datos del trabajador para que armes el texto:<br>• Colaborador: <span class="dlp-token" data-token="t_pan" data-sensitive="true">[María Gómez — Cédula V-15.442.910]</span><br>• Nuevo Sueldo Confidencial: <span class="dlp-token" data-token="t_track2" data-sensitive="true">[Sueldo Mensual + Bono Ejecutivo Confidencial]</span><br>• Cuenta Nómina: <span class="dlp-token" data-token="t_cred" data-sensitive="true">[Cuenta Bancaria 0134-0092-18-9928371]</span>`,
+        sensitiveKeys: ['t_pan', 't_track2', 't_cred'],
+        explanation: "<strong>¡Excelente!</strong> Puedes usar ChatGPT para que te ayude a redactar una carta con buen tono, pero <strong>siempre debes tapar u omitir nombres reales, números de cédula, sueldos y cuentas bancarias</strong> del personal de Suiche 7B."
       },
       {
         id: 2,
-        context: "Consulta de Sintaxis General y Fórmulas de Excel Anonimizadas",
-        department: "Gerencia Gestión Estratégica / Finanzas",
-        promptText: `
-          Hola asistente, necesito crear una macro o fórmula en Excel para consolidar una tabla de indicadores mensuales.
-          <br><br>
-          Las columnas tienen nombres genéricos: <span class="inspectable" data-clue="anon_data">Columna A (Fecha), Columna B (Código_Categoría), Columna C (Porcentaje_Disponibilidad)</span>.
-          <br><br>
-          ¿Puedes darme una fórmula con <span class="inspectable" data-clue="formula_req">SUMAR.SI.CONJUNTO y Manejo de Errores SI.ERROR</span> sin utilizar datos reales de la empresa?
-        `,
-        isSafe: true,
-        clues: {
-          anon_data: {
-            title: "Estructura Anonimizada y Genérica",
-            text: "El colaborador únicamente describe la estructura de columnas abstractas sin revelar cifras financieras, nombres de bancos afiliados ni datos personales.",
-            isHazard: false
-          },
-          formula_req: {
-            title: "Consulta Técnica Estándar",
-            text: "Usar IA como apoyo para aprender fórmulas de ofimática o sintaxis estándar sin exponer datos confidenciales de Suiche 7B es una práctica segura.",
-            isHazard: false
-          }
-        },
-        explanation: "<strong>Uso Seguro de IA Generativa.</strong> La consulta no incluye ningún dato confidencial, financiero ni personal de Corporación Suiche 7B. Siempre abstrae y anonimiza cualquier problema antes de consultar fuentes externas."
+        context: "Resumen de Reunión de Finanzas y Presupuesto Anual",
+        department: "Dirección Finanzas / Gestión Estratégica",
+        template: `Por favor hazme un <span class="dlp-token" data-token="t_tone" data-sensitive="false">[Resumen en 3 Puntos Clave]</span> de esta nota de reunión:<br><br>"En el cierre trimestral de Suiche 7B obtuvimos <span class="dlp-token" data-token="t_oficio" data-sensitive="true">[Ingresos Internos Confidenciales por $1.850.000]</span>. Además, el archivo Excel de presupuesto quedó guardado con la <span class="dlp-token" data-token="t_fw" data-sensitive="true">[Contraseña: FinanzasSuiche2026*]</span> para presentarlo en la <span class="dlp-token" data-token="t_patch" data-sensitive="false">[Próxima Reunión del Lunes]</span>."`,
+        sensitiveKeys: ['t_oficio', 't_fw'],
+        explanation: "<strong>¡Muy bien hecho!</strong> Todo lo que escribes en un chat de IA gratuito queda guardado en servidores externos. Jamás pongas cifras financieras secretas de la empresa ni contraseñas de tus archivos Excel."
       },
       {
         id: 3,
-        context: "Resumen de Acta Confidencial de Comité de Riesgos y Auditoría SUDEBAN",
-        department: "Oficial de Cumplimiento / Comité de Riesgos",
-        promptText: `
-          Por favor resume en 5 puntos ejecutivos el siguiente documento adjunto para mi presentación de hoy:
-          <br><br>
-          📄 <span class="inspectable" data-clue="doc_leak">Acta_Confidencial_Riesgos_SUDEBAN_Suiche7B.docx</span>
-          <br><br>
-          "En la revisión interna se detectaron <span class="inspectable" data-clue="vuln_leak">3 vulnerabilidades críticas pendientes de parcheo en el firewall perimetral y observaciones regulatorias confidenciales</span> que deben subsanarse antes del cierre trimestral..."
-        `,
-        isSafe: false,
-        clues: {
-          doc_leak: {
-            title: "Carga de Documentos Internos Clasificados",
-            text: "Subir actas de Junta Directiva, reportes de Auditoría o comunicaciones regulatorias de SUDEBAN a herramientas externas transfiere información estratégica fuera del control de la Corporación.",
-            isHazard: true
-          },
-          vuln_leak: {
-            title: "Divulgación de Vulnerabilidades Técnicas",
-            text: "Exponer debilidades o hallazgos de auditoría de seguridad en plataformas de terceros representa un riesgo altísimo de inteligencia para atacantes.",
-            isHazard: true
-          }
-        },
-        explanation: "<strong>Riesgo Alto de Fuga Documental.</strong> Las actas de Comité de Riesgos, hallazgos de auditoría de sistemas y reportes para SUDEBAN son estrictamente confidenciales y jamás deben procesarse en servicios de IA o traductores externos no autorizados."
+        context: "Respuesta a un Reclamo de un Cliente por un Cobro en Punto de Venta",
+        department: "Gerencia Operaciones y Servicio al Cliente",
+        template: `Ayúdame a escribir un correo de respuesta con <span class="dlp-token" data-token="t_sql" data-sensitive="false">[Disculpas y Explicación Amable]</span> para un cliente:<br><br>El caso pertenece al tarjetahabiente <span class="dlp-token" data-token="t_vip" data-sensitive="true">[Tarjeta de Débito N° 4509-1288-3910-4421 de Carlos Rivas]</span> quien reportó un cobro duplicado y nos dejó su <span class="dlp-token" data-token="t_key" data-sensitive="true">[Teléfono 0414-5559922 y Dirección de Habitación]</span>.`,
+        sensitiveKeys: ['t_vip', 't_key'],
+        explanation: "<strong>¡Protección Total al Cliente!</strong> Nunca pegues números completos de tarjetas de débito/crédito ni teléfonos o direcciones personales de clientes en herramientas de Inteligencia Artificial."
       }
     ];
   }
@@ -1193,46 +1207,169 @@ class AiSecurityGame {
   init() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
+    this.startBrain3DAnimation();
     this.renderCase();
+  }
+
+  startBrain3DAnimation() {
+    const canvas = document.getElementById('ai-brain-3d-canvas');
+    if (!canvas || typeof canvas.getContext !== 'function') return;
+    const ctx = canvas.getContext('2d');
+    if (this.brainAnimId) cancelAnimationFrame(this.brainAnimId);
+
+    const nodes = Array.from({ length: 28 }, (_, i) => {
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / 28);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      return {
+        x: Math.cos(theta) * Math.sin(phi) * 78,
+        y: Math.sin(theta) * Math.sin(phi) * 62,
+        z: Math.cos(phi) * 78
+      };
+    });
+
+    let angle = 0;
+    const draw = () => {
+      angle += 0.018;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const c = this.cases[this.currentCaseIndex];
+      const remainingLeaks = c ? c.sensitiveKeys.filter(k => !this.redactedTokens.has(k)).length : 0;
+      const isClean = remainingLeaks === 0;
+      const mainColor = isClean ? '#4ade80' : '#ef4444';
+      const glowColor = isClean ? 'rgba(74, 222, 128, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      const proj = nodes.map(n => {
+        const rx = n.x * cos - n.z * sin;
+        const rz = n.z * cos + n.x * sin;
+        const scale = 260 / (260 + rz);
+        return { px: cx + rx * scale, py: cy + n.y * scale, scale };
+      });
+
+      ctx.strokeStyle = glowColor;
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < proj.length; i++) {
+        for (let j = i + 1; j < proj.length; j++) {
+          const dx = proj[i].px - proj[j].px;
+          const dy = proj[i].py - proj[j].py;
+          if (dx * dx + dy * dy < 3800) {
+            ctx.beginPath();
+            ctx.moveTo(proj[i].px, proj[i].py);
+            ctx.lineTo(proj[j].px, proj[j].py);
+            ctx.stroke();
+          }
+        }
+      }
+
+      proj.forEach(p => {
+        ctx.fillStyle = mainColor;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, Math.max(2, 4 * p.scale), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      this.brainAnimId = requestAnimationFrame(draw);
+    };
+    draw();
   }
 
   renderCase() {
     this.hasAnswered = false;
+    this.redactedTokens = new Set();
     const c = this.cases[this.currentCaseIndex];
 
     document.getElementById('ai-case-index').textContent = this.currentCaseIndex + 1;
     document.getElementById('ai-case-total').textContent = this.cases.length;
     document.getElementById('ai-context-title').textContent = c.context;
     document.getElementById('ai-dept-badge').textContent = c.department;
-    document.getElementById('ai-prompt-content').innerHTML = c.promptText;
+    document.getElementById('ai-prompt-content').innerHTML = c.template;
 
     document.getElementById('ai-feedback').style.display = 'none';
     document.getElementById('ai-actions').style.display = 'flex';
 
-    document.getElementById('ai-clue-title').textContent = '🛡️ Escáner DLP de Prompts IA';
-    document.getElementById('ai-clue-desc').textContent = 'Haz clic en los fragmentos subrayados del prompt para auditar si contienen datos regulados o secretos corporativos.';
-    document.getElementById('ai-clue-card').className = 'current-clue-card';
-
-    document.querySelectorAll('#ai_sec-view .inspectable').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        const clueKey = el.getAttribute('data-clue');
-        const clue = c.clues && c.clues[clueKey];
-        if (!clue) return;
-        app.playAudio('click');
-        document.getElementById('ai-clue-title').textContent = clue.title;
-        document.getElementById('ai-clue-desc').textContent = clue.text;
-        document.getElementById('ai-clue-card').className = clue.isHazard ? 'current-clue-card hazard' : 'current-clue-card';
-      });
+    document.querySelectorAll('#ai_sec-view .dlp-token').forEach(el => {
+      const tokenKey = el.getAttribute('data-token');
+      el.setAttribute('data-original', el.textContent);
+      el.addEventListener('click', () => this.toggleTokenRedaction(tokenKey, el));
     });
+
+    this.updateRiskMeter();
   }
 
-  makeDecision(markedSafe) {
+  toggleTokenRedaction(tokenKey, el) {
+    if (this.hasAnswered) return;
+    app.playAudio('click');
+
+    if (this.redactedTokens.has(tokenKey)) {
+      this.redactedTokens.delete(tokenKey);
+      el.classList.remove('redacted');
+      el.textContent = el.getAttribute('data-original');
+    } else {
+      this.redactedTokens.add(tokenKey);
+      el.classList.add('redacted');
+      el.textContent = '🙈 [DATO PRIVADO TAPADO]';
+    }
+    this.updateRiskMeter();
+  }
+
+  updateRiskMeter() {
+    const c = this.cases[this.currentCaseIndex];
+    const totalSensitive = c.sensitiveKeys.length;
+    const exposedSensitive = c.sensitiveKeys.filter(k => !this.redactedTokens.has(k)).length;
+    const riskPct = Math.round((exposedSensitive / totalSensitive) * 100);
+
+    const riskValEl = document.getElementById('ai-dlp-risk-value');
+    const riskBarEl = document.getElementById('ai-dlp-risk-bar');
+    const badgeEl = document.getElementById('ai-neural-state-badge');
+
+    if (riskBarEl) riskBarEl.style.width = `${riskPct}%`;
+
+    if (riskPct === 0) {
+      if (riskValEl) {
+        riskValEl.textContent = '0% ¡LISTO Y SEGURO PARA ENVIAR!';
+        riskValEl.style.color = '#4ade80';
+      }
+      if (riskBarEl) riskBarEl.style.background = '#4ade80';
+      if (badgeEl) {
+        badgeEl.textContent = 'MENSAJE PROTEGIDO';
+        badgeEl.style.borderColor = '#4ade80';
+        badgeEl.style.color = '#4ade80';
+      }
+    } else {
+      if (riskValEl) {
+        riskValEl.textContent = `FALTAN ${exposedSensitive} DATOS ROJOS POR TAPAR`;
+        riskValEl.style.color = '#ef4444';
+      }
+      if (riskBarEl) riskBarEl.style.background = '#ef4444';
+      if (badgeEl) {
+        badgeEl.textContent = 'DATOS PRIVADOS A LA VISTA';
+        badgeEl.style.borderColor = '#ef4444';
+        badgeEl.style.color = '#fca5a5';
+      }
+    }
+  }
+
+  verifySanitization() {
+    if (this.hasAnswered) return;
+    const c = this.cases[this.currentCaseIndex];
+    const allSensitiveRedacted = c.sensitiveKeys.every(k => this.redactedTokens.has(k));
+    this.makeDecision(allSensitiveRedacted);
+  }
+
+  makeDecision(isSuccess) {
     if (this.hasAnswered) return;
     this.hasAnswered = true;
 
     const c = this.cases[this.currentCaseIndex];
-    const isCorrect = (markedSafe === c.isSafe);
+    const isCorrect = Boolean(isSuccess);
+    if (isCorrect) {
+      c.sensitiveKeys.forEach(k => this.redactedTokens.add(k));
+      this.updateRiskMeter();
+    }
 
     document.getElementById('ai-actions').style.display = 'none';
     const fb = document.getElementById('ai-feedback');
@@ -1245,17 +1382,17 @@ class AiSecurityGame {
       app.playAudio('correct');
       app.addPoints(50, true, 'ai_sec');
       statusEl.className = 'feedback-header feedback-correct';
-      statusEl.innerHTML = '✅ ¡Auditoría DLP Correcta! (+50 PTS)';
+      statusEl.innerHTML = '🧠 ¡Datos Privados Tapados con Éxito! (+50 PTS)';
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false, 'ai_sec');
       statusEl.className = 'feedback-header feedback-incorrect';
-      statusEl.innerHTML = '🚨 Error de Clasificación DLP (0 PTS)';
+      statusEl.innerHTML = '🚨 Dejaste Datos Privados sin Tapar en el Mensaje (0 PTS)';
     }
 
     descEl.innerHTML = c.explanation;
     document.getElementById('ai-next-btn').textContent =
-      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Caso →';
+      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Situación →';
   }
 
   nextCase() {
@@ -1264,10 +1401,11 @@ class AiSecurityGame {
       this.currentCaseIndex++;
       this.renderCase();
     } else {
+      if (this.brainAnimId) cancelAnimationFrame(this.brainAnimId);
       app.markModuleCompleted('ai_sec');
       app.showModalAlert({
-        title: '🤖 Módulo IA Generativa Segura Completado',
-        message: 'Has dominado las políticas de prevención de fuga de datos (DLP) frente al uso de Inteligencia Artificial (Shadow AI) en Corporación Suiche 7B.',
+        title: '🧠 Módulo Uso Seguro de ChatGPT e IA Completado',
+        message: '¡Felicidades! Ya sabes cómo usar herramientas de Inteligencia Artificial en la oficina sin exponer sueldos, cédulas, cuentas ni datos privados de Corporación Suiche 7B.',
         type: 'success'
       }).then(() => app.navigateTo('dashboard'));
     }
@@ -1275,129 +1413,225 @@ class AiSecurityGame {
 }
 
 // ============================================================================
-// FASE 2 — MÓDULO 7: PCI-DSS 4.0 Y DATOS DE TARJETAHABIENTES
+// FASE 2 — MÓDULO 7: PROTECCIÓN DE TARJETAS Y CLIENTES (TARJETA 3D INTERACTIVA)
 // ============================================================================
 class PciDssGame {
   constructor() {
+    this.currentMissionIdx = 0;
+    this.hasAnswered = false;
+
     this.items = [
       {
         id: 'pan_mask',
-        name: 'Enmascaramiento de PAN en Pantallas (BIN + 4 últimos)',
-        desc: 'Mostrar únicamente los primeros 6 y últimos 4 dígitos de la tarjeta (ej. 450912******4421) en reportes y consultas operativas.',
-        category: 'compliant',
-        explanation: 'PCI-DSS 4.0 Requisito 3.4 exige enmascarar el PAN para que solo el personal con necesidad legítima de negocio vea más de los primeros 6 y últimos 4 dígitos.'
+        reqBadge: 'Situación 1 · Reportes de Excel y Correos Internos',
+        title: 'Ocultar los Números del Medio de la Tarjeta en Reportes',
+        desc: 'En Finanzas o Atención al Cliente debes enviar un cuadro de Excel con varios casos de reclamos. Mira la Tarjeta 3D a la izquierda: tiene los 16 números completamente visibles (`4509 1288 3910 4421`). ¿Cómo debes escribir ese número de tarjeta en tu reporte o correo?',
+        cardSide: 'front',
+        targetZone: 'pan',
+        rawStream: '⚠️ En tu Excel dice: 4509 1288 3910 4421 (¡Peligro: Número completo expuesto!)',
+        protectedStream: '✅ En tu Excel ahora dice: 4509 12** **** 4421 (¡Protegido con asteriscos!)',
+        options: [
+          { text: 'Poner asteriscos en los números del medio y dejar solo los primeros 6 y últimos 4 (4509 12** **** 4421)', isCorrect: true },
+          { text: 'Escribir los 16 números completos de la tarjeta en el correo para que todos los vean', isCorrect: false },
+          { text: 'Mandar una foto de la tarjeta completa por el grupo de WhatsApp de la oficina', isCorrect: false }
+        ],
+        explanation: '<strong>¡Regla de Oro con Tarjetas!</strong> En cualquier reporte, correo o cuadro de Excel administrativo, jamás escribas los 16 dígitos completos: tapa siempre los dígitos centrales con asteriscos (`4509 12** **** 4421`).'
       },
       {
-        id: 'cvv_storage',
-        name: 'Guardar CVV2 / CVC2 en Logs de Auditoría Post-Autorización',
-        desc: 'Almacenar temporalmente los 3 dígitos de seguridad del reverso de la tarjeta en una tabla o archivo log para reclamos.',
-        category: 'violation',
-        explanation: '¡Violación Crítica PCI-DSS Requisito 3.3! Los datos sensibles de autenticación (SAD: CVV2, Track 2, PIN) JAMÁS pueden almacenarse después de la autorización, ni siquiera cifrados.'
+        id: 'sad_purge',
+        reqBadge: 'Situación 2 · Los 3 Números Secretos del Reverso (CVV)',
+        title: '¿Se pueden anotar los 3 numeritos de atrás de la tarjeta?',
+        desc: 'La Tarjeta 3D acaba de girar mostrando la parte de atrás. Un cliente llama para una consulta y te quiere dictar los 3 numeritos de seguridad del reverso (`891`) para que los anotes en el expediente. ¿Qué debes hacer?',
+        cardSide: 'back',
+        targetZone: 'cvv',
+        rawStream: '⚠️ Reverso de la Tarjeta: Código Secreto [ 891 ] visible',
+        protectedStream: '✅ Código Secreto [ *** ] oculto — ¡Jamás se pide ni se anota!',
+        options: [
+          { text: 'Indicarle al cliente que NO nos dicte esos 3 números y jamás anotarlos en papel, correo ni computadora', isCorrect: true },
+          { text: 'Anotar los 3 números en una libreta o archivo Word por si los necesitamos mañana', isCorrect: false },
+          { text: 'Pedirle que nos mande una foto de la parte de atrás de su tarjeta por correo', isCorrect: false }
+        ],
+        explanation: 'Los <strong>3 números del reverso de la tarjeta (código CVV)</strong> son ultra secretos para compras por internet. Ningún trabajador de Suiche 7B debe pedirlos ni anotarlos nunca.'
       },
       {
         id: 'hsm_pin',
-        name: 'Procesamiento de PIN Block dentro de Módulo Criptográfico HSM',
-        desc: 'Traducir y validar bloques PIN exclusivamente dentro de módulos de seguridad de hardware (HSM) certificados FIPS 140-2/3.',
-        category: 'compliant',
-        explanation: 'En un switch transaccional como Suiche 7B, los PIN de cajeros y puntos de venta nunca deben existir en texto claro fuera del HSM.'
+        reqBadge: 'Situación 3 · La Clave Secreta de 4 Dígitos del Cajero / Punto de Venta',
+        title: '¿Podemos pedir o guardar la Clave del Cajero (PIN) de un cliente?',
+        desc: 'Mira el Chip Dorado en la Tarjeta 3D. Para resolver un reclamo de un cajero automático o punto de venta, un compañero sugiere preguntarle al cliente cuál es su clave secreta de 4 dígitos. ¿Es correcto?',
+        cardSide: 'iso',
+        targetZone: 'chip',
+        rawStream: '⚠️ Consulta: ¿Solicitar clave secreta de 4 dígitos al cliente?',
+        protectedStream: '✅ Clave Secreta 100% Privada — Ningún empleado debe conocerla',
+        options: [
+          { text: 'Prohibido: La clave de 4 dígitos (PIN) es secreta del cliente y ningún empleado debe pedirla ni conocerla', isCorrect: true },
+          { text: 'Pedirle la clave solo por teléfono para probar su tarjeta rápidamente', isCorrect: false },
+          { text: 'Anotar la clave del cliente en el ticket de atención al cliente', isCorrect: false }
+        ],
+        explanation: 'La <strong>clave secreta (PIN)</strong> del cajero o punto de venta es exclusivamente del dueño de la tarjeta. En Suiche 7B ningún área administrativa ni técnica solicita jamás la clave de un tarjetahabiente.'
       },
       {
-        id: 'pan_whatsapp',
-        name: 'Enviar Captura con PAN Completo por Chat para Conciliación',
-        desc: 'Compartir por mensajería instantánea o correo sin cifrar una foto o listado Excel con números completos de tarjetas de clientes.',
-        category: 'violation',
-        explanation: 'PCI-DSS Requisito 4.2 prohíbe estrictamente enviar números de cuenta primarios (PAN) sin proteger mediante tecnologías de mensajería de usuario final (chats, correos).'
-      },
-      {
-        id: 'track2_db',
-        name: 'Retener Banda Magnética Completa (Track 2) en Base de Datos QA',
-        desc: 'Copiar tramas reales con el Track 2 completo del ambiente de producción hacia el servidor de pruebas de desarrollo.',
-        category: 'violation',
-        explanation: 'Prohibido por PCI-DSS 4.0 (Requisitos 3.3 y 6.5.5): Nunca se debe almacenar Track 2 ni utilizar datos reales de producción (PAN vivos) en ambientes de prueba o desarrollo.'
-      },
-      {
-        id: 'synthetic_qa',
-        name: 'Uso de Tarjetas de Prueba Ficticias en Ambientes de Certificación',
-        desc: 'Ejecutar todas las pruebas de integración interbancaria usando numeraciones de tarjetas simuladas y llaves criptográficas de prueba.',
-        category: 'compliant',
-        explanation: 'Excelente práctica PCI-DSS: Los entornos de desarrollo y certificación deben estar 100% segregados de producción y operar solo con datos ficticios.'
+        id: 'qa_anonymize',
+        reqBadge: 'Situación 4 · Presentaciones, Capacitaciones y Ejemplos',
+        title: '¿Qué tarjetas usamos para hacer una presentación o manual de oficina?',
+        desc: 'Debes preparar unas láminas de PowerPoint o un manual para entrenar a nuevos compañeros de tu departamento. ¿Qué números de tarjeta debes poner en las capturas de ejemplo?',
+        cardSide: 'front',
+        targetZone: 'pan',
+        rawStream: '⚠️ Lámina de PowerPoint con datos de un cliente real de un banco',
+        protectedStream: '✅ Lámina de PowerPoint con datos inventados de ejemplo (4000 00** **** 0001)',
+        options: [
+          { text: 'Usar siempre nombres y números de tarjetas inventados (ficticios) o tapados en manuales y presentaciones', isCorrect: true },
+          { text: 'Tomar la foto de una tarjeta real de un cliente verdadero y pegarla en el PowerPoint', isCorrect: false },
+          { text: 'Poner la foto de mi propia tarjeta de débito personal en el manual', isCorrect: false }
+        ],
+        explanation: 'En manuales, presentaciones de PowerPoint y capacitaciones internas siempre debemos usar <strong>datos ficticios de ejemplo</strong>, nunca datos de clientes reales.'
       }
     ];
-    this.placedCount = 0;
   }
 
   init() {
-    this.placedCount = 0;
-    document.getElementById('pcidss-compliant-items').innerHTML = '';
-    document.getElementById('pcidss-violation-items').innerHTML = '';
-    document.getElementById('pcidss-completion-feedback').style.display = 'none';
-    document.getElementById('pcidss-items-list').style.display = 'grid';
-    this.renderItems();
+    this.currentMissionIdx = 0;
+    this.hasAnswered = false;
+    this.renderMission();
   }
 
-  renderItems() {
-    const list = document.getElementById('pcidss-items-list');
-    list.innerHTML = '';
+  rotateCard3D(mode) {
+    const cardInner = document.getElementById('pci-3d-card-inner');
+    if (!cardInner) return;
+    app.playAudio('click');
+    cardInner.classList.remove('is-flipped');
 
-    this.items.forEach(item => {
-      list.innerHTML += `
-        <div class="pci-data-card" id="pcidss-card-${item.id}">
-          <div class="pci-data-desc">
-            <span class="pci-data-title">${item.name}</span>
-            <span class="pci-data-hint">${item.desc}</span>
-          </div>
-          <div style="display:flex; gap:0.4rem; margin-top:0.6rem;">
-            <button class="btn btn-secondary" style="padding:0.35rem 0.5rem; font-size:0.72rem; flex:1;" onclick="games.pci_dss.classifyItem('${item.id}', 'compliant')">🟢 Cumple PCI-DSS 4.0</button>
-            <button class="btn btn-secondary" style="padding:0.35rem 0.5rem; font-size:0.72rem; flex:1;" onclick="games.pci_dss.classifyItem('${item.id}', 'violation')">🔴 Violación PCI-DSS</button>
-          </div>
-        </div>
-      `;
+    if (mode === 'back') {
+      cardInner.classList.add('is-flipped');
+      cardInner.style.transform = 'rotateY(180deg)';
+    } else if (mode === 'iso') {
+      cardInner.style.transform = 'rotateY(-28deg) rotateX(18deg) scale(1.03)';
+    } else {
+      cardInner.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    }
+  }
+
+  selectZone(zoneId) {
+    app.playAudio('click');
+    ['chip', 'pan', 'track2', 'cvv'].forEach(z => {
+      const el = document.getElementById(`zone-${z}`);
+      if (el) {
+        if (z === zoneId) el.classList.add('zone-active-pulse');
+        else el.classList.remove('zone-active-pulse');
+      }
     });
+
+    // Si el usuario toca directamente la zona de la tarjeta 3D, aplicar efecto visual interactivo
+    if (zoneId === 'pan') {
+      const panEl = document.getElementById('card3d-live-pan');
+      if (panEl) panEl.innerHTML = '4509 12<span style="color:#4ade80;">** ****</span> 4421';
+    } else if (zoneId === 'cvv') {
+      const cvvEl = document.getElementById('card3d-live-cvv');
+      if (cvvEl) cvvEl.textContent = '***';
+    }
   }
 
-  classifyItem(itemId, chosenCategory) {
-    const item = this.items.find(i => i.id === itemId);
-    const card = document.getElementById(`pcidss-card-${itemId}`);
-    if (!item || !card) return;
+  renderMission() {
+    this.hasAnswered = false;
+    const m = this.items[this.currentMissionIdx];
 
-    const isCorrect = (item.category === chosenCategory);
-    card.remove();
+    document.getElementById('pcidss-mission-idx').textContent = this.currentMissionIdx + 1;
+    document.getElementById('pcidss-mission-total').textContent = this.items.length;
+    document.getElementById('pcidss-req-badge').textContent = m.reqBadge;
+    document.getElementById('pcidss-mission-title').textContent = m.title;
+    document.getElementById('pcidss-mission-desc').textContent = m.desc;
+    document.getElementById('pcidss-live-stream').textContent = m.rawStream;
+    document.getElementById('pcidss-live-stream').style.color = '#fbba0a';
 
-    const targetContainer = document.getElementById(`pcidss-${chosenCategory}-items`);
-    const statusIcon = isCorrect ? '✅' : '❌';
-    const borderStyle = isCorrect ? 'border-color:rgba(57,255,20,0.35);' : 'border-color:rgba(214,26,39,0.45);';
+    this.rotateCard3D(m.cardSide);
+    this.selectZone(m.targetZone);
 
-    targetContainer.innerHTML += `
-      <div class="dropped-tag" style="${borderStyle}">
-        <span>${statusIcon} ${item.name}</span>
-      </div>
-    `;
+    const list = document.getElementById('pcidss-controls-list');
+    list.innerHTML = '';
+    this.currentOptions = shuffleOptions(m.options, this);
+    const letters = ['A', 'B', 'C'];
+    this.currentOptions.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-secondary';
+      btn.style.textAlign = 'left';
+      btn.style.padding = '0.75rem 1rem';
+      btn.style.fontSize = '0.85rem';
+      btn.textContent = `${letters[idx] || idx + 1}) ${opt.text}`;
+      btn.onclick = () => this.executeControl(idx);
+      list.appendChild(btn);
+    });
+
+    document.getElementById('pcidss-feedback').style.display = 'none';
+  }
+
+  executeControl(optionIdx) {
+    if (this.hasAnswered) return;
+    this.hasAnswered = true;
+
+    const m = this.items[this.currentMissionIdx];
+    const optionsList = this.currentOptions || m.options;
+    const isCorrect = optionsList[optionIdx] ? optionsList[optionIdx].isCorrect : false;
+
+    const fb = document.getElementById('pcidss-feedback');
+    fb.style.display = 'block';
+    const statusEl = document.getElementById('pcidss-feedback-status');
+    const descEl = document.getElementById('pcidss-feedback-desc');
 
     if (isCorrect) {
       app.playAudio('correct');
-      app.addPoints(25, true, 'pci_dss');
+      app.addPoints(40, true, 'pci_dss');
+      statusEl.className = 'feedback-header feedback-correct';
+      statusEl.innerHTML = '💳 ¡Excelente Cuidado de los Datos de Tarjeta! (+40 PTS)';
+
+      const streamEl = document.getElementById('pcidss-live-stream');
+      if (streamEl) {
+        streamEl.textContent = m.protectedStream;
+        streamEl.style.color = '#4ade80';
+      }
+      if (m.id === 'pan_mask') {
+        const panEl = document.getElementById('card3d-live-pan');
+        if (panEl) panEl.innerHTML = '4509 12<span style="color:#4ade80;">** ****</span> 4421';
+      } else if (m.id === 'sad_purge') {
+        const cvvEl = document.getElementById('card3d-live-cvv');
+        if (cvvEl) cvvEl.textContent = '***';
+      }
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false, 'pci_dss');
-      app.showModalAlert({
-        title: '💳 Normativa PCI-DSS 4.0 — Observación de Auditoría',
-        message: `Clasificación incorrecta para <strong>"${item.name}"</strong>.<br><br>${item.explanation}`,
-        type: 'danger'
-      });
+      statusEl.className = 'feedback-header feedback-incorrect';
+      statusEl.innerHTML = '🚨 Cuidado: Eso expondría la tarjeta del cliente (0 PTS)';
     }
 
-    this.placedCount++;
-    if (this.placedCount === this.items.length) {
-      app.playAudio('complete');
+    descEl.innerHTML = m.explanation;
+    document.getElementById('pcidss-next-btn').textContent =
+      this.currentMissionIdx === this.items.length - 1 ? 'Finalizar Módulo' : 'Siguiente Situación →';
+  }
+
+  classifyItem() {
+    const m = this.items[this.currentMissionIdx];
+    const opts = this.currentOptions || (m ? m.options : []);
+    const cIdx = opts.findIndex(o => o.isCorrect);
+    this.executeControl(cIdx >= 0 ? cIdx : 0);
+    this.nextMission();
+  }
+
+  nextMission() {
+    app.playAudio('click');
+    if (this.currentMissionIdx < this.items.length - 1) {
+      this.currentMissionIdx++;
+      this.renderMission();
+    } else {
       app.markModuleCompleted('pci_dss');
-      document.getElementById('pcidss-items-list').style.display = 'none';
-      document.getElementById('pcidss-completion-feedback').style.display = 'block';
+      app.showModalAlert({
+        title: '💳 Módulo Protección de Tarjetas y Clientes Completado',
+        message: '¡Excelente! Ahora dominas cómo proteger los números de tarjetas, el código de 3 dígitos de atrás (CVV) y la privacidad de los tarjetahabientes en el trabajo diario.',
+        type: 'success'
+      }).then(() => app.navigateTo('dashboard'));
     }
   }
 }
 
 // ============================================================================
-// FASE 2 — MÓDULO 8: QUISHING (QR FALSOS) Y FATIGA DE MFA (PUSH BOMBING)
+// FASE 2 — MÓDULO 8: TU CELULAR 3D Y CÓDIGOS QR TRAMPA
 // ============================================================================
 class QuishingMfaGame {
   constructor() {
@@ -1406,46 +1640,52 @@ class QuishingMfaGame {
 
     this.cases = [
       {
-        title: "Bombardeo Nocturno de Notificaciones Push 2FA (MFA Fatigue)",
-        badge: "Autenticación Multifactor (MFA)",
-        visualIcon: "📲",
-        visualTitle: "Solicitud Push #7: Aprobar Inicio de Sesión",
-        visualMeta: "Hora: 11:48 PM | Origen: IP Externa No Reconocida | Dispositivo: Windows 11",
-        scenarioDesc: "Estás en tu casa a las 11:48 PM sin usar la computadora. Tu celular corporativo empieza a vibrar con 7 notificaciones seguidas de Microsoft Authenticator / VPN pidiendo que presiones 'APROBAR' para iniciar sesión. ¿Qué está ocurriendo y cómo debes actuar?",
+        title: "Reto 1: Tu Celular Vibra a Medianoche Pidiendo Permiso para Entrar",
+        stageBadge: "RETO 1 · TOCA LA PANTALLA DEL CELULAR 3D",
+        phoneTime: "11:48 PM",
+        phoneMode: "push_bombing",
+        visualTitle: "🔎 Lupa Detectora: ¿Quién intenta entrar a esta hora?",
+        visualMeta: "Haz clic en '🔎 Ver Pista Oculta' para descubrir desde dónde están intentando abrir tu correo...",
+        xrayRevealed: "⚠️ PISTA DESCUBIERTA: Alguien en otro país adivinó tu contraseña y te está mandando muchos avisos seguidos a las 11:48 PM para que presiones 'Aceptar' por cansancio.",
+        scenarioDesc: "Estás en tu casa descansando a las 11:48 de la noche. De pronto tu celular empieza a vibrar muchas veces seguidas preguntando: '¿Le das permiso a otra computadora para entrar a tu cuenta de Suiche 7B?'. ¡Toca el botón correcto en la pantalla del Celular 3D a la izquierda!",
         options: [
-          { text: "🚨 Rechazar la solicitud ('No fui yo') y reportar compromiso de contraseña a Seguridad de la Información", isCorrect: true },
-          { text: "🟡 Presionar 'Aprobar' una sola vez para que el teléfono deje de sonar y poder dormir", isCorrect: false },
-          { text: "🔴 Desinstalar la aplicación de doble factor del teléfono para detener las alertas", isCorrect: false }
+          { text: "Tocar 'NO FUI YO (BLOQUEAR)' en el celular y avisar a Seguridad para cambiar mi contraseña", isCorrect: true },
+          { text: "Tocar 'Sí, Aprobar' para que el celular deje de hacer ruido y seguir durmiendo", isCorrect: false },
+          { text: "Ignorar el aviso y no decirle a nadie en la oficina", isCorrect: false }
         ],
-        explanation: "Esto es un ataque de <strong>Fatiga de MFA (Push Bombing)</strong>. El atacante ya conoce tu contraseña y envía decenas de notificaciones esperando que apruebes una por cansancio o error. Si recibes un Push que tú no iniciaste, significa que tu contraseña está comprometida: debes presionar <strong>Denegar</strong> y cambiar tu clave de inmediato."
+        explanation: "<strong>¡Muy bien!</strong> Si tu celular te pregunta si estás intentando entrar a tu cuenta cuando tú no estás usando la computadora, significa que alguien más intenta meterse. <strong>Nunca presiones Aprobar si no fuiste tú.</strong>"
       },
       {
-        title: "Cartel con Código QR para 'Actualización de Beneficios Corporativos' (Quishing)",
-        badge: "Inspección de Código QR",
-        visualIcon: "🏁",
-        visualTitle: "QR Escaneado: http://suiche7b-login.auth-ve.xyz/sso",
-        visualMeta: "Ubicación del QR: Correo externo sin firma digital / Volante impreso",
-        scenarioDesc: "Recibes un correo con un código QR gigante que dice: 'Por nuevas políticas, escanea este QR desde tu celular personal para evitar que el filtro de red bloquee la actualización de tu bono de alimentación'. Al previsualizar la URL del QR en tu cámara, apunta a 'suiche7b-login.auth-ve.xyz'. ¿Qué haces?",
+        title: "Reto 2: El Código QR con un Supuesto 'Bono Especial' (Quishing)",
+        stageBadge: "RETO 2 · ESCÁNER DE CÓDIGO QR EN TU CELULAR 3D",
+        phoneTime: "12:15 PM",
+        phoneMode: "qr_scanner",
+        visualTitle: "🔎 Lupa Detectora: ¿A qué página lleva este Código QR?",
+        visualMeta: "Toca el cuadro del Código QR en el celular 3D o el botón '🔎 Ver Pista Oculta' para ver a dónde lleva...",
+        xrayRevealed: "🚨 PISTA DESCUBIERTA: El código QR NO es de Suiche 7B; lleva a una página pirata ('bono-falso-trampa.xyz') diseñada para robarte la contraseña de tu correo.",
+        scenarioDesc: "Recibes un volante o un correo muy llamativo que dice: '¡Escanea este Código QR con tu celular y escribe tu contraseña del trabajo para cobrar un Bono Especial hoy!'. Mira el visor en el Celular 3D:",
         options: [
-          { text: "🚨 No ingresar credenciales y reportar el correo como ataque de Quishing (QR Phishing)", isCorrect: true },
-          { text: "🟡 Ingresar tu usuario y clave de red desde el celular porque los códigos QR no tienen virus", isCorrect: false },
-          { text: "🔴 Reenviar el código QR por el grupo de WhatsApp del departamento para que todos prueben", isCorrect: false }
+          { text: "Tocar 'CERRAR PÁGINA FALSA' en el celular y no escribir jamás mi contraseña en códigos QR dudosos", isCorrect: true },
+          { text: "Escribir mi usuario y contraseña de Suiche 7B rápido para no perderme el bono", isCorrect: false },
+          { text: "Mandarle foto del código QR por WhatsApp a todos mis compañeros de oficina", isCorrect: false }
         ],
-        explanation: "El <strong>Quishing (Phishing mediante códigos QR)</strong> busca trasladar al empleado de su computadora protegida hacia su teléfono móvil para robarle las credenciales en un dominio falso (`.auth-ve.xyz`). Siempre verifica la URL completa antes de interactuar con cualquier QR."
+        explanation: "Los estafadores usan <strong>Códigos QR falsos</strong> con promesas de bonos, premios o sorteos para llevarte a páginas engañosas desde tu celular. Nunca ingreses tu clave del trabajo tras escanear un QR desconocido."
       },
       {
-        title: "Validación MFA con Número de Coincidencia Iniciada por Ti",
-        badge: "Verificación Legítima",
-        visualIcon: "🔐",
-        visualTitle: "Código en Pantalla: [ 84 ] — Ingresa este número en tu App",
-        visualMeta: "Hora: 09:05 AM | Origen: Portal Interno https://academiasi.suiche7b.com",
-        scenarioDesc: "Acabas de escribir tu usuario y contraseña en tu computadora de oficina a las 9:05 AM para entrar al portal corporativo oficial y la pantalla te muestra el número '84'. Instantáneamente tu app de autenticación te pide escribir el número que ves en pantalla. ¿Es seguro aprobar?",
+        title: "Reto 3: Entrando a tu Correo en la Oficina (Toca el Número 84)",
+        stageBadge: "RETO 3 · TECLADO DEL CELULAR 3D",
+        phoneTime: "08:30 AM",
+        phoneMode: "number_match",
+        visualTitle: "🔎 Lupa Detectora: Verificando tu propio ingreso",
+        visualMeta: "En la pantalla de tu computadora de oficina ves grande el número: [ 84 ].",
+        xrayRevealed: "✅ PISTA CONFIRMADA: Fuiste tú mismo quien acaba de abrir el correo en tu escritorio de Corporación Suiche 7B a las 8:30 AM.",
+        scenarioDesc: "Acabas de llegar a tu oficina en Suiche 7B, abres tu correo en tu computadora y la pantalla te dice: 'Toca el número 84 en tu celular para confirmar que eres tú'. ¡Toca el número 84 directamente en el teclado del Celular 3D!",
         options: [
-          { text: "🟢 Sí, ingresar el número 84 porque la solicitud fue iniciada por mí en este exacto segundo y en el dominio oficial", isCorrect: true },
-          { text: "🟡 Rechazar todas las solicitudes MFA aunque yo mismo esté intentando iniciar sesión", isCorrect: false },
-          { text: "🔴 Enviar captura del número 84 por correo a soporte técnico para que ellos entren por mí", isCorrect: false }
+          { text: "Tocar el número [ 84 ] en la pantalla del celular porque yo mismo estoy abriendo mi correo", isCorrect: true },
+          { text: "Tocar cualquier otro número sin mirar la pantalla de mi computadora", isCorrect: false },
+          { text: "Mandarle ese número por mensaje a otra persona", isCorrect: false }
         ],
-        explanation: "<strong>Autenticación MFA Segura (Number Matching).</strong> Cuando tú mismo acabas de iniciar sesión en el sitio oficial HTTPS y el código numérico coincide con tu pantalla, es seguro completar el segundo factor."
+        explanation: "<strong>¡Perfecto!</strong> Cuando tú mismo estás iniciando sesión en tu computadora de trabajo y confirmas el mismo número en tu celular, tu cuenta queda 100% protegida."
       }
     ];
   }
@@ -1461,23 +1701,28 @@ class QuishingMfaGame {
     this.hasAnswered = false;
     const c = this.cases[this.currentCaseIndex];
 
-    document.getElementById('qmfa-case-counter').textContent = `Caso ${this.currentCaseIndex + 1} de ${this.cases.length}`;
+    document.getElementById('qmfa-case-counter').textContent = `${this.currentCaseIndex + 1} de ${this.cases.length}`;
+    document.getElementById('qmfa-stage-badge').textContent = c.stageBadge;
     document.getElementById('qmfa-scenario-title').textContent = c.title;
     document.getElementById('qmfa-scenario-desc').textContent = c.scenarioDesc;
-    document.getElementById('qmfa-visual-icon').textContent = c.visualIcon;
+    document.getElementById('qmfa-phone-time').textContent = c.phoneTime;
     document.getElementById('qmfa-visual-title').textContent = c.visualTitle;
     document.getElementById('qmfa-visual-meta').textContent = c.visualMeta;
+    document.getElementById('qmfa-visual-meta').style.color = 'var(--text-muted)';
+
+    this.renderPhone3DScreen(c);
 
     const container = document.getElementById('qmfa-options-container');
     container.innerHTML = '';
-    c.options.forEach((opt, idx) => {
+    this.currentOptions = shuffleOptions(c.options, this);
+    const letters = ['A', 'B', 'C'];
+    this.currentOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
       btn.style.textAlign = 'left';
-      btn.style.padding = '0.75rem 1rem';
-      btn.style.lineHeight = '1.4';
-      btn.style.fontSize = '0.85rem';
-      btn.textContent = opt.text;
+      btn.style.padding = '0.7rem 1rem';
+      btn.style.fontSize = '0.84rem';
+      btn.textContent = `${letters[idx] || idx + 1}) ${opt.text}`;
       btn.onclick = () => this.makeDecision(idx);
       container.appendChild(btn);
     });
@@ -1485,12 +1730,96 @@ class QuishingMfaGame {
     document.getElementById('qmfa-feedback').style.display = 'none';
   }
 
-  makeDecision(idx) {
+  renderPhone3DScreen(c) {
+    const screen = document.getElementById('qmfa-phone-screen');
+    const phoneWrap = document.getElementById('qmfa-phone-3d');
+    if (!screen || !phoneWrap) return;
+
+    phoneWrap.classList.remove('phone-vibrating');
+
+    if (c.phoneMode === 'push_bombing') {
+      phoneWrap.classList.add('phone-vibrating');
+      const phoneBtns = shuffleOptions([
+        { label: '🛑 NO FUI YO (BLOQUEAR)', cls: 'btn-danger', isCorrect: true },
+        { label: 'Sí, Aprobar', cls: 'btn-secondary', isCorrect: false }
+      ]);
+      screen.innerHTML = `
+        <div style="text-align:center; padding:0.4rem;">
+          <div style="font-size:0.7rem; color:#f87171; font-weight:700; margin-bottom:0.4rem;">🚨 AVISO NOCTURNO (7 SEGUIDOS)</div>
+          <div style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; border-radius:10px; padding:0.65rem; font-size:0.74rem; margin-bottom:0.7rem;">
+            <strong>¿Eres tú intentando entrar a tu cuenta?</strong><br>
+            <span style="color:#cbd5e1; font-size:0.68rem;">Desde: Otro País Desconocido</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.45rem;">
+            ${phoneBtns.map(b => `
+              <button type="button" class="btn ${b.cls}" style="padding:0.48rem; font-size:0.72rem; width:100%;" onclick="games.quishing_mfa.makeDecision(${b.isCorrect})">
+                ${b.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (c.phoneMode === 'qr_scanner') {
+      screen.innerHTML = `
+        <div style="text-align:center; padding:0.3rem;">
+          <div style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700; margin-bottom:0.4rem;">CÁMARA DE TU CELULAR</div>
+          <div class="qr-laser-box" onclick="games.quishing_mfa.runXrayScan()" title="Toca para revisar el QR">
+            <div class="qr-laser-line"></div>
+            <div style="font-family:monospace; font-size:0.95rem; line-height:1.15; letter-spacing:2px; color:#e2e8f0;">
+              ▣▤▥▦▣<br>▤▥▣▤▥<br>▥▣◉▣▤<br>▣▤▥▦▣
+            </div>
+          </div>
+          <div style="font-size:0.66rem; color:#fca5a5; margin:0.45rem 0; font-weight:700;">
+            ⚠️ Enlace: bono-falso-trampa.xyz
+          </div>
+          <button type="button" class="btn btn-danger" style="padding:0.45rem; font-size:0.72rem; width:100%;" onclick="games.quishing_mfa.makeDecision(true)">
+            🚫 CERRAR PÁGINA FALSA
+          </button>
+        </div>
+      `;
+    } else {
+      const nums = shuffleOptions([
+        { num: 19, isCorrect: false },
+        { num: 84, isCorrect: true },
+        { num: 42, isCorrect: false }
+      ]);
+      screen.innerHTML = `
+        <div style="text-align:center; padding:0.3rem;">
+          <div style="font-size:0.7rem; color:#4ade80; font-weight:700; margin-bottom:0.35rem;">🔐 CONFIRMA TU INGRESO</div>
+          <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:0.55rem;">Toca el número que ves en tu computadora (<strong>84</strong>):</div>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.4rem; margin-bottom:0.5rem;">
+            ${nums.map(n => `
+              <button type="button" class="btn btn-secondary" style="padding:0.5rem 0.2rem; font-family:var(--font-mono); font-size:0.9rem;" onclick="games.quishing_mfa.makeDecision(${n.isCorrect})">${n.num}</button>
+            `).join('')}
+          </div>
+          <div style="font-size:0.64rem; color:#94a3b8;">Oficina Suiche 7B · Caracas</div>
+        </div>
+      `;
+    }
+  }
+
+  runXrayScan() {
+    const c = this.cases[this.currentCaseIndex];
+    app.playAudio('click');
+    const metaEl = document.getElementById('qmfa-visual-meta');
+    if (metaEl) {
+      metaEl.textContent = c.xrayRevealed;
+      metaEl.style.color = '#fbba0a';
+    }
+  }
+
+  makeDecision(idxOrBool) {
     if (this.hasAnswered) return;
     this.hasAnswered = true;
 
+    const phoneWrap = document.getElementById('qmfa-phone-3d');
+    if (phoneWrap) phoneWrap.classList.remove('phone-vibrating');
+
     const c = this.cases[this.currentCaseIndex];
-    const isCorrect = c.options[idx].isCorrect;
+    const optionsList = this.currentOptions || c.options;
+    const isCorrect = typeof idxOrBool === 'boolean'
+      ? idxOrBool
+      : (optionsList[idxOrBool] ? optionsList[idxOrBool].isCorrect : false);
 
     const fb = document.getElementById('qmfa-feedback');
     fb.style.display = 'block';
@@ -1501,17 +1830,17 @@ class QuishingMfaGame {
       app.playAudio('correct');
       app.addPoints(50, true, 'quishing_mfa');
       statusEl.className = 'feedback-header feedback-correct';
-      statusEl.innerHTML = '🛡️ ¡Decisión MFA/QR Correcta! (+50 PTS)';
+      statusEl.innerHTML = '📲 ¡Muy Bien! Protegiste tu Celular y tu Cuenta (+50 PTS)';
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false, 'quishing_mfa');
       statusEl.className = 'feedback-header feedback-incorrect';
-      statusEl.innerHTML = '🚨 Riesgo de Secuestro de Sesión (0 PTS)';
+      statusEl.innerHTML = '🚨 Cuidado: Caíste en una trampa móvil (0 PTS)';
     }
 
     descEl.innerHTML = c.explanation;
     document.getElementById('qmfa-next-btn').textContent =
-      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Caso →';
+      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Reto →';
   }
 
   nextCase() {
@@ -1522,8 +1851,8 @@ class QuishingMfaGame {
     } else {
       app.markModuleCompleted('quishing_mfa');
       app.showModalAlert({
-        title: '📲 Módulo Quishing y Fatiga MFA Completado',
-        message: 'Excelente. Ahora sabes cómo defender tu segundo factor de autenticación (2FA) frente a bombardeos Push y códigos QR maliciosos.',
+        title: '📲 Módulo Celular 3D y Códigos QR Completado',
+        message: '¡Excelente trabajo! Ya sabes cómo actuar ante avisos sospechosos en tu celular y cómo detectar códigos QR engañosos.',
         type: 'success'
       }).then(() => app.navigateTo('dashboard'));
     }
@@ -1531,49 +1860,66 @@ class QuishingMfaGame {
 }
 
 // ============================================================================
-// FASE 2 — MÓDULO 9: FRAUDE EJECUTIVO (BEC / WHALING) Y PROVEEDORES
+// FASE 2 — MÓDULO 9: PAGOS URGENTES, PROVEEDORES Y FALSOS JEFES
 // ============================================================================
 class BecFraudGame {
   constructor() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
+    this.waveAnimId = null;
+    this.isScanningWave = false;
 
     this.cases = [
       {
-        title: "Solicitud Urgente de 'Presidencia Ejecutiva' Fuera de Horario (Whaling)",
-        sender: "presidencia.suiche7b@ejecutivo-corporativo.com",
-        subject: "CONFIDENCIAL: Adquisición Estratégica — Pago de Garantía Tecnológica Hoy",
-        scenarioDesc: "Son las 4:40 PM de un viernes. Recibes un correo marcado como 'Estrictamente Confidencial' que aparenta venir de Presidencia Ejecutiva: 'Estoy entrando a una reunión con la Junta Directiva y no puedo atender llamadas. Necesito que proceses hoy mismo el pago de anticipo por $45,000 (o su equivalente) a esta nueva cuenta de un proveedor internacional de ciberseguridad sin pasarlo aún por el circuito normal de firmas para evitar filtraciones'. ¿Cómo procedes?",
-        options: [
-          { text: "🟢 Detener la operación, verificar el dominio del remitente y validar por un canal oficial independiente (extensión interna) cumpliendo el control de doble firma", isCorrect: true },
-          { text: "🟡 Ejecutar la transferencia de inmediato por tratarse de una orden directa de Presidencia Ejecutiva", isCorrect: false },
-          { text: "🔴 Responder al mismo correo preguntando si de verdad es el Presidente Ejecutivo", isCorrect: false }
+        title: "Caso 1: El 'Presidente' Apurado Pidiendo un Pago Secreto el Viernes",
+        sender: "presidente.suiche7b@gmail.com",
+        subject: "URGENTE Y CONFIDENCIAL: Haz esta transferencia hoy sin comentarle a nadie",
+        scenarioDesc: "Son las 4:40 PM del viernes. Te llega un correo y una nota de voz que suena igualita al Presidente de Suiche 7B diciendo: 'Estoy en una reunión privada, transfiere urgente este anticipo a esta cuenta nueva y no llames a nadie'. ¡Toca las 3 lupas de la izquierda para averiguar la verdad!",
+        evidences: [
+          "📧 [LUPA 1 · VER CORREO]: ¡Mira la dirección! Dice 'presidente.suiche7b@gmail.com'. Los directivos de Suiche 7B nunca usan correos @gmail.com para ordenar pagos.",
+          "🏦 [LUPA 2 · VER CUENTA]: La cuenta bancaria que pide el mensaje es de un desconocido que no está registrado en Finanzas ni Administración.",
+          "📞 [LUPA 3 · LLAMAR A OFICINA]: Llamaste a la extensión interna de Presidencia y te confirmaron que el Presidente NUNCA envió ese mensaje (su voz fue imitada por computadora)."
         ],
-        explanation: "El <strong>Fraude del CEO (Business Email Compromise / Whaling)</strong> utiliza la autoridad de altos directivos, el secreto ('no comentes con nadie') y la presión de tiempo ('no puedo atender llamadas') para lograr que el personal salte los controles internos. <strong>Ningún ejecutivo de Suiche 7B solicitará omitir los controles de autorización dual ni pagos desde dominios externos.</strong>"
+        options: [
+          { text: "No hacer el pago, confirmar por teléfono interno y pedir siempre las firmas de autorización de la empresa", isCorrect: true },
+          { text: "Hacer la transferencia rápido por miedo a que el jefe se moleste", isCorrect: false },
+          { text: "Responderle al correo @gmail.com preguntando a nombre de quién va el cheque", isCorrect: false }
+        ],
+        explanation: "Esta estafa se llama <strong>El Fraude del Falso Jefe</strong>: los delincuentes te presionan un viernes por la tarde y te piden 'mantenerlo en secreto' para que no llames a tu supervisor. <strong>En Suiche 7B ningún pago sale sin seguir las firmas y aprobaciones normales.</strong>"
       },
       {
-        title: "Cambio de Cuenta Bancaria de Proveedor Tecnológico Conocido",
-        sender: "cobranzas@proveedor-fibra.com.ve (Cuenta de proveedor comprometida)",
-        subject: "Actualización de Coordenadas Bancarias — Factura Mensual Enlace Principal",
-        scenarioDesc: "Un proveedor legítimo de telecomunicaciones escribe desde su correo habitual informando que, por 'auditoría bancaria', cambiaron su cuenta receptora y adjunta una carta PDF solicitando que el pago de este mes se deposite en una cuenta a nombre de una empresa distinta. ¿Cuál es el protocolo obligatorio?",
-        options: [
-          { text: "🟢 No modificar los datos maestros del proveedor hasta realizar verificación telefónica cruzada (Out-of-Band) llamando al número registrado originalmente en el contrato", isCorrect: true },
-          { text: "🟡 Actualizar la cuenta bancaria en el sistema administrativo porque el correo vino de la dirección real del proveedor", isCorrect: false },
-          { text: "🔴 Llamar al número telefónico nuevo que aparece impreso dentro del mismo PDF sospechoso", isCorrect: false }
+        title: "Caso 2: El Proveedor que Pide Cambiar su Cuenta Bancaria por Correo",
+        sender: "cobranzas@proveedor-oficina.com.ve",
+        subject: "Aviso: A partir de hoy deposítennos las facturas en esta nueva cuenta",
+        scenarioDesc: "Un proveedor habitual de la oficina envía una carta en PDF diciendo que cambió de banco y pide que el pago de este mes se deposite a nombre de otra persona. Toca las 3 lupas a la izquierda:",
+        evidences: [
+          "📧 [LUPA 1 · VER CORREO]: Aunque el correo parece del proveedor, un estafador se metió en su buzón para mandar cartas falsas a sus clientes.",
+          "🏦 [LUPA 2 · VER CUENTA]: La cuenta nueva del PDF está a nombre de una persona natural que no tiene nada que ver con la empresa proveedora.",
+          "📞 [LUPA 3 · LLAMAR A OFICINA]: Al llamar al teléfono fijo de toda la vida del proveedor, el gerente te dice: '¡Cuidado, nosotros NO hemos cambiado de cuenta bancaria!'."
         ],
-        explanation: "En ataques de <strong>Compromiso de Cuenta de Proveedor (Vendor Email Compromise)</strong>, los criminales hackean el correo real de un proveedor de Suiche 7B y envían instrucciones de pago alteradas. Siempre se debe validar cualquier cambio de cuenta llamando al contacto histórico registrado en el expediente original, nunca al número del correo recibido."
+        options: [
+          { text: "No cambiar la cuenta bancaria hasta llamar por teléfono al contacto conocido de siempre del proveedor", isCorrect: true },
+          { text: "Cambiar la cuenta en el sistema y transferir el dinero sin llamar", isCorrect: false },
+          { text: "Llamar al número de celular extraño que venía escrito dentro de la carta sospechosa", isCorrect: false }
+        ],
+        explanation: "Cuando un proveedor pida cambiar su cuenta bancaria para recibir pagos de Suiche 7B, <strong>siempre debes confirmar llamando al teléfono que ya teníamos guardado desde que se firmó el contrato</strong>, nunca al número que venga en el correo nuevo."
       },
       {
-        title: "Suplantación de Inspector de SUDEBAN Solicitando Accesos Remotos",
-        sender: "inspeccion.tecnica@sudeban-auditoria.org",
-        subject: "Requerimiento Inmediato: Instalación de Agente de Supervisión Remota",
-        scenarioDesc: "Recibes un correo que exige instalar una herramienta de escritorio remoto (AnyDesk / TeamViewer) en tu estación de trabajo en los próximos 30 minutos para una 'inspección en vivo de SUDEBAN', amenazando con multas regulatorias. ¿Qué debes hacer?",
-        options: [
-          { text: "🟢 No instalar ningún software, reportar a la Gerencia de Seguridad de la Información y al Oficial de Cumplimiento", isCorrect: true },
-          { text: "🟡 Descargar e instalar AnyDesk rápidamente para colaborar con el supuesto ente regulador", isCorrect: false },
-          { text: "🔴 Entregarle las credenciales de solo lectura del servidor para no instalar programas", isCorrect: false }
+        title: "Caso 3: Correo Falso Pidiendo la Lista de Sueldos y Cédulas del Personal",
+        sender: "auditoria.externa@revision-bancaria.org",
+        subject: "Envío inmediato de nómina, cédulas y teléfonos de todos los empleados",
+        scenarioDesc: "Recibes un correo que dice ser de unos 'Auditores Externos' exigiendo que les envíes en los próximos 20 minutos el archivo Excel con los nombres, cédulas, sueldos y direcciones de todo el personal de Suiche 7B. Usa las 3 lupas:",
+        evidences: [
+          "📧 [LUPA 1 · VER CORREO]: El remitente '@revision-bancaria.org' es un correo externo desconocido que no pertenece a ninguna institución oficial.",
+          "🏦 [LUPA 2 · VER ARCHIVO PEDIDO]: Están pidiendo datos privados de nómina para suplantar la identidad de los trabajadores.",
+          "📞 [LUPA 3 · LLAMAR A OFICINA]: Consultaste con Capital Humano y Cumplimiento, y confirmaron que no existe ninguna auditoría pidiendo esos datos por correo."
         ],
-        explanation: "Los entes reguladores como <strong>SUDEBAN jamás solicitan a colaboradores individuales la instalación de herramientas de control remoto (RAT/AnyDesk)</strong> por correo electrónico ni desde dominios `.org` no gubernamentales. Toda comunicación regulatoria se canaliza exclusivamente a través del Oficial de Cumplimiento y Presidencia."
+        options: [
+          { text: "Negarse a enviar el archivo y reportar el correo a Seguridad de la Información", isCorrect: true },
+          { text: "Enviarles el Excel con todas las cédulas y sueldos para salir del paso", isCorrect: false },
+          { text: "Enviarles solo la mitad de la lista de trabajadores", isCorrect: false }
+        ],
+        explanation: "Los datos de nómina, cédulas, teléfonos y contratos de los trabajadores son estrictamente confidenciales y jamás se envían por correo ante solicitudes apresuradas de desconocidos."
       }
     ];
   }
@@ -1581,30 +1927,89 @@ class BecFraudGame {
   init() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
-    document.getElementById('bec-feedback').style.display = 'none';
+    this.startWave3DAnimation();
     this.renderCase();
+  }
+
+  startWave3DAnimation() {
+    const canvas = document.getElementById('bec-wave-3d-canvas');
+    if (!canvas || typeof canvas.getContext !== 'function') return;
+    const ctx = canvas.getContext('2d');
+    if (this.waveAnimId) cancelAnimationFrame(this.waveAnimId);
+
+    let phase = 0;
+    const draw = () => {
+      phase += this.isScanningWave ? 0.14 : 0.04;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const layers = [
+        { color: '#ef4444', amp: this.isScanningWave ? 36 : 16, freq: 0.045 },
+        { color: '#fbba0a', amp: this.isScanningWave ? 26 : 11, freq: 0.03 },
+        { color: '#0088ff', amp: this.isScanningWave ? 18 : 8, freq: 0.06 }
+      ];
+
+      layers.forEach((l, idx) => {
+        ctx.beginPath();
+        ctx.strokeStyle = l.color;
+        ctx.lineWidth = 2;
+        for (let x = 0; x < canvas.width; x += 4) {
+          const y = canvas.height / 2 +
+            Math.sin(x * l.freq + phase + idx) * l.amp * Math.sin((x / canvas.width) * Math.PI);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+
+      this.waveAnimId = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  triggerWaveAnalysis() {
+    app.playAudio('incident_alert');
+    this.isScanningWave = true;
+    this.inspectEvidence(2);
+    setTimeout(() => { this.isScanningWave = false; }, 2500);
+  }
+
+  inspectEvidence(lensIdx) {
+    app.playAudio('click');
+    const c = this.cases[this.currentCaseIndex];
+    const out = document.getElementById('bec-evidence-output');
+    if (out && c.evidences[lensIdx]) {
+      out.textContent = c.evidences[lensIdx];
+    }
   }
 
   renderCase() {
     this.hasAnswered = false;
     const c = this.cases[this.currentCaseIndex];
 
-    document.getElementById('bec-case-counter').textContent = `Caso ${this.currentCaseIndex + 1} de ${this.cases.length}`;
+    document.getElementById('bec-case-counter').textContent = `${this.currentCaseIndex + 1} de ${this.cases.length}`;
     document.getElementById('bec-scenario-title').textContent = c.title;
     document.getElementById('bec-sender').textContent = c.sender;
     document.getElementById('bec-subject').textContent = c.subject;
     document.getElementById('bec-scenario-desc').textContent = c.scenarioDesc;
+    document.getElementById('bec-evidence-output').textContent =
+      '👆 Toca cualquiera de las 3 lupas de arriba (1. Ver Correo, 2. Ver Cuenta, 3. Llamar a Oficina) para descubrir la trampa...';
+
+    const c1 = document.getElementById('bec-check-oob');
+    const c2 = document.getElementById('bec-check-dual');
+    if (c1) c1.checked = false;
+    if (c2) c2.checked = false;
 
     const container = document.getElementById('bec-options-container');
     container.innerHTML = '';
-    c.options.forEach((opt, idx) => {
+    this.currentOptions = shuffleOptions(c.options, this);
+    const letters = ['A', 'B', 'C'];
+    this.currentOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
       btn.style.textAlign = 'left';
-      btn.style.padding = '0.75rem 1rem';
-      btn.style.lineHeight = '1.4';
+      btn.style.padding = '0.7rem 1rem';
       btn.style.fontSize = '0.85rem';
-      btn.textContent = opt.text;
+      btn.textContent = `${letters[idx] || idx + 1}) ${opt.text}`;
       btn.onclick = () => this.makeDecision(idx);
       container.appendChild(btn);
     });
@@ -1617,7 +2022,8 @@ class BecFraudGame {
     this.hasAnswered = true;
 
     const c = this.cases[this.currentCaseIndex];
-    const isCorrect = c.options[idx].isCorrect;
+    const optionsList = this.currentOptions || c.options;
+    const isCorrect = optionsList[idx] ? optionsList[idx].isCorrect : false;
 
     const fb = document.getElementById('bec-feedback');
     fb.style.display = 'block';
@@ -1628,12 +2034,12 @@ class BecFraudGame {
       app.playAudio('correct');
       app.addPoints(50, true, 'bec_fraud');
       statusEl.className = 'feedback-header feedback-correct';
-      statusEl.innerHTML = '🏛️ ¡Control Antifraude Correcto! (+50 PTS)';
+      statusEl.innerHTML = '🏛️ ¡Estafa Detectada y Bloqueada a Tiempo! (+50 PTS)';
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false, 'bec_fraud');
       statusEl.className = 'feedback-header feedback-incorrect';
-      statusEl.innerHTML = '🚨 Alerta de Fraude Corporativo BEC (0 PTS)';
+      statusEl.innerHTML = '🚨 Peligro: Así es como roban pagos en las empresas (0 PTS)';
     }
 
     descEl.innerHTML = c.explanation;
@@ -1647,10 +2053,11 @@ class BecFraudGame {
       this.currentCaseIndex++;
       this.renderCase();
     } else {
+      if (this.waveAnimId) cancelAnimationFrame(this.waveAnimId);
       app.markModuleCompleted('bec_fraud');
       app.showModalAlert({
-        title: '🏛️ Módulo Fraude Ejecutivo (BEC) Completado',
-        message: 'Has completado el entrenamiento contra suplantación de alta gerencia, fraude a proveedores y falsas inspecciones regulatorias.',
+        title: '🎙️ Módulo Pagos Urgentes y Falsos Jefes Completado',
+        message: '¡Excelente! Ahora sabes cómo verificar cualquier solicitud urgente de pago, cambio de cuenta bancaria o envío de información administrativa en Corporación Suiche 7B.',
         type: 'success'
       }).then(() => app.navigateTo('dashboard'));
     }
@@ -1658,52 +2065,51 @@ class BecFraudGame {
 }
 
 // ============================================================================
-// FASE 2 — MÓDULO 10: TELETRABAJO SEGURO, VPN Y REDES WI-FI (EVIL TWIN)
+// FASE 2 — MÓDULO 10: CAFETERÍAS, CASA Y WI-FI SEGURO (RADAR 3D)
 // ============================================================================
 class RemoteVpnGame {
   constructor() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
+    this.sonarAnimId = null;
+    this.tunnelSwitches = { aes: false, killswitch: false };
 
     this.cases = [
       {
-        title: "Detección de Red Wi-Fi Gemela Maliciosa (Evil Twin) Fuera de la Oficina",
-        networkBadge: "Escáner de Redes Inalámbricas",
-        ssid: "WiFi_Gratis_Aeropuerto_VIP (Abierta / Sin Cifrado)",
-        securitySpec: "Cifrado: NINGUNO | Portal Cautivo solicita correo corporativo",
-        scenarioDesc: "Debes conectarte de emergencia desde tu laptop corporativa para revisar un reporte de Corporación Suiche 7B mientras estás fuera de la sede. Ves una red abierta sin contraseña llamada 'WiFi_Gratis_Aeropuerto_VIP'. ¿Cuál es el procedimiento seguro?",
+        title: "Situación 1: Conectarse al 'Wi-Fi Gratis' en un Café o Aeropuerto",
+        ssid: "WiFi_Gratis_Sin_Clave (🔴 PUNTO ROJO PELIGROSO EN EL RADAR)",
+        securitySpec: "Cualquier desconocido conectado a ese Wi-Fi puede espiar lo que haces",
+        scenarioDesc: "Estás en una cafetería o en el aeropuerto y necesitas enviar un correo urgente de Suiche 7B desde tu laptop. En el Radar 3D ves un Wi-Fi abierto sin clave ('WiFi_Gratis_Sin_Clave'). ¡Enciende tus 2 escudos arriba y elige qué hacer!",
         options: [
-          { text: "🟢 No conectarse a la red Wi-Fi abierta; utilizar datos móviles cifrados (Hotspot personal con WPA2/WPA3) y activar inmediatamente el túnel VPN corporativo", isCorrect: true },
-          { text: "🟡 Conectarse al Wi-Fi gratis abierto porque el navegador tiene candado HTTPS y eso basta", isCorrect: false },
-          { text: "🔴 Desactivar el Firewall de Windows para que el portal del aeropuerto cargue más rápido", isCorrect: false }
+          { text: "No usar el Wi-Fi gratis abierto; compartir los datos de mi celular con clave y encender la VPN de Suiche 7B", isCorrect: true },
+          { text: "Conectarme al Wi-Fi gratis sin clave porque es más rápido y cómodo", isCorrect: false },
+          { text: "Pedirle prestada la computadora a un desconocido en la cafetería para abrir mi correo", isCorrect: false }
         ],
-        explanation: "Las redes Wi-Fi públicas o sin contraseña suelen utilizarse para ataques <strong>Evil Twin (Gemelo Malvado) y Man-in-the-Middle</strong>, donde un atacante intercepta el tráfico DNS y sesiones. Siempre utiliza una conexión confiable y levanta la <strong>VPN oficial de Corporación Suiche 7B</strong>."
+        explanation: "Los <strong>Wi-Fi públicos o abiertos sin clave</strong> en cafeterías, centros comerciales o aeropuertos son muy peligrosos porque los atacantes crean redes trampa para robar contraseñas. Usa siempre datos móviles seguros y <strong>enciende la VPN de Suiche 7B</strong>."
       },
       {
-        title: "Prevención de Espionaje Visual (Shoulder Surfing) y Uso de Equipos en Casa",
-        networkBadge: "Entorno de Teletrabajo",
-        ssid: "Hogar_Fibra_5G (WPA3) + VPN Suiche 7B Activa",
-        securitySpec: "Estado: Sesión Remota Abierta en Sala Compartida",
-        scenarioDesc: "Estás trabajando de forma remota con la VPN activa. Un familiar o visita en casa te pide usar tu laptop de Corporación Suiche 7B durante 15 minutos para descargar e imprimir un archivo de la universidad. ¿Qué indica la política de seguridad?",
+        title: "Situación 2: Un Familiar en Casa Pide Prestada la Laptop del Trabajo",
+        ssid: "Trabajando desde Casa con la Laptop de Suiche 7B",
+        securitySpec: "Tu sesión de trabajo tiene acceso a las carpetas internas de la empresa",
+        scenarioDesc: "Estás trabajando desde tu casa y un sobrino o familiar te dice: '¿Me prestas tu laptop de Suiche 7B media hora para ver una película en internet y descargar un juego?'. ¿Qué debes responder?",
         options: [
-          { text: "🟢 Negar el uso del equipo corporativo a terceros o familiares y bloquear la pantalla (Win + L) siempre que te separes de la laptop", isCorrect: true },
-          { text: "🟡 Prestarle la laptop corporativa pero cerrando antes la ventana del correo electrónico", isCorrect: false },
-          { text: "🔴 Crear una carpeta en el escritorio corporativo para que tu familiar descargue sus programas allí", isCorrect: false }
+          { text: "Decirle amablemente que la laptop de Suiche 7B es solo para trabajar y bloquear la pantalla (Win + L) al levantarme", isCorrect: true },
+          { text: "Prestarle la laptop del trabajo con tal de que no borre mis carpetas", isCorrect: false },
+          { text: "Anotarle mi clave de la laptop en un papel para que él entre cuando quiera", isCorrect: false }
         ],
-        explanation: "Los equipos portátiles asignados por <strong>Corporación Suiche 7B son de uso estrictamente laboral e intransferible</strong>. Un tercero o familiar puede descargar accidentalmente troyanos o infostealers en una sesión que tiene túnel VPN directo hacia la red interna de la empresa."
+        explanation: "Las computadoras asignadas por <strong>Corporación Suiche 7B son de uso exclusivo para el trabajo</strong>. Muchas páginas de juegos o películas gratuitas instalan virus ocultos que pondrían en peligro toda la oficina."
       },
       {
-        title: "Sincronización de Archivos Confidenciales en Nubes Personales",
-        networkBadge: "Control de Almacenamiento en la Nube",
-        ssid: "Transferencia de Archivos de Trabajo",
-        securitySpec: "Destino detectado: Google Drive / Dropbox / WhatsApp Personal",
-        scenarioDesc: "Para avanzar un trabajo el fin de semana desde tu computadora personal de casa, piensas subir una base de datos de clientes y reportes operativos de Suiche 7B a tu cuenta personal de Google Drive o enviártelos a tu correo personal `@gmail.com`. ¿Es válido?",
+        title: "Situación 3: Mandar Archivos de la Oficina a tu Correo Personal (@gmail)",
+        ssid: "Cuidado de Documentos, Excel y Reportes de Trabajo",
+        securitySpec: "Los correos y nubes personales no tienen la protección de la empresa",
+        scenarioDesc: "Para terminar de revisar unas facturas, presupuestos o listados el fin de semana, piensas mandarte esos archivos confidenciales de Suiche 7B a tu correo personal `@gmail.com` o a tu WhatsApp personal. ¿Es correcto?",
         options: [
-          { text: "🟢 Prohibido: La información de Corporación Suiche 7B solo debe almacenarse y transmitirse en los repositorios y equipos corporativos autorizados", isCorrect: true },
-          { text: "🟡 Es válido siempre y cuando borres el archivo de tu Gmail el lunes por la mañana", isCorrect: false },
-          { text: "🔴 Es válido si le pones de nombre 'archivo_personal.xlsx' para que nadie sospeche", isCorrect: false }
+          { text: "No: Los documentos de Suiche 7B deben guardarse y revisarse únicamente en el correo y carpetas oficiales de la empresa", isCorrect: true },
+          { text: "Sí, no pasa nada en mandármelos a mi Gmail personal si luego los borro", isCorrect: false },
+          { text: "Subir los archivos de finanzas a una página web pública para bajarlos rápido", isCorrect: false }
         ],
-        explanation: "Enviar información corporativa a correos personales (`@gmail`, `@hotmail`) o nubes personales no administradas constituye una <strong>exfiltración no autorizada de datos</strong> y viola las políticas de seguridad de la información de Corporación Suiche 7B."
+        explanation: "Enviar documentos internos (facturas, nóminas, presupuestos, reportes) a correos personales (`@gmail`, `@hotmail`) o WhatsApp personal está prohibido porque saca la información del resguardo seguro de Suiche 7B."
       }
     ];
   }
@@ -1711,30 +2117,113 @@ class RemoteVpnGame {
   init() {
     this.currentCaseIndex = 0;
     this.hasAnswered = false;
-    document.getElementById('vpn-feedback').style.display = 'none';
+    this.tunnelSwitches = { aes: false, killswitch: false };
+    this.startSonar3DAnimation();
     this.renderCase();
+  }
+
+  startSonar3DAnimation() {
+    const canvas = document.getElementById('wifi-sonar-3d-canvas');
+    if (!canvas || typeof canvas.getContext !== 'function') return;
+    const ctx = canvas.getContext('2d');
+    if (this.sonarAnimId) cancelAnimationFrame(this.sonarAnimId);
+
+    let sweepAngle = 0;
+    const blips = [
+      { r: 42, a: 0.9, safe: true, label: 'VPN_S7B' },
+      { r: 68, a: 2.4, safe: false, label: 'WIFI_GRATIS' },
+      { r: 82, a: 4.3, safe: true, label: 'RED_SEGURA' },
+      { r: 55, a: 5.5, safe: false, label: 'TRAMPA' }
+    ];
+
+    const draw = () => {
+      sweepAngle = (sweepAngle + 0.03) % (Math.PI * 2);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const isTunnelSecure = this.tunnelSwitches.aes && this.tunnelSwitches.killswitch;
+      const radarColor = isTunnelSecure ? '#4ade80' : '#38bdf8';
+
+      [30, 60, 90].forEach(r => {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      ctx.strokeStyle = radarColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(sweepAngle) * 92, cy + Math.sin(sweepAngle) * 92);
+      ctx.stroke();
+
+      blips.forEach(b => {
+        const bx = cx + Math.cos(b.a) * b.r;
+        const by = cy + Math.sin(b.a) * b.r;
+        ctx.fillStyle = b.safe ? '#4ade80' : '#ef4444';
+        ctx.beginPath();
+        ctx.arc(bx, by, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      this.sonarAnimId = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  toggleTunnelSwitch(key) {
+    app.playAudio('click');
+    this.tunnelSwitches[key] = !this.tunnelSwitches[key];
+    this.updateTunnelUI();
+  }
+
+  updateTunnelUI() {
+    const aesBtn = document.getElementById('vpn-toggle-aes');
+    const ksBtn = document.getElementById('vpn-toggle-killswitch');
+    const pill = document.getElementById('vpn-tunnel-state-pill');
+
+    if (aesBtn) {
+      aesBtn.textContent = `${this.tunnelSwitches.aes ? '✅' : '⬜'} Escudo 1: Encender VPN de Suiche 7B`;
+      aesBtn.style.borderColor = this.tunnelSwitches.aes ? '#4ade80' : '';
+    }
+    if (ksBtn) {
+      ksBtn.textContent = `${this.tunnelSwitches.killswitch ? '✅' : '⬜'} Escudo 2: Bloquear Pantalla (Win + L)`;
+      ksBtn.style.borderColor = this.tunnelSwitches.killswitch ? '#4ade80' : '';
+    }
+
+    const bothActive = this.tunnelSwitches.aes && this.tunnelSwitches.killswitch;
+    if (pill) {
+      pill.textContent = bothActive ? '¡ESCUDOS ACTIVADOS!' : 'ESCUDOS APAGADOS';
+      pill.style.borderColor = bothActive ? '#4ade80' : '#ef4444';
+      pill.style.color = bothActive ? '#4ade80' : '#fca5a5';
+    }
   }
 
   renderCase() {
     this.hasAnswered = false;
     const c = this.cases[this.currentCaseIndex];
 
-    document.getElementById('vpn-case-counter').textContent = `Caso ${this.currentCaseIndex + 1} de ${this.cases.length}`;
+    document.getElementById('vpn-case-counter').textContent = `${this.currentCaseIndex + 1} de ${this.cases.length}`;
     document.getElementById('vpn-scenario-title').textContent = c.title;
     document.getElementById('vpn-ssid').textContent = c.ssid;
     document.getElementById('vpn-spec').textContent = c.securitySpec;
     document.getElementById('vpn-scenario-desc').textContent = c.scenarioDesc;
+    this.updateTunnelUI();
 
     const container = document.getElementById('vpn-options-container');
     container.innerHTML = '';
-    c.options.forEach((opt, idx) => {
+    this.currentOptions = shuffleOptions(c.options, this);
+    const letters = ['A', 'B', 'C'];
+    this.currentOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
       btn.style.textAlign = 'left';
-      btn.style.padding = '0.75rem 1rem';
-      btn.style.lineHeight = '1.4';
+      btn.style.padding = '0.7rem 1rem';
       btn.style.fontSize = '0.85rem';
-      btn.textContent = opt.text;
+      btn.textContent = `${letters[idx] || idx + 1}) ${opt.text}`;
       btn.onclick = () => this.makeDecision(idx);
       container.appendChild(btn);
     });
@@ -1747,7 +2236,14 @@ class RemoteVpnGame {
     this.hasAnswered = true;
 
     const c = this.cases[this.currentCaseIndex];
-    const isCorrect = c.options[idx].isCorrect;
+    const optionsList = this.currentOptions || c.options;
+    const isCorrect = optionsList[idx] ? optionsList[idx].isCorrect : false;
+
+    if (isCorrect) {
+      this.tunnelSwitches.aes = true;
+      this.tunnelSwitches.killswitch = true;
+      this.updateTunnelUI();
+    }
 
     const fb = document.getElementById('vpn-feedback');
     fb.style.display = 'block';
@@ -1758,17 +2254,17 @@ class RemoteVpnGame {
       app.playAudio('correct');
       app.addPoints(50, true, 'remote_vpn');
       statusEl.className = 'feedback-header feedback-correct';
-      statusEl.innerHTML = '🌐 ¡Conexión y Perímetro Protegido! (+50 PTS)';
+      statusEl.innerHTML = '📡 ¡Excelente Decisión de Trabajo Seguro! (+50 PTS)';
     } else {
       app.playAudio('incorrect');
       app.addPoints(0, false, 'remote_vpn');
       statusEl.className = 'feedback-header feedback-incorrect';
-      statusEl.innerHTML = '🚨 Brecha en Seguridad Remota (0 PTS)';
+      statusEl.innerHTML = '🚨 Cuidado: Eso pondría en riesgo la información de la oficina (0 PTS)';
     }
 
     descEl.innerHTML = c.explanation;
     document.getElementById('vpn-next-btn').textContent =
-      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Caso →';
+      this.currentCaseIndex === this.cases.length - 1 ? 'Finalizar Módulo' : 'Siguiente Situación →';
   }
 
   nextCase() {
@@ -1777,10 +2273,11 @@ class RemoteVpnGame {
       this.currentCaseIndex++;
       this.renderCase();
     } else {
+      if (this.sonarAnimId) cancelAnimationFrame(this.sonarAnimId);
       app.markModuleCompleted('remote_vpn');
       app.showModalAlert({
-        title: '🌐 Módulo Teletrabajo y VPN Completado',
-        message: 'Has completado exitosamente el entrenamiento sobre redes Wi-Fi seguras, túneles VPN y protección de activos fuera de la oficina.',
+        title: '📡 Módulo Cafeterías, Casa y Wi-Fi Seguro Completado',
+        message: '¡Felicidades! Ahora sabes cómo trabajar de forma segura fuera de la oficina, evitar redes Wi-Fi peligrosas y resguardar tu laptop y archivos de Corporación Suiche 7B.',
         type: 'success'
       }).then(() => app.navigateTo('dashboard'));
     }
@@ -1795,7 +2292,7 @@ const games = {
   incident: new IncidentGame(),
   password: new PasswordGame(),
   usb: new UsbGame(),
-  // Fase 2 (Avanzado / Transaccional)
+  // Fase 2 (Simuladores 3D Interactivos para Todo el Personal)
   ai_sec: new AiSecurityGame(),
   pci_dss: new PciDssGame(),
   quishing_mfa: new QuishingMfaGame(),

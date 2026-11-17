@@ -17,7 +17,12 @@ const MODULE_MAX_SCORES = {
   pci_dss: 150,
   quishing_mfa: 150,
   bec_fraud: 150,
-  remote_vpn: 150
+  remote_vpn: 150,
+  // Arcade (juegos extra: no afectan certificados)
+  arcade_jornada: 300,
+  arcade_bandeja: 200,
+  arcade_cartas: 200,
+  arcade_boveda: 250
 };
 
 // Generar código único verificable de certificado institucional
@@ -168,6 +173,12 @@ const updateProgress = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (error.message === 'DB_FAST_OFFLINE') {
+      return res.json({
+        success: true,
+        localMode: true
+      });
+    }
     next(error);
   }
 };

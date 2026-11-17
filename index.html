@@ -12,11 +12,14 @@
     href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Playball&family=Alex+Brush&display=swap"
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3.4">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
 <body data-view="welcome">
+
+  <!-- MOTOR 3D ULTRALIGERO EN CANVAS: RED INTERBANCARIA TRIDIMENSIONAL SUICHE 7B -->
+  <canvas id="cyber-globe-3d-canvas" aria-hidden="true"></canvas>
 
   <header>
     <div class="logo-container" aria-label="Corporación Suiche 7B">
@@ -34,13 +37,15 @@
         </svg>
         Panel Principal
       </a>
-      <a class="nav-link" id="nav-admin-link" onclick="app.navigateTo('admin-dashboard'); app.loadAdminDashboard();" style="display: none;">
+      <a class="nav-link" id="nav-admin-link" onclick="app.navigateTo('admin-dashboard'); app.loadAdminDashboard();"
+        style="display: none;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
         Auditoría y Control de Fases
       </a>
-      <a class="nav-link" id="nav-customizer-link" onclick="app.navigateTo('customizer'); customizer.renderEditor();" style="display: none;">
+      <a class="nav-link" id="nav-customizer-link" onclick="app.navigateTo('customizer'); customizer.renderEditor();"
+        style="display: none;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path
             d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -114,13 +119,26 @@
     <!-- VISTA 2: PANEL PRINCIPAL (DASHBOARD COLABORADOR) -->
     <section id="dashboard-view" class="view-section">
       <div class="hero-banner">
-        <div class="hero-content">
-          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap;">
-            <span id="dash-campaign-badge" class="phase-pill">Programa Anual de Concientización 2026</span>
-            <span id="dash-active-phase-badge" class="phase-pill phase-pill-cyan">Fase 1 & Fase 2 Activas</span>
+        <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+          <!-- Escudo / Núcleo Giroscópico 3D -->
+          <div class="hero-3d-scene" title="Núcleo CiberSeguro 3D Activo">
+            <div class="hero-3d-core">
+              <div class="core-ring ring-x"></div>
+              <div class="core-ring ring-y"></div>
+              <div class="core-ring ring-z"></div>
+              <div class="core-shield-center">🛡️</div>
+            </div>
           </div>
-          <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
-          <p id="dash-hero-subtitle">Tu misión hoy es salvaguardar el ecosistema transaccional y la información de La Corporación Suiche 7B. Completa los módulos interactivos asignados para obtener tu <strong>Certificado de Ciberseguridad</strong>.</p>
+          <div class="hero-content">
+            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap;">
+              <span id="dash-campaign-badge" class="phase-pill">Programa Anual de Concientización 2026</span>
+              <span id="dash-active-phase-badge" class="phase-pill phase-pill-cyan">Fase 1 & Fase 2 Activas</span>
+            </div>
+            <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
+            <p id="dash-hero-subtitle">Tu misión hoy es salvaguardar el ecosistema transaccional y la información de La
+              Corporación Suiche 7B. Completa los módulos interactivos asignados para obtener tu <strong>Certificado de
+                Ciberseguridad</strong>.</p>
+          </div>
         </div>
         <div style="display:flex; flex-direction:column; gap:0.6rem; align-items:flex-end;">
           <div id="cert-grant-phase1" style="display:none;">
@@ -129,7 +147,8 @@
             </button>
           </div>
           <div id="cert-grant-phase2" style="display:none;">
-            <button class="btn btn-primary" style="background:linear-gradient(135deg, #b60e80, #6d084d);" onclick="app.showCertificate('phase2')">
+            <button class="btn btn-primary" style="background:linear-gradient(135deg, #b60e80, #6d084d);"
+              onclick="app.showCertificate('phase2')">
               🎖️ Certificado Fase 2 (Especialista)
             </button>
           </div>
@@ -139,13 +158,16 @@
       <!-- Barra de Conmutación Rápida de Fase (Visible cuando Ambas Fases están activas) -->
       <div id="user-phase-tabs" class="phase-tabs-bar" style="display:none;">
         <button class="phase-tab-btn active" id="tab-btn-all" onclick="app.setUserPhaseFilter('all')">
-          ⚡ Todas las Fases Activas (10 Módulos)
+          ⚡ Todo el Catálogo (F1 + F2 + Arcade)
         </button>
         <button class="phase-tab-btn" id="tab-btn-phase1" onclick="app.setUserPhaseFilter('phase1')">
           🛡️ Fase 1: Fundamentos (5 Módulos)
         </button>
         <button class="phase-tab-btn" id="tab-btn-phase2" onclick="app.setUserPhaseFilter('phase2')">
-          🚀 Fase 2: Especialista Transaccional (5 Módulos)
+          🚀 Fase 2: Interactivos 3D (5 Módulos)
+        </button>
+        <button class="phase-tab-btn" id="tab-btn-arcade" onclick="app.setUserPhaseFilter('arcade')">
+          🕹️ Zona Arcade 3D (4 Juegos Nuevos)
         </button>
       </div>
 
@@ -155,7 +177,8 @@
 
           <!-- BLOQUE FASE 1: FUNDAMENTOS DE CIBERSEGURIDAD -->
           <div id="phase1-section-block" style="margin-bottom: 2.2rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <div
+              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
               <h3 class="modules-title" style="margin-bottom:0;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
@@ -176,7 +199,8 @@
                     </svg>
                   </div>
                   <h3>1. Phishing Detective</h3>
-                  <p>Analiza correos simulados cotidianos de la oficina. Identifica pistas en remitentes, enlaces y adjuntos para reportar amenazas a tiempo.</p>
+                  <p>Analiza correos simulados cotidianos de la oficina. Identifica pistas en remitentes, enlaces y
+                    adjuntos para reportar amenazas a tiempo.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -185,7 +209,8 @@
                     </span>
                     <span id="status-phishing" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPhishingGame()">
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startPhishingGame()">
                     Iniciar Módulo
                   </button>
                 </div>
@@ -204,7 +229,8 @@
                     </svg>
                   </div>
                   <h3>2. Oficina Segura (Clean Desk)</h3>
-                  <p>Aprende políticas de seguridad física. Clasifica hábitos en el puesto de trabajo como buenas prácticas o infracciones.</p>
+                  <p>Aprende políticas de seguridad física. Clasifica hábitos en el puesto de trabajo como buenas
+                    prácticas o infracciones.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -229,7 +255,8 @@
                     </svg>
                   </div>
                   <h3>3. Alerta de Vishing y SMS</h3>
-                  <p>Simulador táctico de teléfono móvil. Enfrenta llamadas telefónicas (Vishing) y chats de soporte técnico falso (WhatsApp/SMS).</p>
+                  <p>Simulador táctico de teléfono móvil. Enfrenta llamadas telefónicas (Vishing) y chats de soporte
+                    técnico falso (WhatsApp/SMS).</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -238,7 +265,8 @@
                     </span>
                     <span id="status-incident" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startIncidentGame()">
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startIncidentGame()">
                     Iniciar Módulo
                   </button>
                 </div>
@@ -254,7 +282,8 @@
                     </svg>
                   </div>
                   <h3>4. Simulador de Hacking</h3>
-                  <p>Escribe una contraseña y ve en tiempo real la simulación visual (efecto Matrix) de cuántos segundos tardarían en descifrarla por fuerza bruta.</p>
+                  <p>Escribe una contraseña y ve en tiempo real la simulación visual (efecto Matrix) de cuántos segundos
+                    tardarían en descifrarla por fuerza bruta.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -263,7 +292,8 @@
                     </span>
                     <span id="status-password" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPasswordGame()">
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startPasswordGame()">
                     Iniciar Módulo
                   </button>
                 </div>
@@ -279,7 +309,8 @@
                     </svg>
                   </div>
                   <h3>5. Trampas con USB y Dispositivos</h3>
-                  <p>Aprende a reaccionar ante memorias USB caídas en la oficina (Baiting) y personas que solicitan conectar celulares o discos desconocidos.</p>
+                  <p>Aprende a reaccionar ante memorias USB caídas en la oficina (Baiting) y personas que solicitan
+                    conectar celulares o discos desconocidos.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -298,7 +329,8 @@
 
           <!-- BLOQUE FASE 2: ESPECIALIZACIÓN TRANSACCIONAL Y AMENAZAS AVANZADAS -->
           <div id="phase2-section-block">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <div
+              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
               <h3 class="modules-title" style="margin-bottom:0; color:var(--accent-cyan);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -309,108 +341,260 @@
             </div>
 
             <!-- Aviso si el Admin activó bloqueo de Fase 2 hasta completar Fase 1 -->
-            <div id="phase2-locked-banner" class="sidebar-panel" style="display:none; margin-bottom:1rem; border-color:var(--accent-cyan); background:rgba(251,186,10,0.08);">
+            <div id="phase2-locked-banner" class="sidebar-panel"
+              style="display:none; margin-bottom:1rem; border-color:var(--accent-cyan); background:rgba(251,186,10,0.08);">
               <strong style="color:var(--accent-cyan);">🔒 Requisito de Desbloqueo Activo:</strong>
-              <span style="font-size:0.85rem; color:var(--text-main);"> Completa primero los 5 módulos de la Fase 1 para desbloquear los simuladores avanzados de la Fase 2.</span>
+              <span style="font-size:0.85rem; color:var(--text-main);"> Completa primero los 5 módulos de la Fase 1 para
+                desbloquear los simuladores avanzados de la Fase 2.</span>
             </div>
 
             <div class="modules-grid" id="phase2-cards-grid">
               <!-- Juego 6: IA Generativa -->
-              <div class="game-card" style="--accent-color: #fbba0a">
+              <div class="game-card game-card-phase2" style="--accent-color: #fbba0a">
                 <div>
-                  <div class="game-icon-wrapper">🤖</div>
-                  <h3>6. IA Generativa y Fuga DLP</h3>
-                  <p>Audita prompts enviados a modelos de Inteligencia Artificial públicos (Shadow AI). Detecta fugas de tramas ISO-8583, PAN, código y actas confidenciales.</p>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🧠</div>
+                    <span class="sim3d-badge">JUEGO 3D · TAPA LOS DATOS</span>
+                  </div>
+                  <h3>6. Uso Seguro de ChatGPT e IA</h3>
+                  <p>¿Usas Inteligencia Artificial para redactar correos o resumir textos? Haz clic sobre los datos
+                    privados (sueldos, cédulas, tarjetas, claves) para taparlos antes de enviar tu consulta.</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: var(--accent-cyan)">
-                      <span class="difficulty-dot"></span> Fase 2 · Avanzado
+                      <span class="difficulty-dot"></span> Fase 2 · Interactivo 3D
                     </span>
                     <span id="status-ai_sec" class="game-status-badge status-pending">Pendiente</span>
                   </div>
                   <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startAiSecGame()">
-                    Iniciar Módulo
+                    Jugar Simulador IA 3D
                   </button>
                 </div>
               </div>
 
-              <!-- Juego 7: PCI-DSS 4.0 -->
-              <div class="game-card" style="--accent-color: #357e32">
+              <!-- Juego 7: Cuidado de Tarjetas -->
+              <div class="game-card game-card-phase2" style="--accent-color: #357e32">
                 <div>
-                  <div class="game-icon-wrapper">💳</div>
-                  <h3>7. PCI-DSS 4.0 Transaccional</h3>
-                  <p>Protege los datos de tarjetahabientes en el Switch Interbancario. Clasifica el manejo de PAN, CVV2, Track 2, bloques PIN en HSM y entornos QA.</p>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">💳</div>
+                    <span class="sim3d-badge" style="border-color:#4ade80; color:#4ade80;">TARJETA 3D INTERACTIVA</span>
+                  </div>
+                  <h3>7. Protección de Tarjetas y Clientes</h3>
+                  <p>Gira una tarjeta bancaria en 3D (frente y reverso) y toca directamente sus partes para ocultar
+                    números de tarjeta y códigos secretos en reportes, reclamos y correos.</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: var(--accent-green)">
-                      <span class="difficulty-dot"></span> Fase 2 · Avanzado
+                      <span class="difficulty-dot"></span> Fase 2 · Interactivo 3D
                     </span>
                     <span id="status-pci_dss" class="game-status-badge status-pending">Pendiente</span>
                   </div>
                   <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startPciDssGame()">
-                    Iniciar Módulo
+                    Jugar Tarjeta 3D
                   </button>
                 </div>
               </div>
 
-              <!-- Juego 8: Quishing y Fatiga MFA -->
-              <div class="game-card" style="--accent-color: #b60e80">
+              <!-- Juego 8: Celular 3D y Códigos QR -->
+              <div class="game-card game-card-phase2" style="--accent-color: #b60e80">
                 <div>
-                  <div class="game-icon-wrapper">📲</div>
-                  <h3>8. Quishing QR y Fatiga MFA</h3>
-                  <p>Defiende tu doble factor de autenticación (2FA) frente a ataques de bombardeo nocturno (Push Bombing) y códigos QR adulterados.</p>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">📲</div>
+                    <span class="sim3d-badge" style="border-color:#f472b6; color:#f472b6;">TELÉFONO 3D
+                      INTERACTIVO</span>
+                  </div>
+                  <h3>8. Tu Celular 3D y Códigos QR Trampa</h3>
+                  <p>Usa un teléfono móvil en 3D para frenar alertas falsas de acceso a medianoche, escanear códigos QR
+                    engañosos con lupa detectora y aprobar tu ingreso real.</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: var(--accent-red-light)">
-                      <span class="difficulty-dot"></span> Fase 2 · Avanzado
+                      <span class="difficulty-dot"></span> Fase 2 · Interactivo 3D
                     </span>
                     <span id="status-quishing_mfa" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startQuishingMfaGame()">
-                    Iniciar Módulo
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startQuishingMfaGame()">
+                    Jugar Celular 3D
                   </button>
                 </div>
               </div>
 
-              <!-- Juego 9: Fraude BEC y Proveedores -->
-              <div class="game-card" style="--accent-color: #005e9c">
+              <!-- Juego 9: Pagos Urgentes y Falsos Jefes -->
+              <div class="game-card game-card-phase2" style="--accent-color: #005e9c">
                 <div>
-                  <div class="game-icon-wrapper">🏛️</div>
-                  <h3>9. Fraude Ejecutivo (BEC)</h3>
-                  <p>Neutraliza ataques de Whaling que suplantan a la Alta Gerencia, cambios fraudulentos de cuentas de proveedores y falsas inspecciones.</p>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🎙️</div>
+                    <span class="sim3d-badge" style="border-color:#60a5fa; color:#60a5fa;">DETECTOR DE ESTAFAS 3D</span>
+                  </div>
+                  <h3>9. Pagos Urgentes y Falsos Jefes</h3>
+                  <p>¿Un correo o nota de voz del "Presidente" o de un proveedor pidiendo transferir dinero rápido o
+                    cambiar cuentas bancarias? Usa las 3 lupas de verificación para descubrir la trampa.</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: var(--primary-light)">
-                      <span class="difficulty-dot"></span> Fase 2 · Avanzado
+                      <span class="difficulty-dot"></span> Fase 2 · Interactivo 3D
                     </span>
                     <span id="status-bec_fraud" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startBecFraudGame()">
-                    Iniciar Módulo
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startBecFraudGame()">
+                    Jugar Detector 3D
                   </button>
                 </div>
               </div>
 
-              <!-- Juego 10: Teletrabajo y VPN -->
-              <div class="game-card" style="--accent-color: #38bdf8">
+              <!-- Juego 10: Trabajo Fuera de Oficina y Wi-Fi -->
+              <div class="game-card game-card-phase2" style="--accent-color: #38bdf8">
                 <div>
-                  <div class="game-icon-wrapper">🌐</div>
-                  <h3>10. Teletrabajo, VPN y Wi-Fi</h3>
-                  <p>Escanea redes inalámbricas fuera de la oficina, detecta puntos de acceso gemelos maliciosos (Evil Twin) y asegura el túnel VPN corporativo.</p>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">📡</div>
+                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">RADAR WI-FI 3D</span>
+                  </div>
+                  <h3>10. Cafeterías, Casa y Wi-Fi Seguro</h3>
+                  <p>Mira en un Radar 3D qué redes Wi-Fi cercanas son peligrosas, enciende tus escudos de protección y
+                    aprende a cuidar tu laptop y archivos fuera de la oficina.</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: #38bdf8">
-                      <span class="difficulty-dot"></span> Fase 2 · Avanzado
+                      <span class="difficulty-dot"></span> Fase 2 · Interactivo 3D
                     </span>
                     <span id="status-remote_vpn" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="app.startRemoteVpnGame()">
-                    Iniciar Módulo
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startRemoteVpnGame()">
+                    Jugar Radar 3D
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOQUE ARCADE 3D: JUEGOS ESPECIALES PARA OFICINA Y FINANZAS -->
+          <div id="arcade-section-block" style="margin-top: 2.4rem;">
+            <div
+              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <h3 class="modules-title" style="margin-bottom:0.2rem; color:#38bdf8;">
+                  🕹️ Zona Arcade 3D: Juegos Interactivos de Oficina (4 Propuestas Jugables)
+                </h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
+                  Cuatro experiencias distintas y 100% rejugables con motor 3D propio para personal administrativo,
+                  financiero, RR.HH. y atención al cliente.
+                </p>
+              </div>
+              <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 4 Jugados</span>
+            </div>
+
+            <div class="modules-grid" id="arcade-cards-grid">
+              <!-- Propuesta A: Jornada Crítica -->
+              <div class="game-card game-card-phase2" style="--accent-color: #38bdf8">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🏢</div>
+                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">OFICINA ISOMÉTRICA 3D ·
+                      RECOMENDADO</span>
+                  </div>
+                  <h3>A. Jornada Crítica: Un Día en Suiche 7B</h3>
+                  <p>Simulador de un día laboral completo (8:00 AM a 5:00 PM) en una oficina 3D interactiva. Elige tu
+                    departamento (Finanzas, RR.HH., Atención, Operaciones o Gerencia), atiende alertas simultáneas y
+                    evita consecuencias en cadena.</p>
+                </div>
+                <div>
+                  <div class="game-meta">
+                    <span class="game-difficulty" style="color: #38bdf8">
+                      <span class="difficulty-dot"></span> Simulador 3D · +300 PTS Máx
+                    </span>
+                    <span id="status-arcade_jornada" class="game-status-badge status-pending">Disponible</span>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startArcadeGame('arcade_jornada')">
+                    Jugar Jornada Crítica 3D
+                  </button>
+                </div>
+              </div>
+
+              <!-- Propuesta B: Bandeja Blindada -->
+              <div class="game-card game-card-phase2" style="--accent-color: #fbba0a">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">📥</div>
+                    <span class="sim3d-badge">ARCADE SWIPE 3D · 90 SEGUNDOS</span>
+                  </div>
+                  <h3>B. Bandeja Blindada (Contra Reloj)</h3>
+                  <p>Arrastra tarjetas 3D de correo hacia la izquierda (<strong>🚫 Es Fraude</strong>) o derecha
+                    (<strong>✅ Es Seguro</strong>) antes de que se agote el reloj. Acumula combos x4 y cuida tus 3
+                    vidas.</p>
+                </div>
+                <div>
+                  <div class="game-meta">
+                    <span class="game-difficulty" style="color: var(--accent-cyan)">
+                      <span class="difficulty-dot"></span> Acción Rápida · +200 PTS Máx
+                    </span>
+                    <span id="status-arcade_bandeja" class="game-status-badge status-pending">Disponible</span>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startArcadeGame('arcade_bandeja')">
+                    Jugar Bandeja Blindada
+                  </button>
+                </div>
+              </div>
+
+              <!-- Propuesta C: Caza-Fraudes (Duelo de Cartas) -->
+              <div class="game-card game-card-phase2" style="--accent-color: #b60e80">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🃏</div>
+                    <span class="sim3d-badge" style="border-color:#f472b6; color:#f472b6;">DUELO DE CARTAS 3D</span>
+                  </div>
+                  <h3>C. Caza-Fraudes: Duelo de Cartas</h3>
+                  <p>Enfréntate a <em>"El Estafador"</em> durante 8 rondas. Cada vez que lance un engaño (falso jefe,
+                    cambio de cuenta, llamada trampa), responde con tu mejor carta de defensa 3D y evita las cartas
+                    trampa.</p>
+                </div>
+                <div>
+                  <div class="game-meta">
+                    <span class="game-difficulty" style="color: #f472b6">
+                      <span class="difficulty-dot"></span> Estrategia 3D · +200 PTS Máx
+                    </span>
+                    <span id="status-arcade_cartas" class="game-status-badge status-pending">Disponible</span>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startArcadeGame('arcade_cartas')">
+                    Jugar Duelo de Cartas
+                  </button>
+                </div>
+              </div>
+
+              <!-- Propuesta D: Escape Room La Bóveda Digital -->
+              <div class="game-card game-card-phase2" style="--accent-color: #4ade80">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🔐</div>
+                    <span class="sim3d-badge" style="border-color:#4ade80; color:#4ade80;">ESCAPE ROOM · BÓVEDA
+                      3D</span>
+                  </div>
+                  <h3>D. Escape Room: La Bóveda Digital 3D</h3>
+                  <p>Gira una bóveda bancaria 3D y resuelve sus 5 candados interactivos (claves, correo falso,
+                    escritorio
+                    desordenado, llamada sospechosa y pago urgente) para descubrir el código de 5 dígitos y abrir la
+                    puerta.</p>
+                </div>
+                <div>
+                  <div class="game-meta">
+                    <span class="game-difficulty" style="color: #4ade80">
+                      <span class="difficulty-dot"></span> Escape Room 3D · +250 PTS Máx
+                    </span>
+                    <span id="status-arcade_boveda" class="game-status-badge status-pending">Disponible</span>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                    onclick="app.startArcadeGame('arcade_boveda')">
+                    Abrir Bóveda Digital 3D
                   </button>
                 </div>
               </div>
@@ -456,6 +640,15 @@
             </div>
           </div>
 
+          <!-- Panel de Radar de Competencias CiberSeguras -->
+          <div class="sidebar-panel">
+            <h3>🕸️ Radar de Competencias</h3>
+            <div id="skills-radar-container"
+              style="display:flex; justify-content:center; align-items:center; padding:0.4rem 0;">
+              <!-- SVG Radar generado dinámicamente en app.js -->
+            </div>
+          </div>
+
           <!-- Panel de Insignias de Ciberseguridad (Gamificación 2.0) -->
           <div class="sidebar-panel">
             <h3>🎖️ Insignias de Especialización</h3>
@@ -467,7 +660,8 @@
           <!-- Panel de Ranking Interdepartamental (Reactivado y Conectado a BD) -->
           <div class="sidebar-panel">
             <h3>🏆 Ranking por Departamento</h3>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.8rem;">Clasificación en vivo de las áreas de La Corporación Suiche 7B.</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.8rem;">Clasificación en vivo de las
+              áreas de La Corporación Suiche 7B.</p>
             <div id="leaderboard-container" class="leaderboard-list">
               <!-- Renderizado dinámico en app.js -->
             </div>
@@ -562,7 +756,8 @@
           style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-green);">Fase 1 · Política de Escritorio
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-green);">Fase 1 · Política de
+          Escritorio
           Limpio (Clean Desk)</span>
       </div>
 
@@ -572,7 +767,8 @@
         </h3>
         <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5;">
           ¡La ciberseguridad empieza en el mundo físico! En los pasillos y escritorios de <strong>Corporación Suiche
-            7B</strong>, debemos resguardar los datos sensibles. Clasifica cada hábito diario arrastrándolo o pulsando la bóveda correcta.
+            7B</strong>, debemos resguardar los datos sensibles. Clasifica cada hábito diario arrastrándolo o pulsando
+          la bóveda correcta.
         </p>
       </div>
 
@@ -624,7 +820,8 @@
           style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-red-light);">Fase 1 · Simulador Móvil
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-red-light);">Fase 1 · Simulador
+          Móvil
           Corporativo - Ingeniería Social</span>
       </div>
 
@@ -691,7 +888,8 @@
           style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-cyan);">Fase 1 · Hacking Simulator:
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-cyan);">Fase 1 · Hacking
+          Simulator:
           Cracking en Vivo</span>
       </div>
 
@@ -706,6 +904,14 @@
             </div>
 
             <div class="cracking-gauge-container">
+              <!-- Bóveda Criptográfica 3D de 4 Anillos -->
+              <div class="crypto-vault-3d">
+                <div class="vault-ring v-ring-1" id="vault-ring-1"></div>
+                <div class="vault-ring v-ring-2" id="vault-ring-2"></div>
+                <div class="vault-ring v-ring-3" id="vault-ring-3"></div>
+                <div class="vault-ring v-ring-4" id="vault-ring-4"></div>
+                <div class="vault-center-lock" id="vault-lock-icon">🔓</div>
+              </div>
               <div class="cracking-speed-value" id="cracking-time-value">Instantáneo</div>
               <div class="cracking-label-speed" id="cracking-time-label">Tiempo Estimado de Descifrado</div>
             </div>
@@ -849,48 +1055,86 @@
     </section>
 
     <!-- ================================================================== -->
-    <!-- VISTAS DE FASE 2: ESPECIALIZACIÓN TRANSACCIONAL Y AMENAZAS AVANZADAS -->
+    <!-- VISTAS DE FASE 2: SIMULADORES 3D INTERACTIVOS DE NUEVA GENERACIÓN  -->
     <!-- ================================================================== -->
 
-    <!-- VISTA FASE 2 · MÓDULO 6: IA GENERATIVA Y FUGA DLP -->
+    <!-- VISTA FASE 2 · MÓDULO 6: USO SEGURO DE CHATGPT E IA EN LA OFICINA -->
     <section id="ai_sec-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+      <div
+        style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+          style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
         <div style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-cyan);">
-          Fase 2 · Auditoría DLP de IA Generativa — Caso <span id="ai-case-index">1</span> de <span id="ai-case-total">3</span>
+          🧠 Uso Seguro de IA en la Oficina · Caso <span id="ai-case-index">1</span> de <span
+            id="ai-case-total">3</span>
         </div>
       </div>
 
-      <div class="game-layout">
-        <div class="phishing-screen">
-          <div class="email-client">
-            <div class="email-client-header">
-              <span class="dot-red"></span>
-              <span class="dot-yellow"></span>
-              <span class="dot-green"></span>
-              <span class="email-client-title">MONITOR DLP :: PROMPT ENVIADO A CHATBOT DE IA PÚBLICO</span>
+      <div class="sim3d-split-layout">
+        <!-- Columna Izquierda: Cerebro IA 3D en Canvas y Semáforo de Privacidad -->
+        <div class="sim3d-visualizer-box">
+          <div class="sim3d-header-bar">
+            <span>CEREBRO DE IA 3D :: SEMÁFORO DE DATOS PRIVADOS</span>
+            <span id="ai-neural-state-badge" class="sim3d-badge" style="border-color:#ef4444; color:#fca5a5;">DATOS
+              PRIVADOS A LA VISTA</span>
+          </div>
+          <div
+            style="position:relative; height:240px; width:100%; display:flex; justify-content:center; align-items:center;">
+            <canvas id="ai-brain-3d-canvas" width="360" height="230"></canvas>
+          </div>
+          <div style="padding:1rem; background:rgba(0,0,0,0.35); border-top:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; font-size:0.78rem; margin-bottom:0.35rem;">
+              <span style="color:var(--text-muted);">Riesgo de exponer información de Suiche 7B:</span>
+              <strong id="ai-dlp-risk-value" style="color:#ef4444; font-family:var(--font-mono);">100% PELIGRO</strong>
             </div>
-            <div class="email-meta-info">
-              <div class="meta-row">
-                <span class="meta-label">Escenario:</span>
-                <span class="meta-value" id="ai-context-title" style="font-weight:700; color:var(--accent-cyan);"></span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">Área Origen:</span>
-                <span class="meta-value" id="ai-dept-badge"></span>
+            <div style="height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+              <div id="ai-dlp-risk-bar" style="height:100%; width:100%; background:#ef4444; transition:all 0.35s ease;">
               </div>
             </div>
-            <div class="email-body" id="ai-prompt-content" style="font-family:var(--font-mono); font-size:0.88rem;"></div>
+            <div id="ai-clue-card"
+              style="margin-top:0.8rem; font-size:0.8rem; color:var(--text-main); line-height:1.45; background:rgba(251,186,10,0.08); padding:0.65rem; border-radius:8px; border:1px solid rgba(251,186,10,0.25);">
+              <strong id="ai-clue-title" style="color:var(--accent-cyan);">👆 ¿Cómo jugar?:</strong>
+              <span id="ai-clue-desc"> Haz clic directamente sobre las <strong>etiquetas rojas con datos
+                  privados</strong> (nombres, sueldos, cuentas, tarjetas o claves) dentro del mensaje para taparlas
+                antes de enviarlo a ChatGPT.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Mensaje de Oficina Interactivo -->
+        <div class="phishing-screen" style="justify-content:space-between;">
+          <div>
+            <div
+              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <span style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Situación de
+                  Oficina:</span>
+                <h3 id="ai-context-title" style="color:var(--accent-cyan); font-size:1.05rem;"></h3>
+              </div>
+              <span id="ai-dept-badge" class="phase-pill"></span>
+            </div>
+
+            <div class="email-client" style="border:1px solid rgba(251,186,10,0.3);">
+              <div class="email-client-header" style="justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span>
+                  <span class="email-client-title">MENSAJE PARA CHATGPT — HAZ CLIC EN LOS DATOS PRIVADOS PARA TAPARLOS
+                    🙈</span>
+                </div>
+              </div>
+              <div class="email-body" id="ai-prompt-content"
+                style="font-size:0.95rem; line-height:2.0; min-height:210px;">
+                <!-- Etiquetas interactivas renderizadas por AiSecurityGame -->
+              </div>
+            </div>
           </div>
 
-          <div class="decision-bar" id="ai-actions">
-            <button class="btn btn-danger" onclick="games.ai_sec.makeDecision(false)">
-              🚨 Bloquear Prompt (Fuga de Datos / Shadow AI)
-            </button>
-            <button class="btn btn-success" onclick="games.ai_sec.makeDecision(true)">
-              🟢 Aprobar Consulta (Uso Seguro Anonimizado)
+          <div class="decision-bar" id="ai-actions" style="margin-top:1rem;">
+            <button class="btn btn-primary" id="ai-submit-prompt-btn" style="width:100%;"
+              onclick="games.ai_sec.verifySanitization()">
+              ✅ Ya tapé los datos privados — Enviar consulta a la IA
             </button>
           </div>
 
@@ -898,220 +1142,396 @@
             <div class="feedback-header" id="ai-feedback-status"></div>
             <div class="feedback-text" id="ai-feedback-desc"></div>
             <div style="text-align:right;">
-              <button class="btn btn-primary" id="ai-next-btn" onclick="games.ai_sec.nextCase()">Siguiente Caso →</button>
+              <button class="btn btn-primary" id="ai-next-btn" onclick="games.ai_sec.nextCase()">Siguiente Situación
+                →</button>
             </div>
-          </div>
-        </div>
-
-        <div class="inspection-sidebar">
-          <div class="sidebar-panel" style="padding:1.2rem;">
-            <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem; color:var(--accent-cyan);">🤖 Políticas de IA en Suiche 7B</h4>
-            <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">Haz clic sobre los fragmentos <u>subrayados</u> del prompt para inspeccionar si exponen datos PCI-DSS, credenciales, IPs internas o documentos regulatorios.</p>
-          </div>
-          <div class="current-clue-card" id="ai-clue-card">
-            <div class="clue-title" id="ai-clue-title">🛡️ Escáner DLP de Prompts IA</div>
-            <div class="clue-text" id="ai-clue-desc">Inspecciona los elementos subrayados antes de tomar tu decisión.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VISTA FASE 2 · MÓDULO 7: PCI-DSS 4.0 TRANSACCIONAL -->
+    <!-- VISTA FASE 2 · MÓDULO 7: PROTECCIÓN DE TARJETAS Y CLIENTES (TARJETA 3D INTERACTIVA) -->
     <section id="pci_dss-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+      <div
+        style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+          style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-green);">Fase 2 · Estándar Internacional PCI-DSS v4.0</span>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-green);">
+          💳 Cuidado de Tarjetas en Oficina — Situación <span id="pcidss-mission-idx">1</span> de <span
+            id="pcidss-mission-total">4</span>
+        </span>
       </div>
 
-      <div class="sidebar-panel" style="margin-bottom:1.5rem;">
-        <h3 style="border-bottom:none; padding-bottom:0; margin-bottom:0.5rem; color:var(--accent-green);">
-          💳 Auditoría de Seguridad de Datos de Tarjetahabientes (PCI-DSS 4.0)
-        </h3>
-        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5;">
-          Como corazón del procesamiento interbancario, <strong>Corporación Suiche 7B</strong> protege rigurosamente el PAN, PIN Block, CVV2 y Track 2. Clasifica cada práctica operativa según cumpla o viole la norma PCI-DSS 4.0.
-        </p>
-      </div>
-
-      <div class="pci-grid">
-        <div class="pci-source-panel">
-          <h4>📋 Operaciones con Datos de Tarjetas y Ambientes</h4>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.2rem;">Evalúa cada operación y clasifícala en la bóveda correspondiente.</p>
-          <div class="pci-items-container" id="pcidss-items-list"></div>
-
-          <div id="pcidss-completion-feedback" class="feedback-overlay">
-            <div class="feedback-header feedback-correct">💳 Entorno Transaccional Certificado PCI-DSS 4.0</div>
-            <div class="feedback-text">
-              Has auditado correctamente todos los controles de protección de datos de tarjetahabientes (PAN, SAD, CVV2, Track 2 y HSM).
+      <div class="sim3d-split-layout">
+        <!-- Escenario 3D: Tarjeta Bancaria Rotable con Partes Tocables -->
+        <div class="sim3d-visualizer-box"
+          style="padding:1.2rem; display:flex; flex-direction:column; align-items:center; justify-content:space-between;">
+          <div
+            style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-green);">👆 GIRA Y TOCA LAS
+              PARTES DE LA TARJETA 3D</span>
+            <div style="display:flex; gap:0.4rem;">
+              <button type="button" class="btn btn-secondary" style="padding:0.25rem 0.6rem; font-size:0.72rem;"
+                onclick="games.pci_dss.rotateCard3D('front')">Ver Frente</button>
+              <button type="button" class="btn btn-secondary" style="padding:0.25rem 0.6rem; font-size:0.72rem;"
+                onclick="games.pci_dss.rotateCard3D('iso')">Ángulo 3D</button>
+              <button type="button" class="btn btn-secondary" style="padding:0.25rem 0.6rem; font-size:0.72rem;"
+                onclick="games.pci_dss.rotateCard3D('back')">Ver Reverso</button>
             </div>
-            <button class="btn btn-primary" onclick="app.navigateTo('dashboard')" style="width:100%;">
-              Volver al Panel Principal
-            </button>
+          </div>
+
+          <!-- Tarjeta Bancaria 3D Interactiva -->
+          <div class="card3d-scene" style="width:330px; height:198px; margin:1rem auto;">
+            <div class="card3d-inner" id="pci-3d-card-inner">
+              <!-- Frente -->
+              <div class="card3d-face card3d-front">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span
+                    style="font-size:0.74rem; font-weight:800; letter-spacing:1px; color:var(--accent-cyan);">CORPORACIÓN
+                    SUICHE 7B</span>
+                  <span
+                    style="font-size:0.65rem; padding:0.15rem 0.4rem; background:rgba(53,126,50,0.3); border:1px solid #4ade80; border-radius:4px; color:#bbf7d0;">TARJETA
+                    CLIENTE</span>
+                </div>
+                <div class="card3d-chip-row" onclick="games.pci_dss.selectZone('chip')" style="cursor:pointer;"
+                  title="Toca para inspeccionar el Chip y la Clave del Cajero">
+                  <div class="card3d-emv-chip hotspot-3d-zone" id="zone-chip"></div>
+                  <span style="font-size:0.72rem; color:#fde047; font-family:var(--font-mono);">👆 [CHIP Y CLAVE
+                    SECRETA]</span>
+                </div>
+                <div class="card3d-pan hotspot-3d-zone" id="zone-pan" onclick="games.pci_dss.selectZone('pan')"
+                  style="cursor:pointer; padding:0.25rem 0.4rem; border-radius:6px;"
+                  title="Toca para proteger los 16 números de la tarjeta">
+                  <span id="card3d-live-pan">4509 1288 3910 4421</span>
+                </div>
+                <div
+                  style="display:flex; justify-content:space-between; font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono);">
+                  <span>👆 [NÚMERO DE TARJETA]</span>
+                  <span>VENCE 10/28</span>
+                </div>
+              </div>
+              <!-- Reverso -->
+              <div class="card3d-face card3d-back">
+                <div class="card3d-magstripe hotspot-3d-zone" id="zone-track2"
+                  onclick="games.pci_dss.selectZone('track2')" style="cursor:pointer;">
+                  👆 [BANDA NEGRA TRASERA — DATOS DE LA TARJETA]
+                </div>
+                <div class="card3d-cvv-row" style="margin-top:0.5rem;">
+                  <div class="card3d-signature">FIRMA DEL CLIENTE</div>
+                  <div class="card3d-cvv-box hotspot-3d-zone" id="zone-cvv" onclick="games.pci_dss.selectZone('cvv')"
+                    style="cursor:pointer;">
+                    👆 [3 NÚMEROS ATRÁS: <span id="card3d-live-cvv">891</span>]
+                  </div>
+                </div>
+                <div
+                  style="font-size:0.64rem; color:#fca5a5; padding:0 0.8rem; line-height:1.3; font-family:var(--font-mono);">
+                  ⚠️ ESTOS 3 NÚMEROS DE ATRÁS JAMÁS SE ANOTAN NI SE GUARDAN
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado Visual del Dato en Oficina -->
+          <div
+            style="width:100%; background:#050b14; border:1px solid rgba(74,222,128,0.25); border-radius:8px; padding:0.75rem; font-size:0.8rem;">
+            <div style="color:var(--text-muted); margin-bottom:0.25rem; font-size:0.72rem;">CÓMO SE VE EN TU PANTALLA DE
+              OFICINA:</div>
+            <div id="pcidss-live-stream" style="color:#fbba0a; font-weight:700;"></div>
           </div>
         </div>
 
-        <div class="pci-vaults-container">
-          <div class="pci-vault">
-            <div class="pci-vault-title vault-safe">🟢 CUMPLE NORMATIVA PCI-DSS 4.0</div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Controles criptográficos, enmascaramiento y segregación aprobados.</p>
-            <div class="vault-dropped-items" id="pcidss-compliant-items"></div>
+        <!-- Situaciones Prácticas de Atención, Finanzas y Reclamos -->
+        <div class="phishing-screen" style="justify-content:space-between;">
+          <div>
+            <span class="phase-pill" style="margin-bottom:0.5rem;" id="pcidss-req-badge">Regla de Oro en la
+              Oficina</span>
+            <h3 id="pcidss-mission-title" style="color:var(--accent-green); font-size:1.1rem; margin-bottom:0.6rem;">
+            </h3>
+            <p id="pcidss-mission-desc"
+              style="font-size:0.9rem; color:var(--text-main); line-height:1.55; margin-bottom:1.2rem;"></p>
+
+            <div
+              style="font-size:0.78rem; font-weight:700; color:var(--text-muted); margin-bottom:0.6rem; text-transform:uppercase;">
+              ¿QUÉ DEBES HACER EN TU PUESTO DE TRABAJO?:
+            </div>
+            <div id="pcidss-controls-list" style="display:flex; flex-direction:column; gap:0.65rem;"></div>
           </div>
 
-          <div class="pci-vault">
-            <div class="pci-vault-title vault-forbidden">🔴 VIOLACIÓN CRÍTICA PCI-DSS</div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-0.4rem;">Prácticas prohibidas que comprometen datos de tarjetas o auditorías.</p>
-            <div class="vault-dropped-items" id="pcidss-violation-items"></div>
+          <div class="feedback-overlay" id="pcidss-feedback" style="margin-top:1rem;">
+            <div class="feedback-header" id="pcidss-feedback-status"></div>
+            <div class="feedback-text" id="pcidss-feedback-desc"></div>
+            <div style="text-align:right; margin-top:0.8rem;">
+              <button class="btn btn-primary" id="pcidss-next-btn" onclick="games.pci_dss.nextMission()">Siguiente
+                Situación →</button>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VISTA FASE 2 · MÓDULO 8: QUISHING Y FATIGA DE MFA -->
+    <!-- VISTA FASE 2 · MÓDULO 8: TU CELULAR 3D Y CÓDIGOS QR TRAMPA -->
     <section id="quishing_mfa-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+      <div style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+          style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-purple);">Fase 2 · Defensa contra Quishing (QR) y Push Bombing (MFA)</span>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--accent-purple);">
+          📲 Simulador de Celular 3D — Reto <span id="qmfa-case-counter">1 de 3</span>
+        </span>
       </div>
 
-      <div class="access-layout">
-        <div class="gate-console">
-          <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:var(--accent-cyan); font-size:1.1rem;">📲 Simulador de Doble Factor (2FA) y Códigos QR</h3>
-            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--primary-light);" id="qmfa-case-counter">Caso 1 de 3</span>
+      <div class="sim3d-split-layout">
+        <!-- Izquierda: Teléfono Celular 3D Interactivo -->
+        <div class="sim3d-visualizer-box"
+          style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem;">
+          <div style="font-size:0.72rem; color:var(--accent-cyan); font-weight:700; margin-bottom:0.6rem;">
+            👇 ¡INTERACTÚA CON LOS BOTONES DENTRO DEL CELULAR 3D!
           </div>
-
-          <div>
-            <div style="font-weight:700; margin-bottom:0.4rem;">Escenario: <span id="qmfa-scenario-title" style="color:var(--accent-cyan);"></span></div>
-            <div class="character-speech-bubble">
-              <div class="speech-text" id="qmfa-scenario-desc"></div>
+          <div class="phone-3d-wrapper" id="qmfa-phone-3d">
+            <div class="phone-3d-notch"></div>
+            <div class="phone-3d-statusbar">
+              <span>Suiche7B Móvil</span>
+              <span id="qmfa-phone-time">11:48 PM</span>
+              <span>🔋 94%</span>
+            </div>
+            <div class="phone-3d-screen-body" id="qmfa-phone-screen">
+              <!-- Pantalla interactiva del teléfono -->
             </div>
           </div>
+        </div>
 
-          <div style="display:flex; flex-direction:column; gap:0.8rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1.2rem;">
-            <div style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">¿CÓMO REACCIONAS ANTE ESTA ALERTA?</div>
+        <!-- Derecha: Explicación Sencilla y Lupa Detectora -->
+        <div class="phishing-screen" style="justify-content:space-between;">
+          <div>
+            <span class="phase-pill phase-pill-cyan" id="qmfa-stage-badge">Reto en tu Teléfono Móvil</span>
+            <h3 id="qmfa-scenario-title" style="color:var(--accent-cyan); font-size:1.1rem; margin:0.5rem 0;"></h3>
+            <p id="qmfa-scenario-desc"
+              style="font-size:0.9rem; color:var(--text-main); line-height:1.55; margin-bottom:1rem;"></p>
+
+            <!-- Lupa Detectora para ver quién envía la alerta o el QR -->
+            <div id="qmfa-xray-panel" class="sidebar-panel"
+              style="background:rgba(0,0,0,0.45); border:1px dashed rgba(0,150,255,0.4); margin-bottom:1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <strong style="font-size:0.84rem; color:var(--accent-cyan);" id="qmfa-visual-title">🔎 Lupa Detectora de
+                  Engaños</strong>
+                <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.75rem; font-size:0.75rem;"
+                  onclick="games.quishing_mfa.runXrayScan()">
+                  🔎 Ver Pista Oculta
+                </button>
+              </div>
+              <div id="qmfa-visual-meta" style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;"></div>
+            </div>
+
+            <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
+              TOCA EL CELULAR 3D O ELIGE TU ACCIÓN AQUÍ:
+            </div>
             <div style="display:flex; flex-direction:column; gap:0.6rem;" id="qmfa-options-container"></div>
           </div>
 
           <div class="feedback-overlay" id="qmfa-feedback" style="margin-top:1rem;">
             <div class="feedback-header" id="qmfa-feedback-status"></div>
             <div class="feedback-text" id="qmfa-feedback-desc"></div>
-            <div style="text-align:right; margin-top:1rem;">
-              <button class="btn btn-primary" id="qmfa-next-btn" onclick="games.quishing_mfa.nextCase()">Siguiente Caso →</button>
+            <div style="text-align:right; margin-top:0.8rem;">
+              <button class="btn btn-primary" id="qmfa-next-btn" onclick="games.quishing_mfa.nextCase()">Siguiente Reto
+                →</button>
             </div>
-          </div>
-        </div>
-
-        <div class="inspection-sidebar">
-          <div class="physical-badge" style="background: rgba(18, 24, 38, 0.95); border:1px solid var(--accent-cyan); text-align:center; padding:1.5rem 1rem;">
-            <div style="font-size:3rem; margin-bottom:0.6rem;" id="qmfa-visual-icon">📲</div>
-            <div style="font-weight:700; font-size:0.95rem; color:var(--accent-cyan);" id="qmfa-visual-title">Alerta 2FA</div>
-            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.5rem; font-family:var(--font-mono);" id="qmfa-visual-meta"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VISTA FASE 2 · MÓDULO 9: FRAUDE EJECUTIVO (BEC / WHALING) -->
+    <!-- VISTA FASE 2 · MÓDULO 9: PAGOS URGENTES, PROVEEDORES Y FALSOS JEFES -->
     <section id="bec_fraud-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+      <div style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+          style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--primary-light);">Fase 2 · Prevención de Fraude Ejecutivo (BEC / Whaling)</span>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--primary-light);">
+          🎙️ Detector de Estafas a Finanzas y Administración — Caso <span id="bec-case-counter">1 de 3</span>
+        </span>
       </div>
 
-      <div class="access-layout">
-        <div class="gate-console">
-          <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:var(--accent-cyan); font-size:1.1rem;" id="bec-scenario-title">Fraude BEC</h3>
-            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--primary-light);" id="bec-case-counter">Caso 1 de 3</span>
+      <div class="sim3d-split-layout">
+        <!-- Izquierda: Detector de Voz Falsa en 3D + 3 Botones de Verificación Cotidiana -->
+        <div class="sim3d-visualizer-box" style="padding:1.2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+            <span style="font-size:0.76rem; font-weight:700; color:var(--accent-cyan);">🎧 DETECTOR DE VOZ Y MENSAJES
+              FALSOS 3D</span>
+            <button type="button" class="btn btn-secondary" style="padding:0.25rem 0.65rem; font-size:0.73rem;"
+              onclick="games.bec_fraud.triggerWaveAnalysis()">
+              ▶️ Escuchar / Analizar Voz
+            </button>
           </div>
+          <canvas id="bec-wave-3d-canvas" width="360" height="125"
+            style="width:100%; height:125px; background:#040812; border-radius:8px; border:1px solid rgba(0,150,255,0.25);"></canvas>
 
-          <div class="email-meta-info" style="border-radius:8px; margin-top:0.5rem;">
-            <div class="meta-row"><span class="meta-label">Remitente:</span><span class="meta-value" id="bec-sender" style="font-family:var(--font-mono); color:var(--accent-cyan);"></span></div>
-            <div class="meta-row"><span class="meta-label">Asunto:</span><span class="meta-value" id="bec-subject" style="font-weight:700;"></span></div>
+          <div style="margin-top:1rem;">
+            <div style="font-size:0.78rem; font-weight:700; color:var(--text-main); margin-bottom:0.5rem;">
+              👆 HAZ CLIC EN ESTAS 3 LUPAS PARA AVERIGUAR SI ES UNA TRAMPA:
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem; margin-bottom:0.7rem;">
+              <button type="button" class="btn btn-secondary" id="bec-lens-1" style="padding:0.5rem; font-size:0.74rem;"
+                onclick="games.bec_fraud.inspectEvidence(0)">
+                📧 1. Ver Correo
+              </button>
+              <button type="button" class="btn btn-secondary" id="bec-lens-2" style="padding:0.5rem; font-size:0.74rem;"
+                onclick="games.bec_fraud.inspectEvidence(1)">
+                🏦 2. Ver Cuenta
+              </button>
+              <button type="button" class="btn btn-secondary" id="bec-lens-3" style="padding:0.5rem; font-size:0.74rem;"
+                onclick="games.bec_fraud.inspectEvidence(2)">
+                📞 3. Llamar a Oficina
+              </button>
+            </div>
+            <div id="bec-evidence-output"
+              style="min-height:85px; padding:0.8rem; border-radius:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(251,186,10,0.35); font-size:0.83rem; color:var(--accent-cyan); line-height:1.5;">
+              Toca cualquiera de los 3 botones de arriba (1. Ver Correo, 2. Ver Cuenta, 3. Llamar a Oficina) para
+              descubrir las pistas...
+            </div>
           </div>
+        </div>
 
-          <div class="character-speech-bubble">
-            <div class="speech-text" id="bec-scenario-desc"></div>
-          </div>
+        <!-- Derecha: Solicitud Recibida + Pasos de Seguridad -->
+        <div class="phishing-screen" style="justify-content:space-between;">
+          <div>
+            <h3 id="bec-scenario-title" style="color:var(--accent-cyan); font-size:1.05rem; margin-bottom:0.5rem;"></h3>
+            <div class="email-meta-info" style="border-radius:8px; margin-bottom:0.8rem;">
+              <div class="meta-row"><span class="meta-label">De parte de:</span><span class="meta-value" id="bec-sender"
+                  style="color:var(--accent-cyan); font-weight:600;"></span></div>
+              <div class="meta-row"><span class="meta-label">Pedido:</span><span class="meta-value" id="bec-subject"
+                  style="font-weight:700;"></span></div>
+            </div>
+            <div class="character-speech-bubble" style="margin-bottom:1rem;">
+              <div class="speech-text" id="bec-scenario-desc"></div>
+            </div>
 
-          <div style="display:flex; flex-direction:column; gap:0.8rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1rem;">
-            <div style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">PROTOCOLO DE CONTROL INTERNO A APLICAR:</div>
+            <!-- Checklist Sencillo de Oficina -->
+            <div
+              style="background:rgba(0,94,156,0.12); border:1px solid rgba(0,150,255,0.25); border-radius:8px; padding:0.75rem; margin-bottom:1rem;">
+              <div style="font-size:0.76rem; font-weight:700; color:var(--accent-cyan); margin-bottom:0.4rem;">
+                ✅ MARCA TUS PASOS DE SEGURIDAD ANTES DE RESPONDER:
+              </div>
+              <label
+                style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer; margin-bottom:0.35rem;">
+                <input type="checkbox" id="bec-check-oob" onchange="app.playAudio('click')">
+                Llamé por teléfono a la extensión interna de la oficina para confirmar
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">
+                <input type="checkbox" id="bec-check-dual" onchange="app.playAudio('click')">
+                Pedí la segunda firma de autorización de mi Supervisor / Gerente
+              </label>
+            </div>
+
             <div style="display:flex; flex-direction:column; gap:0.6rem;" id="bec-options-container"></div>
           </div>
 
           <div class="feedback-overlay" id="bec-feedback" style="margin-top:1rem;">
             <div class="feedback-header" id="bec-feedback-status"></div>
             <div class="feedback-text" id="bec-feedback-desc"></div>
-            <div style="text-align:right; margin-top:1rem;">
-              <button class="btn btn-primary" id="bec-next-btn" onclick="games.bec_fraud.nextCase()">Siguiente Caso →</button>
+            <div style="text-align:right; margin-top:0.8rem;">
+              <button class="btn btn-primary" id="bec-next-btn" onclick="games.bec_fraud.nextCase()">Siguiente Caso
+                →</button>
             </div>
-          </div>
-        </div>
-
-        <div class="inspection-sidebar">
-          <div class="sidebar-panel" style="padding:1.2rem;">
-            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:0.5rem; color:var(--accent-cyan);">🏛️ Regla de Oro Antifraude BEC</h4>
-            <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
-              En <strong>Corporación Suiche 7B</strong>, ninguna solicitud de transferencia, cambio de cuenta bancaria de proveedor ni requerimiento de acceso urgente se ejecuta sin <strong>verificación por canal alterno oficial (Out-of-Band)</strong> y doble autorización.
-            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VISTA FASE 2 · MÓDULO 10: TELETRABAJO SEGURO, VPN Y REDES WI-FI -->
+    <!-- VISTA FASE 2 · MÓDULO 10: CAFETERÍAS, CASA Y WI-FI SEGURO (RADAR 3D) -->
     <section id="remote_vpn-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+      <div style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+          style="padding:0.4rem 0.8rem; font-size:0.85rem;">
           ← Volver al Panel
         </button>
-        <span style="font-family:var(--font-mono); font-size:0.9rem; color:#38bdf8;">Fase 2 · Seguridad en Teletrabajo, VPN y Redes Wi-Fi</span>
+        <span style="font-family:var(--font-mono); font-size:0.9rem; color:#38bdf8;">
+          📡 Radar Wi-Fi 3D: Trabajo Fuera de la Oficina — Caso <span id="vpn-case-counter">1 de 3</span>
+        </span>
       </div>
 
-      <div class="access-layout">
-        <div class="gate-console">
-          <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:#38bdf8; font-size:1.1rem;" id="vpn-scenario-title">Seguridad Remota</h3>
-            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--primary-light);" id="vpn-case-counter">Caso 1 de 3</span>
+      <div class="sim3d-split-layout">
+        <!-- Izquierda: Radar Sonar Circular 3D en Vivo -->
+        <div class="sim3d-visualizer-box"
+          style="padding:1.2rem; display:flex; flex-direction:column; align-items:center;">
+          <div
+            style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <span style="font-size:0.76rem; font-weight:700; color:#38bdf8;">📡 RADAR DE REDES CERCANAS 3D</span>
+            <span id="vpn-tunnel-state-pill" class="sim3d-badge" style="border-color:#ef4444; color:#fca5a5;">ESCUDOS
+              APAGADOS</span>
           </div>
-
-          <div class="email-meta-info" style="border-radius:8px; margin-top:0.5rem;">
-            <div class="meta-row"><span class="meta-label">Red / Canal:</span><span class="meta-value" id="vpn-ssid" style="font-family:var(--font-mono); color:var(--accent-cyan);"></span></div>
-            <div class="meta-row"><span class="meta-label">Parámetros:</span><span class="meta-value" id="vpn-spec"></span></div>
+          <canvas id="wifi-sonar-3d-canvas" width="260" height="220" style="border-radius:12px;"></canvas>
+          <div
+            style="width:100%; margin-top:0.6rem; background:rgba(0,0,0,0.4); padding:0.75rem; border-radius:8px; border:1px solid rgba(56,189,248,0.25); font-size:0.8rem;">
+            <div><strong>Lugar / Red:</strong> <span id="vpn-ssid" style="color:var(--accent-cyan);"></span></div>
+            <div style="margin-top:0.25rem; color:var(--text-muted);" id="vpn-spec"></div>
           </div>
+        </div>
 
-          <div class="character-speech-bubble">
-            <div class="speech-text" id="vpn-scenario-desc"></div>
-          </div>
+        <!-- Derecha: Botones de Escudo y Decisión Cotidiana -->
+        <div class="phishing-screen" style="justify-content:space-between;">
+          <div>
+            <h3 id="vpn-scenario-title" style="color:#38bdf8; font-size:1.05rem; margin-bottom:0.5rem;"></h3>
+            <div class="character-speech-bubble" style="margin-bottom:1rem;">
+              <div class="speech-text" id="vpn-scenario-desc"></div>
+            </div>
 
-          <div style="display:flex; flex-direction:column; gap:0.8rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1rem;">
-            <div style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">SELECCIONA LA ACCIÓN SEGURA:</div>
+            <!-- Interruptores Sencillos de Protección -->
+            <div
+              style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.8rem; margin-bottom:1rem;">
+              <div style="font-size:0.78rem; font-weight:700; color:#38bdf8; margin-bottom:0.5rem;">
+                👆 ENCIENDE TUS 2 ESCUDOS DE PROTECCIÓN CON UN CLIC:
+              </div>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" id="vpn-toggle-aes"
+                  style="padding:0.4rem 0.75rem; font-size:0.76rem; flex:1;"
+                  onclick="games.remote_vpn.toggleTunnelSwitch('aes')">
+                  ⬜ Escudo 1: Encender VPN de Suiche 7B
+                </button>
+                <button type="button" class="btn btn-secondary" id="vpn-toggle-killswitch"
+                  style="padding:0.4rem 0.75rem; font-size:0.76rem; flex:1;"
+                  onclick="games.remote_vpn.toggleTunnelSwitch('killswitch')">
+                  ⬜ Escudo 2: Bloquear Pantalla (Win + L)
+                </button>
+              </div>
+            </div>
+
+            <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
+              ¿QUÉ HACES EN ESTA SITUACIÓN?:
+            </div>
             <div style="display:flex; flex-direction:column; gap:0.6rem;" id="vpn-options-container"></div>
           </div>
 
           <div class="feedback-overlay" id="vpn-feedback" style="margin-top:1rem;">
             <div class="feedback-header" id="vpn-feedback-status"></div>
             <div class="feedback-text" id="vpn-feedback-desc"></div>
-            <div style="text-align:right; margin-top:1rem;">
-              <button class="btn btn-primary" id="vpn-next-btn" onclick="games.remote_vpn.nextCase()">Siguiente Caso →</button>
+            <div style="text-align:right; margin-top:0.8rem;">
+              <button class="btn btn-primary" id="vpn-next-btn" onclick="games.remote_vpn.nextCase()">Siguiente
+                Situación →</button>
             </div>
           </div>
         </div>
-
-        <div class="inspection-sidebar">
-          <div class="sidebar-panel" style="padding:1.2rem;">
-            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:0.5rem; color:#38bdf8;">🌐 Perímetro Cero Confianza (Zero Trust)</h4>
-            <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
-              Fuera de las oficinas de Suiche 7B, toda red pública se considera hostil. Evita puntos Wi-Fi abiertos (Evil Twin), activa siempre la VPN corporativa y nunca uses nubes personales para archivos de trabajo.
-            </p>
-          </div>
-        </div>
       </div>
+    </section>
+
+    <!-- VISTAS DE LA ZONA ARCADE 3D (4 JUEGOS INTERACTIVOS MODERNOS) -->
+    <section id="arcade_jornada-view" class="view-section">
+      <div id="arcade-root-arcade_jornada"></div>
+    </section>
+
+    <section id="arcade_bandeja-view" class="view-section">
+      <div id="arcade-root-arcade_bandeja"></div>
+    </section>
+
+    <section id="arcade_cartas-view" class="view-section">
+      <div id="arcade-root-arcade_cartas"></div>
+    </section>
+
+    <section id="arcade_boveda-view" class="view-section">
+      <div id="arcade-root-arcade_boveda"></div>
     </section>
 
     <!-- VISTA 8: PANEL DE PERSONALIZACIÓN (ADMIN) -->
@@ -1157,30 +1577,38 @@
 
     <!-- VISTA 9: PANEL DE AUDITORÍA Y CONTROL DE FASES (ADMIN) -->
     <section id="admin-dashboard-view" class="view-section">
-      <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div
+        style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
         <div>
-          <span style="font-family:var(--font-mono); font-size:1.25rem; font-weight:700; color:var(--accent-cyan);">🛡️ Centro de Control y Auditoría CISO (Admin)</span>
-          <p style="font-size:0.82rem; color:var(--text-muted);">Gestión dinámica de Fase 1 / Fase 2, métricas por departamento y trazabilidad SUDEBAN / PCI-DSS.</p>
+          <span style="font-family:var(--font-mono); font-size:1.25rem; font-weight:700; color:var(--accent-cyan);">🛡️
+            Centro de Control y Auditoría CISO (Admin)</span>
+          <p style="font-size:0.82rem; color:var(--text-muted);">Gestión dinámica de Fase 1 / Fase 2, métricas por
+            departamento y trazabilidad SUDEBAN / PCI-DSS.</p>
         </div>
         <div style="display:flex; gap:0.6rem;">
-          <button class="btn btn-secondary" onclick="app.navigateTo('customizer'); customizer.renderEditor();" style="font-size:0.82rem; padding:0.5rem 0.9rem;">
+          <button class="btn btn-secondary" onclick="app.navigateTo('customizer'); customizer.renderEditor();"
+            style="font-size:0.82rem; padding:0.5rem 0.9rem;">
             ✍️ Personalizar Escenarios
           </button>
-          <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')" style="font-size:0.82rem; padding:0.5rem 0.9rem;">
+          <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')"
+            style="font-size:0.82rem; padding:0.5rem 0.9rem;">
             👁️ Vista Previa Colaborador
           </button>
         </div>
       </div>
 
       <!-- PANEL DE CONTROL DE FASES ACTIVAS (FASE 1 / FASE 2 / AMBAS) -->
-      <div class="sidebar-panel" style="margin-bottom:1.8rem; border:1px solid rgba(251,186,10,0.35); background:linear-gradient(135deg, rgba(0,94,156,0.18), rgba(12,19,38,0.85));">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+      <div class="sidebar-panel"
+        style="margin-bottom:1.8rem; border:1px solid rgba(251,186,10,0.35); background:linear-gradient(135deg, rgba(0,94,156,0.18), rgba(12,19,38,0.85));">
+        <div
+          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
           <div>
             <h3 style="border:none; padding:0; margin-bottom:0.2rem; color:var(--accent-cyan);">
               ⚙️ Control de Activación de Fases de Entrenamiento
             </h3>
             <p style="font-size:0.8rem; color:var(--text-muted);">
-              Selecciona qué fase(s) verán y deberán completar los colaboradores de Corporación Suiche 7B al iniciar sesión.
+              Selecciona qué fase(s) verán y deberán completar los colaboradores de Corporación Suiche 7B al iniciar
+              sesión.
             </p>
           </div>
           <span id="admin-current-phase-indicator" class="phase-pill phase-pill-cyan">Modo Actual: Ambas Fases</span>
@@ -1189,30 +1617,40 @@
         <div class="admin-phase-selector-grid">
           <button type="button" class="phase-mode-card" id="mode-btn-phase1" onclick="app.saveAdminPhaseMode('phase1')">
             <div style="font-weight:700; font-size:0.95rem; color:var(--text-main);">🛡️ Solo Fase 1 (Básico)</div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 módulos fundamentales (Phishing, Oficina Segura, Vishing, Contraseñas, USB).</p>
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 módulos
+              fundamentales (Phishing, Oficina Segura, Vishing, Contraseñas, USB).</p>
           </button>
 
           <button type="button" class="phase-mode-card" id="mode-btn-phase2" onclick="app.saveAdminPhaseMode('phase2')">
             <div style="font-weight:700; font-size:0.95rem; color:var(--accent-cyan);">🚀 Solo Fase 2 (Avanzado)</div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 módulos especializados (IA Segura DLP, PCI-DSS 4.0, Quishing/MFA, Fraude BEC, Teletrabajo/VPN).</p>
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 módulos
+              especializados (IA Segura DLP, PCI-DSS 4.0, Quishing/MFA, Fraude BEC, Teletrabajo/VPN).</p>
           </button>
 
-          <button type="button" class="phase-mode-card active" id="mode-btn-both" onclick="app.saveAdminPhaseMode('both')">
-            <div style="font-weight:700; font-size:0.95rem; color:#4ade80;">⚡ Ambas Fases Activas (Fase 1 + Fase 2)</div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Habilita la suite completa de 10 módulos interactivos con doble certificación (Básico + Especialista).</p>
+          <button type="button" class="phase-mode-card active" id="mode-btn-both"
+            onclick="app.saveAdminPhaseMode('both')">
+            <div style="font-weight:700; font-size:0.95rem; color:#4ade80;">⚡ Ambas Fases Activas (Fase 1 + Fase 2)
+            </div>
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Habilita la suite completa de 10
+              módulos interactivos con doble certificación (Básico + Especialista).</p>
           </button>
         </div>
 
-        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.06);">
+        <div
+          style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.06);">
           <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:240px;">
-            <label for="admin-campaign-input" style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">Campaña Activa:</label>
-            <input type="text" id="admin-campaign-input" class="text-input" style="padding:0.4rem 0.7rem; font-size:0.82rem;" value="Programa Anual de Concientización 2026">
+            <label for="admin-campaign-input"
+              style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">Campaña Activa:</label>
+            <input type="text" id="admin-campaign-input" class="text-input"
+              style="padding:0.4rem 0.7rem; font-size:0.82rem;" value="Programa Anual de Concientización 2026">
           </div>
-          <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:var(--text-main); cursor:pointer;">
+          <label
+            style="display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:var(--text-main); cursor:pointer;">
             <input type="checkbox" id="admin-require-p1-checkbox">
             Exigir completar Fase 1 para desbloquear Fase 2 (en modo Ambas)
           </label>
-          <button class="btn btn-primary" style="padding:0.45rem 1rem; font-size:0.8rem;" onclick="app.saveAdminCampaignDetails()">
+          <button class="btn btn-primary" style="padding:0.45rem 1rem; font-size:0.8rem;"
+            onclick="app.saveAdminCampaignDetails()">
             💾 Guardar Parámetros
           </button>
         </div>
@@ -1221,26 +1659,32 @@
       <div class="dashboard-grid">
         <div style="grid-column: 1 / -1;">
           <h3 class="modules-title">Métricas Generales de la Corporación</h3>
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.8rem;">
+          <div
+            style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.8rem;">
             <div class="sidebar-panel" style="text-align:center;">
               <h4 style="font-size:0.8rem; color:var(--text-muted);">Puntaje Acumulado</h4>
-              <p id="admin-total-score" style="font-size:1.8rem; font-weight:800; color:var(--accent-cyan); margin-top:0.3rem;">0 PTS</p>
+              <p id="admin-total-score"
+                style="font-size:1.8rem; font-weight:800; color:var(--accent-cyan); margin-top:0.3rem;">0 PTS</p>
             </div>
             <div class="sidebar-panel" style="text-align:center;">
               <h4 style="font-size:0.8rem; color:var(--text-muted);">Módulos Fase 1 Superados</h4>
-              <p id="admin-p1-modules" style="font-size:1.8rem; font-weight:800; color:var(--accent-green); margin-top:0.3rem;">0</p>
+              <p id="admin-p1-modules"
+                style="font-size:1.8rem; font-weight:800; color:var(--accent-green); margin-top:0.3rem;">0</p>
             </div>
             <div class="sidebar-panel" style="text-align:center;">
               <h4 style="font-size:0.8rem; color:var(--text-muted);">Módulos Fase 2 Superados</h4>
-              <p id="admin-p2-modules" style="font-size:1.8rem; font-weight:800; color:var(--accent-purple); margin-top:0.3rem;">0</p>
+              <p id="admin-p2-modules"
+                style="font-size:1.8rem; font-weight:800; color:var(--accent-purple); margin-top:0.3rem;">0</p>
             </div>
             <div class="sidebar-panel" style="text-align:center;">
               <h4 style="font-size:0.8rem; color:var(--text-muted);">Total Módulos Completados</h4>
-              <p id="admin-total-modules" style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:0.3rem;">0</p>
+              <p id="admin-total-modules"
+                style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:0.3rem;">0</p>
             </div>
             <div class="sidebar-panel" style="text-align:center;">
               <h4 style="font-size:0.8rem; color:var(--text-muted);">Precisión Global</h4>
-              <p id="admin-success-rate" style="font-size:1.8rem; font-weight:800; color:var(--primary-light); margin-top:0.3rem;">0%</p>
+              <p id="admin-success-rate"
+                style="font-size:1.8rem; font-weight:800; color:var(--primary-light); margin-top:0.3rem;">0%</p>
             </div>
           </div>
 
@@ -1248,36 +1692,48 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
             <div class="sidebar-panel">
               <h3>🔍 Verificador Oficial de Certificados (Auditoría)</h3>
-              <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.8rem;">Ingresa el código impreso en el diploma (ej. <code>S7B-F1-001-XXXXXX</code>) para validar su autenticidad.</p>
+              <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.8rem;">Ingresa el código impreso en
+                el diploma (ej. <code>S7B-F1-001-XXXXXX</code>) para validar su autenticidad.</p>
               <div style="display:flex; gap:0.5rem;">
-                <input type="text" id="admin-verify-cert-input" class="text-input" placeholder="Código S7B-..." style="font-family:var(--font-mono); font-size:0.85rem;">
-                <button class="btn btn-primary" onclick="app.verifyCertificateFromAdmin()" style="white-space:nowrap;">Verificar</button>
+                <input type="text" id="admin-verify-cert-input" class="text-input" placeholder="Código S7B-..."
+                  style="font-family:var(--font-mono); font-size:0.85rem;">
+                <button class="btn btn-primary" onclick="app.verifyCertificateFromAdmin()"
+                  style="white-space:nowrap;">Verificar</button>
               </div>
               <div id="admin-verify-cert-result" style="margin-top:0.8rem; font-size:0.82rem;"></div>
             </div>
 
             <div class="sidebar-panel">
               <h3>📊 Cumplimiento y Puntuación por Departamento</h3>
-              <div id="admin-dept-breakdown" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:0.45rem;">
+              <div id="admin-dept-breakdown"
+                style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:0.45rem;">
                 <!-- Se llena dinámicamente -->
               </div>
             </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem; flex-wrap:wrap; gap:0.8rem;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem; flex-wrap:wrap; gap:0.8rem;">
             <div>
               <h3 class="modules-title" style="margin-bottom:0;">Auditoría Detallada de Colaboradores</h3>
-              <span id="admin-user-count" style="color:var(--text-muted); font-size:0.8rem;">0 usuarios registrados</span>
+              <span id="admin-user-count" style="color:var(--text-muted); font-size:0.8rem;">0 usuarios
+                registrados</span>
             </div>
             <div>
-              <button class="btn btn-secondary" onclick="app.exportTableToCSV()" style="margin-right: 0.5rem; font-size: 0.85rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
-              <button class="btn btn-primary" onclick="app.exportTableToPDF()" style="font-size: 0.85rem; padding: 0.5rem 1rem;">📄 Reporte Ejecutivo PDF</button>
+              <button class="btn btn-secondary" onclick="app.exportTableToCSV()"
+                style="margin-right: 0.5rem; font-size: 0.85rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
+              <button class="btn btn-primary" onclick="app.exportTableToPDF()"
+                style="font-size: 0.85rem; padding: 0.5rem 1rem;">📄 Reporte Ejecutivo PDF</button>
             </div>
           </div>
 
           <div style="margin-bottom:1rem;">
-            <label for="admin-user-filter" style="display:block; margin-bottom:0.4rem; color:var(--text-muted); font-size:0.8rem;">Buscar colaborador o gerencia/departamento</label>
-            <input id="admin-user-filter" class="text-input" type="search" placeholder="Ej. dirección tecnología, finanzas o nombre del colaborador" oninput="app.filterAdminUsers(this.value)">
+            <label for="admin-user-filter"
+              style="display:block; margin-bottom:0.4rem; color:var(--text-muted); font-size:0.8rem;">Buscar colaborador
+              o gerencia/departamento</label>
+            <input id="admin-user-filter" class="text-input" type="search"
+              placeholder="Ej. dirección tecnología, finanzas o nombre del colaborador"
+              oninput="app.filterAdminUsers(this.value)">
           </div>
 
           <div style="overflow-x:auto;">
@@ -1306,7 +1762,8 @@
 
   <!-- MODAL FLOTANTE DE CERTIFICADO DE CIBERSEGURIDAD -->
   <div class="modal-overlay" id="certificate-modal">
-    <div class="modal-content cert-modal-wrapper">
+    <canvas id="cert-particles-canvas" style="position:fixed; inset:0; pointer-events:none; z-index:1;"></canvas>
+    <div class="modal-content cert-modal-wrapper" style="position:relative; z-index:2;">
       <button class="modal-close-btn cert-close-btn" onclick="app.hideCertificate()" title="Cerrar">×</button>
 
       <!-- Cuadro Imprimible del Diploma Oficial Canva -->
@@ -1315,7 +1772,7 @@
 
         <div class="cert-dynamic-overlay">
           <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>
-          <div class="cert-phase-banner" id="cert-phase-label">PROGRAMA DE CIBERSEGURIDAD — FASE 1</div>
+          <div class="cert-phase-banner" id="cert-phase-label">(Fase 1: Ciberseguridad Corporativa)</div>
           <div class="cert-code-stamp" id="cert-val-code">S7B-F1-001-SEC</div>
         </div>
       </div>
@@ -1351,9 +1808,12 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js?v=2.5"></script>
-  <script src="customizer.js?v=2.5"></script>
-  <script src="app.js?v=2.5"></script>
+  <script src="games.js?v=3.4"></script>
+  <script src="arcade-core.js?v=3.4"></script>
+  <script src="arcade-jornada.js?v=3.4"></script>
+  <script src="arcade-games.js?v=3.4"></script>
+  <script src="customizer.js?v=3.4"></script>
+  <script src="app.js?v=3.4"></script>
 </body>
 
 </html>
