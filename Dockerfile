@@ -5,20 +5,18 @@
 
 FROM node:24-alpine AS production
 
-# 1. Aplicar todos los parches de seguridad del sistema operativo Alpine (OpenSSL, musl, zlib)
-RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
+# 1. Aplicar parches de seguridad de Alpine si hay salida a internet (tolerante a firewall corporativo)
+RUN (apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*) || true
 
 # 2. Definir directorio de trabajo y entorno de producción
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
-# 3. Copiar manifiestos de paquetes
+# 3. Copiar manifiestos de paquetes e instalar dependencias en capa cacheada
 COPY package*.json ./
-
-# 4. Instalar dependencias determinísticas solo de producción y limpiar caché
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
-# 5. Copiar código fuente de la aplicación con propietario no-root directamente
+# 4. Copiar código fuente de la aplicación con propietario no-root directamente
 COPY --chown=node:node . .
 
 # 6. Ejecutar bajo usuario sin privilegios (Principio de Mínimo Privilegio - CIS Docker Benchmark)

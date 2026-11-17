@@ -77,7 +77,7 @@ const validateProgressUpdate = (req, res, next) => {
   req.sanitizedProgress = {
     userId: effectiveUserId,
     moduleKey,
-    scoreEarned: isNaN(points) ? 0 : Math.max(0, Math.min(points, 200)), // Límite razonable de puntos por acción
+    scoreEarned: isNaN(points) ? 0 : Math.max(0, Math.min(points, 300)), // Límite máximo por módulo (validado además contra MODULE_MAX_SCORES)
     isCompleted: Boolean(isCompleted),
     isCorrectAnswer: Boolean(isCorrectAnswer)
   };
