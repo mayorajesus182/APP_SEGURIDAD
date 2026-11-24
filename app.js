@@ -36,8 +36,9 @@ class AppController {
 
     this.academyConfig = {
       activePhaseMode: 'phase2', // 'phase1', 'phase2', 'both'
-      campaignName: 'Programa Anual de Concientización 2026',
-      requirePhase1ForPhase2: false
+      campaignName: 'Programa de Concientización 2026',
+      requirePhase1ForPhase2: false,
+      allowModuleRetries: false
     };
 
     this.state = {
@@ -362,10 +363,10 @@ class AppController {
     if (indicator) {
       const labels = {
         phase1: 'Modo Actual: Solo Fase 1 (Básico - 5 Módulos)',
-        phase2: 'Modo Actual: Solo Fase 2 (Avanzado - 5 Módulos)',
-        both: 'Modo Actual: Ambas Fases (10 Módulos)'
+        phase2: 'Modo Actual: Solo Fase 2 (Juegos 3D - 4 Módulos)',
+        both: 'Modo Actual: Ambas Fases (9 Módulos)'
       };
-      indicator.textContent = labels[mode] || labels.both;
+      indicator.textContent = labels[mode] || labels.phase2;
     }
 
     const campaignInput = document.getElementById('admin-campaign-input');
@@ -377,6 +378,30 @@ class AppController {
     if (reqCheckbox) {
       reqCheckbox.checked = Boolean(this.academyConfig.requirePhase1ForPhase2);
     }
+
+    const retriesSwitch = document.getElementById('admin-allow-retries-switch');
+    const retriesLabel = document.getElementById('admin-retries-status-label');
+    const allowRetries = Boolean(this.academyConfig.allowModuleRetries);
+    if (retriesSwitch) retriesSwitch.checked = allowRetries;
+    if (retriesLabel) {
+      retriesLabel.textContent = allowRetries
+        ? '🟢 ACTIVO: Los colaboradores pueden repetir módulos varias veces'
+        : '🔒 INACTIVO: Solo 1 intento por módulo (Anti-Farming estricto)';
+      retriesLabel.style.color = allowRetries ? '#4ade80' : '#fca5a5';
+    }
+  }
+
+  async toggleAdminRetries(enabled) {
+    this.academyConfig.allowModuleRetries = Boolean(enabled);
+    this.updateAdminPhaseButtonsUI();
+    await this.persistAdminPhaseSettings(false);
+    this.showModalAlert({
+      title: enabled ? '🔄 Repetición de Módulos Activada' : '🔒 Modo 1 Solo Intento Activado',
+      message: enabled
+        ? 'El interruptor está <strong>ACTIVO</strong>: los colaboradores ahora pueden repetir los módulos varias veces para practicar o mejorar su puntuación.'
+        : 'El interruptor está <strong>INACTIVO</strong>: los colaboradores solo pueden intentar cada módulo <strong>una sola vez</strong> (Anti-Farming estricto).',
+      type: enabled ? 'success' : 'info'
+    });
   }
 
   async saveAdminPhaseMode(newMode) {
@@ -388,12 +413,16 @@ class AppController {
   async saveAdminCampaignDetails() {
     const campaignInput = document.getElementById('admin-campaign-input');
     const reqCheckbox = document.getElementById('admin-require-p1-checkbox');
+    const retriesSwitch = document.getElementById('admin-allow-retries-switch');
 
     if (campaignInput) {
-      this.academyConfig.campaignName = campaignInput.value.trim() || 'Programa Anual de Concientización 2026';
+      this.academyConfig.campaignName = campaignInput.value.trim() || 'Programa de Concientización 2026';
     }
     if (reqCheckbox) {
       this.academyConfig.requirePhase1ForPhase2 = Boolean(reqCheckbox.checked);
+    }
+    if (retriesSwitch) {
+      this.academyConfig.allowModuleRetries = Boolean(retriesSwitch.checked);
     }
 
     await this.persistAdminPhaseSettings(true);
@@ -456,7 +485,7 @@ class AppController {
     const campaignBadge = document.getElementById('dash-campaign-badge');
 
     if (campaignBadge) {
-      campaignBadge.textContent = this.academyConfig.campaignName || 'Programa Anual de Concientización 2026';
+      campaignBadge.textContent = this.academyConfig.campaignName || 'Programa de Concientización 2026';
     }
 
     // Los 5 módulos anteriores de Fase 2 permanecen ocultos; la nueva Fase 2 son los 4 juegos 3D (#arcade-section-block)
@@ -1142,11 +1171,17 @@ class AppController {
     }
     const startBtn = document.getElementById(`btn-start-${gameId}`);
     if (startBtn) {
-      if (isCompleted) {
+      const allowRetries = Boolean(this.academyConfig && this.academyConfig.allowModuleRetries);
+      if (isCompleted && !allowRetries) {
         startBtn.disabled = true;
         startBtn.textContent = '🔒 Completado (1/1)';
         startBtn.style.opacity = '0.6';
         startBtn.style.cursor = 'not-allowed';
+      } else if (isCompleted && allowRetries) {
+        startBtn.disabled = false;
+        startBtn.textContent = '🔁 Volver a Jugar';
+        startBtn.style.opacity = '';
+        startBtn.style.cursor = '';
       } else {
         startBtn.disabled = false;
         if (startBtn.dataset && startBtn.dataset.label) startBtn.textContent = startBtn.dataset.label;
@@ -1543,9 +1578,10 @@ class AppController {
     if (window.games && games.remote_vpn) games.remote_vpn.init();
   }
 
-  // Fase 2 Oficial: Juegos Interactivos 3D (Anti-Farming estricto: 1 solo intento)
+  // Fase 2 Oficial: Juegos Interactivos 3D (respeta el switch Admin de repetir módulos)
   startArcadeGame(key) {
-    if (this.state.user.completedModules[key]) {
+    const allowRetries = Boolean(this.academyConfig && this.academyConfig.allowModuleRetries);
+    if (this.state.user.completedModules[key] && !allowRetries) {
       this.showModalAlert({
         title: '🔒 Módulo Ya Completado (Anti-Farming)',
         message: 'Ya completaste este desafío de la Fase 2. Por política Anti-Farming solo se permite un intento por colaborador.',

@@ -7,8 +7,9 @@ const { getAcademyConfigFromDB } = require('./authController');
 
 let inMemoryAcademyConfig = {
   activePhaseMode: 'phase2',
-  campaignName: 'Programa Anual de Concientización 2026',
-  requirePhase1ForPhase2: false
+  campaignName: 'Programa de Concientización 2026',
+  requirePhase1ForPhase2: false,
+  allowModuleRetries: false
 };
 
 let inMemoryScenarios = null;
@@ -198,7 +199,7 @@ const getAcademySettings = async (req, res) => {
 };
 
 const updateAcademySettings = async (req, res) => {
-  const { activePhaseMode, campaignName, requirePhase1ForPhase2 } = req.body;
+  const { activePhaseMode, campaignName, requirePhase1ForPhase2, allowModuleRetries } = req.body;
   const validModes = ['phase1', 'phase2', 'both'];
 
   if (!activePhaseMode || !validModes.includes(activePhaseMode)) {
@@ -212,7 +213,8 @@ const updateAcademySettings = async (req, res) => {
     ...inMemoryAcademyConfig,
     activePhaseMode,
     campaignName: campaignName ? String(campaignName).trim().slice(0, 120) : inMemoryAcademyConfig.campaignName,
-    requirePhase1ForPhase2: Boolean(requirePhase1ForPhase2)
+    requirePhase1ForPhase2: Boolean(requirePhase1ForPhase2),
+    allowModuleRetries: Boolean(allowModuleRetries)
   };
 
   try {

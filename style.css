@@ -3861,3 +3861,143 @@ main {
   color: #fca5a5;
   background: rgba(127, 29, 29, 0.38);
 }
+
+/* Switch moderno del Panel Admin (Permitir repetir módulos) */
+.s7b-switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.s7b-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.s7b-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: rgba(239, 68, 68, 0.35);
+  border: 1.5px solid rgba(239, 68, 68, 0.7);
+  transition: 0.25s ease;
+  border-radius: 30px;
+}
+
+.s7b-slider::before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 2.5px;
+  background: #ffffff;
+  transition: 0.25s ease;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.s7b-switch input:checked + .s7b-slider {
+  background: rgba(34, 197, 94, 0.45);
+  border-color: #4ade80;
+  box-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
+}
+
+.s7b-switch input:checked + .s7b-slider::before {
+  transform: translateX(25px);
+}
+
+/* Mejoras visuales de Caza-Fraudes: Duelo de Cartas 3D */
+.car-steps-guide {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  margin: 0.9rem 0;
+}
+
+@media (max-width: 720px) {
+  .car-steps-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+.car-step-box {
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+}
+
+.car-step-box span {
+  font-size: 1.25rem;
+}
+
+.car-step-box small {
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.car-bar-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.car-attack-pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  padding: 0.18rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: 0.45rem;
+}
+
+.car-prompt {
+  font-size: 0.9rem;
+  color: #bae6fd;
+  padding: 0.4rem;
+}
+
+.car-card-sub {
+  font-size: 0.76rem !important;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+
+.car-feedback {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  text-align: left;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.car-feedback.ok {
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid #22c55e;
+  color: #dcfce7;
+}
+
+.car-feedback.bad {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid #ef4444;
+  color: #fee2e2;
+}
+
+.car-feedback p {
+  margin-top: 0.35rem;
+}

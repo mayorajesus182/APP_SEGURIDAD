@@ -99,7 +99,7 @@ const ensureSchema = async () => {
       INSERT INTO system_settings (setting_key, setting_value, updated_by)
       VALUES (
         'academy_config',
-        '{"activePhaseMode": "phase2", "campaignName": "Programa Anual de Concientización 2026", "requirePhase1ForPhase2": false, "phase2ArcadeMigrated": true}'::jsonb,
+        '{"activePhaseMode": "phase2", "campaignName": "Programa de Concientización 2026", "requirePhase1ForPhase2": false, "allowModuleRetries": false, "phase2ArcadeMigrated": true}'::jsonb,
         'system'
       )
       ON CONFLICT (setting_key) DO NOTHING;
@@ -112,6 +112,15 @@ const ensureSchema = async () => {
           updated_at = CURRENT_TIMESTAMP
       WHERE setting_key = 'academy_config'
         AND COALESCE((setting_value->>'phase2ArcadeMigrated')::boolean, false) = false;
+    `);
+
+    // Actualizar nombre de campaña anterior si aún figura en BD
+    await query(`
+      UPDATE system_settings
+      SET setting_value = jsonb_set(setting_value, '{campaignName}', '"Programa de Concientización 2026"'::jsonb),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE setting_key = 'academy_config'
+        AND setting_value->>'campaignName' = 'Programa Anual de Concientización 2026';
     `);
 
     console.log('✅ Esquema PostgreSQL Fase 1 + Fase 2 verificado correctamente.');

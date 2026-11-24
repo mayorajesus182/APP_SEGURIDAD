@@ -111,8 +111,19 @@ const updateProgress = async (req, res, next) => {
     const prevCompleted = prevModRes.rows.length > 0 ? Boolean(prevModRes.rows[0].is_completed) : false;
     const prevScore = prevModRes.rows.length > 0 ? parseInt(prevModRes.rows[0].score_earned || 0, 10) : 0;
 
-    // Anti-Farming estricto: si el módulo ya fue completado (1 solo intento permitido), no sumar más puntos ni alterar estadísticas
-    if (prevCompleted) {
+    // Consultar si el Administrador tiene activo el switch de permitir repetir módulos
+    let allowRetries = false;
+    try {
+      const cfgRes = await query("SELECT setting_value FROM system_settings WHERE setting_key = 'academy_config'");
+      if (cfgRes.rows.length > 0 && cfgRes.rows[0].setting_value) {
+        allowRetries = Boolean(cfgRes.rows[0].setting_value.allowModuleRetries);
+      }
+    } catch (e) {
+      allowRetries = false;
+    }
+
+    // Anti-Farming estricto: si el módulo ya fue completado y el switch de repetición está INACTIVO, bloquear
+    if (prevCompleted && !allowRetries) {
       const currentUserRes = await query(
         'SELECT total_score, correct_answers, total_questions FROM users WHERE id = $1',
         [userId]
@@ -136,13 +147,16 @@ const updateProgress = async (req, res, next) => {
 
     const alreadyMaxed = prevCompleted && prevScore >= maxCap;
 
-    // 1. Actualizar tabla module_progress respetando el tope máximo del módulo
+    // 1. Actualizar tabla module_progress respetando el tope máximo del módulo (si es reintento habilitado, conserva el mejor puntaje)
     await query(
       `INSERT INTO module_progress (user_id, module_key, is_completed, score_earned, attempts, completed_at, last_updated)
        VALUES ($1, $2, $3, LEAST($4::integer, $5::integer), 1, CASE WHEN $3 = TRUE THEN CURRENT_TIMESTAMP ELSE NULL END, CURRENT_TIMESTAMP)
        ON CONFLICT (user_id, module_key) DO UPDATE SET
          is_completed = EXCLUDED.is_completed OR module_progress.is_completed,
-         score_earned = LEAST($5::integer, module_progress.score_earned + EXCLUDED.score_earned),
+         score_earned = CASE
+           WHEN module_progress.is_completed = TRUE THEN GREATEST(module_progress.score_earned, LEAST($4::integer, $5::integer))
+           ELSE LEAST($5::integer, module_progress.score_earned + EXCLUDED.score_earned)
+         END,
          attempts = CASE WHEN $3 = TRUE THEN module_progress.attempts + 1 ELSE GREATEST(1, module_progress.attempts) END,
          completed_at = CASE 
            WHEN EXCLUDED.is_completed = TRUE AND module_progress.completed_at IS NULL THEN CURRENT_TIMESTAMP 

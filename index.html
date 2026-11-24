@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=3.8">
+  <link rel="stylesheet" href="style.css?v=4.0">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -132,7 +132,7 @@
           </div>
           <div class="hero-content">
             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap;">
-              <span id="dash-campaign-badge" class="phase-pill">Programa Anual de Concientización 2026</span>
+              <span id="dash-campaign-badge" class="phase-pill">Programa de Concientización 2026</span>
               <span id="dash-active-phase-badge" class="phase-pill phase-pill-cyan">🚀 Fase 2 Activa: Juegos
                 Interactivos 3D</span>
             </div>
@@ -491,7 +491,7 @@
                 </h3>
                 <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
                   Completa los 4 desafíos interactivos en 3D para obtener tu Certificado de Fase 2 (1 solo intento por
-                  módulo · Protección Anti-Farming activa).
+                  módulo ).
                 </p>
               </div>
               <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 4 Completados</span>
@@ -1656,7 +1656,7 @@
             <label for="admin-campaign-input"
               style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">Campaña Activa:</label>
             <input type="text" id="admin-campaign-input" class="text-input"
-              style="padding:0.4rem 0.7rem; font-size:0.82rem;" value="Programa Anual de Concientización 2026">
+              style="padding:0.4rem 0.7rem; font-size:0.82rem;" value="Programa de Concientización 2026">
           </div>
           <label
             style="display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:var(--text-main); cursor:pointer;">
@@ -1667,6 +1667,23 @@
             onclick="app.saveAdminCampaignDetails()">
             💾 Guardar Parámetros
           </button>
+        </div>
+
+        <!-- SWITCH DE CONTROL DE REINTENTOS DE MÓDULOS -->
+        <div
+          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:0.95rem; padding:0.85rem 1rem; border-radius:10px; background:rgba(6, 12, 26, 0.72); border:1px solid rgba(56, 189, 248, 0.28);">
+          <div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-main);">
+              🔄 Permitir repetir módulos (Múltiples intentos)
+            </div>
+            <div id="admin-retries-status-label" style="font-size:0.78rem; color:#fca5a5; margin-top:0.2rem;">
+              🔒 INACTIVO: Solo 1 intento por módulo (Anti-Farming estricto)
+            </div>
+          </div>
+          <label class="s7b-switch" title="Activar o desactivar la repetición de módulos">
+            <input type="checkbox" id="admin-allow-retries-switch" onchange="app.toggleAdminRetries(this.checked)">
+            <span class="s7b-slider"></span>
+          </label>
         </div>
       </div>
 
@@ -1822,12 +1839,12 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js?v=3.8"></script>
-  <script src="arcade-core.js?v=3.8"></script>
-  <script src="arcade-jornada.js?v=3.8"></script>
-  <script src="arcade-games.js?v=3.8"></script>
-  <script src="customizer.js?v=3.8"></script>
-  <script src="app.js?v=3.8"></script>
+  <script src="games.js?v=4.0"></script>
+  <script src="arcade-core.js?v=4.0"></script>
+  <script src="arcade-jornada.js?v=4.0"></script>
+  <script src="arcade-games.js?v=4.0"></script>
+  <script src="customizer.js?v=4.0"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 
 </html>

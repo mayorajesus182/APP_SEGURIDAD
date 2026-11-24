@@ -256,7 +256,8 @@
     },
 
     open(key) {
-      if (window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules && window.app.state.user.completedModules[key]) {
+      const allowRetries = Boolean(window.app && window.app.academyConfig && window.app.academyConfig.allowModuleRetries);
+      if (!allowRetries && window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules && window.app.state.user.completedModules[key]) {
         window.app.showModalAlert({
           title: '🔒 Módulo Ya Completado (Anti-Farming)',
           message: 'Ya completaste este desafío de la Fase 2. Por política Anti-Farming solo se permite jugar una vez por colaborador.',
@@ -295,17 +296,23 @@
       } catch (e) { /* almacenamiento opcional */ }
     },
 
-    // Otorga puntos solo la primera vez (Anti-Farming); las repeticiones son práctica libre.
+    // Otorga puntos la primera vez o actualiza mejor puntaje si el Admin activó el switch de repeticiones.
     async award(key, rawPoints) {
       const points = Math.max(0, Math.min(CAPS[key] || 150, Math.round(rawPoints)));
       this.setBest(key, points);
       const a = window.app;
-      if (!a || !a.state) return { points, first: false };
+      if (!a || !a.state) return { points, first: false, retryAllowed: false };
       const already = Boolean(a.state.user.completedModules[key]);
-      if (already) return { points, first: false };
-      await a.addPoints(points, true, key);
-      await a.markModuleCompleted(key);
-      return { points, first: true };
+      const allowRetries = Boolean(a.academyConfig && a.academyConfig.allowModuleRetries);
+      if (already && !allowRetries) return { points, first: false, retryAllowed: false };
+      if (!already) {
+        await a.addPoints(points, true, key);
+        await a.markModuleCompleted(key);
+        return { points, first: true, retryAllowed: allowRetries };
+      }
+      // Reintento habilitado por Admin: sincronizar mejor puntaje con el servidor (respetando el tope del módulo)
+      await a.markModuleCompleted(key, points);
+      return { points, first: false, retryAllowed: true };
     },
 
     // Pantalla de resultados estándar
@@ -313,14 +320,21 @@
       const statHtml = (stats || []).map((s) => `<div class="arc-stat"><span>${U.esc(s[0])}</span><strong>${U.esc(s[1])}</strong></div>`).join('');
       const lessonHtml = (lessons || []).length
         ? `<div class="arc-lessons"><h4>📘 Lo que debes recordar</h4><ul>${lessons.map((l) => `<li>${l}</li>`).join('')}</ul></div>` : '';
+      const allowRetries = Boolean(window.app && window.app.academyConfig && window.app.academyConfig.allowModuleRetries);
       const note = awarded
-        ? (awarded.first ? `<div class="arc-award ok">🏅 +${awarded.points} puntos registrados · 🔒 Intento único completado (Anti-Farming)</div>`
-          : `<div class="arc-award">🔒 Este módulo ya fue completado anteriormente (Anti-Farming: 1 solo intento permitido)</div>`)
+        ? (awarded.first
+          ? `<div class="arc-award ok">🏅 +${awarded.points} puntos registrados${allowRetries ? ' · 🔄 Reintentos habilitados por el Administrador' : ' · 🔒 Intento único completado (Anti-Farming)'}</div>`
+          : (allowRetries
+            ? `<div class="arc-award ok">🔄 Nuevo intento registrado (${awarded.points} pts · se conserva tu mejor puntuación)</div>`
+            : `<div class="arc-award">🔒 Este módulo ya fue completado anteriormente (Anti-Farming: 1 solo intento permitido)</div>`))
         : '<div class="arc-award">🔒 Intento único completado (Anti-Farming activo)</div>';
       const cm = (window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules) || {};
       const allPhase2Done = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'].every((k) => Boolean(cm[k]));
       const certBtn = allPhase2Done
         ? `<button class="btn btn-success" style="background:linear-gradient(135deg, #b60e80, #6d084d);" onclick="app.navigateTo('dashboard'); app.showCertificate('phase2');">🎖️ Ver / Descargar Certificado Fase 2</button>`
+        : '';
+      const retryBtn = (allowRetries && retryJs)
+        ? `<button class="btn btn-secondary" onclick="${retryJs}">🔁 Volver a intentar</button>`
         : '';
       return `
         <div class="arc-result ${win ? 'win' : 'lose'}">
@@ -333,6 +347,7 @@
           ${lessonHtml}
           <div class="arc-actions">
             ${certBtn}
+            ${retryBtn}
             <button class="btn btn-primary" onclick="app.navigateTo('dashboard')">← Volver al Panel</button>
           </div>
         </div>`;

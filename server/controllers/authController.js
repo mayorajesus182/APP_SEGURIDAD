@@ -16,8 +16,9 @@ const getAcademyConfigFromDB = async (fallback = null) => {
   }
   return fallback || {
     activePhaseMode: 'phase2',
-    campaignName: 'Programa Anual de Concientización 2026',
-    requirePhase1ForPhase2: false
+    campaignName: 'Programa de Concientización 2026',
+    requirePhase1ForPhase2: false,
+    allowModuleRetries: false
   };
 };
 

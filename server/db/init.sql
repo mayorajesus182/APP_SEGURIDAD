@@ -103,7 +103,7 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO system_settings (setting_key, setting_value, updated_by)
 VALUES (
     'academy_config',
-    '{"activePhaseMode": "phase2", "campaignName": "Programa Anual de Concientización 2026", "requirePhase1ForPhase2": false}'::jsonb,
+    '{"activePhaseMode": "phase2", "campaignName": "Programa de Concientización 2026", "requirePhase1ForPhase2": false}'::jsonb,
     'system'
 )
 ON CONFLICT (setting_key) DO NOTHING;

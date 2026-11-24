@@ -248,38 +248,87 @@
   }
 
   // ===========================================================================
-  // C) CAZA-FRAUDES: DUELO DE CARTAS
+  // C) CAZA-FRAUDES: DUELO DE CARTAS 3D (Lógica coherente 100% por escenario)
   // ===========================================================================
-  const DEF = {
-    verify: { n: 'Verificar por el teléfono de siempre', e: '📞' },
-    dual: { n: 'Pedir doble firma de autorización', e: '✍️' },
-    report: { n: 'Reportar a Seguridad de la Información', e: '🚨' },
-    noclick: { n: 'No hacer clic ni abrir nada', e: '🛑' },
-    hangup: { n: 'Colgar y avisar', e: '☎️' },
-    lock: { n: 'Bloquear la pantalla (Win + L)', e: '🔒' },
-    vpn: { n: 'Usar datos del celular y VPN', e: '📶' },
-    mfa: { n: 'Tocar "NO FUI YO" y cambiar mi clave', e: '🔑' },
-    shred: { n: 'Triturar el papel con datos', e: '🗑️' },
-    usbsec: { n: 'Entregar a Seguridad sin conectar', e: '🔌' },
-    badge: { n: 'Pedir identificación y verificar con quien lo contrató', e: '🪪' },
-    // Cartas trampa
-    hurry: { n: 'Responder rápido para no quedar mal', e: '⚡', trap: true },
-    trust: { n: 'Confiar: parece de la empresa', e: '🤝', trap: true },
-    share: { n: 'Compartir mi clave solo por hoy', e: '🔓', trap: true },
-    ignore: { n: 'Ignorarlo y seguir trabajando', e: '🙈', trap: true }
-  };
-
-  const ATTACKS = [
-    { n: 'Falso Jefe', e: '🎭', t: 'Un correo desde Gmail dice ser del Presidente y exige una transferencia urgente y secreta un viernes por la tarde.', best: ['verify', 'dual'], part: ['report'], x: 'Los pagos urgentes se confirman por teléfono interno y con doble firma; el secreto es una señal de fraude.' },
-    { n: 'Enlace de Bloqueo', e: '🪝', t: 'Un correo avisa que tu cuenta se bloquea en 2 horas si no escribes tu clave en un enlace.', best: ['noclick', 'report'], part: ['verify'], x: 'La prisa y la amenaza son el truco. No hagas clic y avisa a Seguridad.' },
-    { n: 'USB Regalo', e: '🎁', t: 'Encuentras una memoria USB nueva en el pasillo con la etiqueta "Sueldos 2026".', best: ['usbsec'], part: ['report'], x: 'Un dispositivo desconocido nunca se conecta: se entrega a Seguridad.' },
-    { n: 'Falso Soporte', e: '📞', t: 'Alguien llama diciendo ser de Soporte y pide el código que te llegó por mensaje de texto.', best: ['hangup', 'report'], part: ['verify'], x: 'Soporte legítimo nunca pide códigos. Cuelga y avisa.' },
-    { n: 'Cambio de Cuenta', e: '🏦', t: 'Un proveedor envía un PDF para cambiar su cuenta bancaria a nombre de otra persona.', best: ['verify', 'dual'], part: ['report'], x: 'Confirma con el teléfono guardado del proveedor, nunca con el que viene en la carta.' },
-    { n: 'Wi-Fi Gratis', e: '📡', t: 'Estás en un aeropuerto y solo ves una red abierta llamada "WiFi_Gratis_Sin_Clave".', best: ['vpn'], part: ['lock'], x: 'Las redes abiertas permiten espiar. Usa datos del celular y VPN.' },
-    { n: 'Avisos de Madrugada', e: '🌙', t: 'A las 11:48 PM tu celular vibra 7 veces preguntando si eres tú quien intenta entrar a tu cuenta.', best: ['mfa'], part: ['report'], x: 'Nunca aceptes un aviso que no iniciaste: alguien tiene tu clave.' },
-    { n: 'QR Trampa', e: '🔳', t: 'Un volante ofrece un "bono especial" si escaneas un QR y pones tu usuario del trabajo.', best: ['noclick', 'report'], part: ['verify'], x: 'Un QR desconocido es un enlace sospechoso: no lo escanees.' },
-    { n: 'Falso Técnico', e: '🦺', t: 'Un desconocido con chaleco pide pasar al piso para "revisar las computadoras".', best: ['badge', 'verify'], part: ['report'], x: 'Toda visita se valida antes de entrar, aunque traiga uniforme.' },
-    { n: 'Papeles Olvidados', e: '📄', t: 'Hay hojas con cédulas y cuentas de clientes olvidadas sobre un escritorio y tu pantalla sigue abierta.', best: ['shred', 'lock'], part: [], x: 'Escritorio limpio: bloquea la pantalla y tritura o guarda lo impreso.' }
+  const DUELS = [
+    {
+      tag: '📧 CORREO DE PROVEEDOR',
+      n: 'Cambio de Cuenta de Proveedor',
+      e: '🏦',
+      t: 'Un proveedor habitual de la oficina envía un PDF pidiendo depositar la factura de este mes en una cuenta bancaria nueva a nombre de otra persona.',
+      cards: [
+        { e: '📞', title: 'Llamar al teléfono guardado', sub: 'Confirmar con el número fijo que ya teníamos antes de cambiar nada.', ok: true, why: 'Confirmar por el canal oficial registrado detiene de inmediato el fraude de cambio de cuenta.' },
+        { e: '💳', title: 'Cambiar y pagar de una vez', sub: 'Actualizar la cuenta en Dirección Finanzas y emitir la transferencia.', ok: false, why: 'El dinero saldría directo a la cuenta del estafador sin verificación previa.' },
+        { e: '📱', title: 'Llamar al celular del PDF', sub: 'Marcar el número nuevo que viene escrito al pie de la carta.', ok: false, why: 'Ese número fue puesto por el mismo estafador para confirmarte la mentira.' },
+        { e: '✉️', title: 'Responder el mismo correo', sub: 'Preguntar por correo si el cambio de cuenta es verdadero.', ok: false, why: 'Si el buzón del proveedor está tomado, te responderá el propio atacante.' }
+      ],
+      lesson: 'Todo cambio de cuenta bancaria de un proveedor se valida llamando al teléfono oficial que ya teníamos guardado.'
+    },
+    {
+      tag: '🎭 CORREO URGENTE · VIERNES 4:45 PM',
+      n: 'El Falso Jefe Apurado',
+      e: '🎭',
+      t: 'Llega un correo desde "presidencia.suiche7b@gmail.com" diciendo: "Transfiere urgente este anticipo hoy y no se lo comentes a nadie".',
+      cards: [
+        { e: '✍️', title: 'Confirmar y pedir doble firma', sub: 'Llamar a la extensión interna de Presidencia Ejecutiva y seguir las firmas.', ok: true, why: 'En Corporación Suiche 7B ningún pago sale sin verificación interna y firmas de autorización.' },
+        { e: '⚡', title: 'Pagar rápido por respeto', sub: 'Hacer el pago sin preguntar para que Presidencia no se moleste.', ok: false, why: 'El apuro y el "secreto" son la trampa clásica del fraude del falso jefe.' },
+        { e: '💬', title: 'Responder al @gmail', sub: 'Escribirle preguntando a nombre de quién va el pago.', ok: false, why: 'Presidencia Ejecutiva nunca usa correos @gmail.com para ordenar pagos.' },
+        { e: '💵', title: 'Pagar solo la mitad hoy', sub: 'Transferir un adelanto pequeño y confirmar el lunes.', ok: false, why: 'Igual pierdes fondos de la empresa frente a una solicitud falsa.' }
+      ],
+      lesson: 'Las órdenes urgentes y "en secreto" desde correos personales siempre son fraude. Confirma por extensión interna y exige doble firma.'
+    },
+    {
+      tag: '☎️ LLAMADA TELEFÓNICA',
+      n: 'Falso Soporte Pidiendo Código SMS',
+      e: '☎️',
+      t: 'Alguien llama diciendo ser de Dirección Tecnología: "Te llegó un código de 6 dígitos por SMS; léemelo rápido para no bloquear tu cuenta".',
+      cards: [
+        { e: '🛑', title: 'Colgar y reportar a Seguridad', sub: 'No dar ningún dígito y avisar a Gerencia Seguridad de la Información.', ok: true, why: 'Dirección Tecnología jamás pide códigos SMS ni contraseñas por teléfono.' },
+        { e: '🔢', title: 'Dictar el código de 6 dígitos', sub: 'Cooperar rápido para evitar que suspendan mi acceso hoy.', ok: false, why: 'Ese código es la llave de tu cuenta; al dictarlo entregas el control al atacante.' },
+        { e: '🔐', title: 'Dar solo los primeros 3 dígitos', sub: 'Compartir la mitad para comprobar si realmente es de Tecnología.', ok: false, why: 'Ningún código temporal se comparte, ni completo ni por partes.' },
+        { e: '📸', title: 'Mandar captura por WhatsApp', sub: 'Enviar foto del mensaje para que Soporte lo valide.', ok: false, why: 'Es exactamente lo mismo que dictar el código y le regala tu sesión al atacante.' }
+      ],
+      lesson: 'Jamás compartas códigos SMS, tokens ni contraseñas por teléfono o WhatsApp.'
+    },
+    {
+      tag: '🔌 PASILLO DE LA OFICINA',
+      n: 'Memoria USB "Nómina 2026"',
+      e: '🔌',
+      t: 'Encuentras una memoria USB nueva tirada cerca del ascensor con la etiqueta "Sueldos Corporación Suiche 7B 2026".',
+      cards: [
+        { e: '🛡️', title: 'Entregar a Seguridad sin conectar', sub: 'Llevarla directo a Gerencia Seguridad de la Información.', ok: true, why: 'Seguridad cuenta con entornos aislados para revisar dispositivos desconocidos sin arriesgar la red.' },
+        { e: '💻', title: 'Conectarla para buscar al dueño', sub: 'Abrir el archivo en mi computadora de oficina para devolverla.', ok: false, why: 'Al enchufarla puede ejecutar virus automáticos que infectan tu equipo y la red.' },
+        { e: '🧹', title: 'Formatearla para mi uso', sub: 'Borrar todo en mi computadora y usarla como memoria de trabajo.', ok: false, why: 'Antes de poder formatearla, el chip malicioso del USB ya pudo atacar tu equipo.' },
+        { e: '🏠', title: 'Probarla en mi casa', sub: 'Llevármela para abrirla en mi laptop personal.', ok: false, why: 'Pones en riesgo tu equipo personal y puedes traer el virus de vuelta a la oficina.' }
+      ],
+      lesson: 'Nunca conectes memorias USB ni cables desconocidos. Entrégalos directamente a Seguridad.'
+    },
+    {
+      tag: '📲 MENSAJE DE WHATSAPP',
+      n: 'Pedido Informal de Reportes de Pago Móvil',
+      e: '📲',
+      t: 'Un número desconocido escribe por WhatsApp diciendo ser de un banco aliado y pide un Excel con operaciones de Pago Móvil Interbancario de ayer.',
+      cards: [
+        { e: '📋', title: 'Exigir el canal oficial validado', sub: 'Negarme por WhatsApp y canalizar vía Gerencia Operaciones y Servicio al Cliente.', ok: true, why: 'La información operativa de la red interbancaria solo se comparte con contactos validados por canales oficiales.' },
+        { e: '📤', title: 'Enviar el Excel por WhatsApp', sub: 'Pasarle el archivo rápido para brindar buena atención.', ok: false, why: 'Compartiste datos transaccionales confidenciales con alguien cuya identidad no fue verificada.' },
+        { e: '📷', title: 'Mandar foto de mi pantalla', sub: 'Enviar solo una foto rápida de la tabla en vez del archivo.', ok: false, why: 'Una foto de pantalla igual filtra datos sensibles de operaciones de la red.' },
+        { e: '📧', title: 'Enviarlo desde mi Gmail', sub: 'Mandárselo desde mi correo personal para no saturar el corporativo.', ok: false, why: 'Sacar archivos de Corporación Suiche 7B hacia correos personales está prohibido.' }
+      ],
+      lesson: 'Los reportes operativos de la red interbancaria nunca se envían por WhatsApp ni correos personales.'
+    },
+    {
+      tag: '🌙 ALERTA EN TU CELULAR · 11:48 PM',
+      n: 'Bombardeo de Avisos Nocturnos',
+      e: '🌙',
+      t: 'Estás descansando a las 11:48 PM y tu celular vibra 7 veces seguidas preguntando: "¿Eres tú intentando entrar a tu cuenta de Corporación Suiche 7B?".',
+      cards: [
+        { e: '🚫', title: 'Tocar "NO FUI YO" y avisar', sub: 'Bloquear el intento y reportar a Seguridad para cambiar mi clave.', ok: true, why: 'Alguien ya tiene tu contraseña y busca que apruebes por cansancio. Bloquearlo detiene la intrusión.' },
+        { e: '✅', title: 'Tocar "Sí, Aprobar"', sub: 'Aceptar para que el celular deje de sonar y poder dormir.', ok: false, why: 'Le abriste la puerta de par en par al atacante dentro de tu cuenta corporativa.' },
+        { e: '🔇', title: 'Apagar el celular y callar', sub: 'Ignorar los avisos y no decirle nada a nadie mañana.', ok: false, why: 'Tu contraseña ya está comprometida; si no avisas, el atacante seguirá intentando.' },
+        { e: '🔁', title: 'Reenviar el aviso a un amigo', sub: 'Mandarle captura a un familiar para preguntarle qué hacer.', ok: false, why: 'Debes bloquear de inmediato y reportar al equipo de Seguridad de la empresa.' }
+      ],
+      lesson: 'Si no estás iniciando sesión tú mismo, jamás apruebes un aviso en tu celular: bloquéalo y cambia tu clave.'
+    }
   ];
 
   class CartasGame {
@@ -291,19 +340,17 @@
       if (!root) return;
       const best = window.arcade.getBest(this.key);
       root.innerHTML = `
-        ${window.arcade.headerHTML('🃏 Caza-Fraudes: Duelo de Cartas', best ? `Mejor puntaje: <strong>${best}</strong>` : '')}
+        ${window.arcade.headerHTML('🃏 Caza-Fraudes: Duelo de Cartas 3D', best ? `Mejor puntaje: <strong>${best}</strong>` : '')}
         <div class="arc-intro single">
           <div class="arc-intro-text">
-            <h2>Enfréntate a "El Estafador"</h2>
-            <p>En cada ronda <strong>El Estafador lanza un ataque</strong> (un correo falso, una llamada, un USB…).
-              Tú tienes <strong>4 cartas de defensa</strong>: elige la mejor para bloquearlo y golpear su plan.</p>
-            <ul>
-              <li>⭐ <b>Carta ideal</b>: bloqueas el ataque y le quitas mucha vida; las rachas dan daño extra.</li>
-              <li>🟨 <b>Carta parcial</b>: ayuda, pero recibes algo de daño.</li>
-              <li>🕳️ <b>Cartas trampa</b> ("Confiar", "Responder rápido"…): ¡te cuestan mucho escudo!</li>
-              <li>🎯 8 rondas. Si tu escudo llega a 0, pierdes.</li>
-            </ul>
-            <button class="btn btn-primary" id="car-go" style="padding:0.8rem 1.6rem;">▶ Comenzar duelo</button>
+            <h2>¿Cómo se juega? (3 pasos súper sencillos)</h2>
+            <p>Te enfrentarás a <strong>El Estafador</strong> durante <strong>6 rondas reales de oficina</strong> en Corporación Suiche 7B.</p>
+            <div class="car-steps-guide">
+              <div class="car-step-box"><span>1️⃣</span><b>Lee el ataque</b><small>Arriba aparece el engaño que intenta El Estafador.</small></div>
+              <div class="car-step-box"><span>2️⃣</span><b>Elige 1 carta</b><small>Abajo tienes 4 cartas diseñadas para esa situación. Solo 1 es la correcta.</small></div>
+              <div class="car-step-box"><span>3️⃣</span><b>Gana el duelo</b><small>✅ Acierto: <b>−25</b> al Estafador · ❌ Error: <b>−20</b> a tu escudo.</small></div>
+            </div>
+            <button class="btn btn-primary" id="car-go" style="padding:0.85rem 1.8rem; margin-top:0.8rem;">▶ Comenzar Duelo (6 Rondas)</button>
           </div>
           <div class="arc-intro-visual"><div class="car-demo"><div class="car-card demo">🛡️</div><div class="car-card demo">📞</div><div class="car-card demo">🦹</div></div></div>
         </div>`;
@@ -312,17 +359,27 @@
 
     start() {
       this.round = 0;
-      this.hp = 100; this.ehp = 100; this.streak = 0; this.correct = 0; this.log = [];
-      this.rounds = U.shuffle(ATTACKS).slice(0, 8);
+      this.hp = 100;
+      this.ehp = 100;
+      this.streak = 0;
+      this.correct = 0;
+      this.log = [];
+      this.rounds = U.shuffle(DUELS);
       this.playing = true;
       const root = window.arcade.root(this.key);
       root.innerHTML = `
-        ${window.arcade.headerHTML('🃏 Caza-Fraudes: Duelo de Cartas', '<span class="arc-clock" id="car-round">Ronda 1/8</span>')}
+        ${window.arcade.headerHTML('🃏 Caza-Fraudes: Duelo de Cartas 3D', '<span class="arc-clock" id="car-round">Ronda 1 / 6</span>')}
         <div class="car-arena">
           <div class="car-top">
-            <div class="car-bar-box"><span>🛡️ Tu escudo</span><div class="arc-bar"><div id="car-hp" class="arc-bar-fill" style="width:100%"></div></div><b id="car-hp-t">100</b></div>
-            <div class="car-streak" id="car-streak"></div>
-            <div class="car-bar-box right"><span>🦹 Plan del Estafador</span><div class="arc-bar"><div id="car-ehp" class="arc-bar-fill enemy" style="width:100%"></div></div><b id="car-ehp-t">100</b></div>
+            <div class="car-bar-box">
+              <div class="car-bar-head"><span>🛡️ Tu Escudo</span><b id="car-hp-t">100 / 100</b></div>
+              <div class="arc-bar"><div id="car-hp" class="arc-bar-fill" style="width:100%"></div></div>
+            </div>
+            <div class="car-streak" id="car-streak">VS</div>
+            <div class="car-bar-box right">
+              <div class="car-bar-head"><span>🦹 Plan del Estafador</span><b id="car-ehp-t">100 / 100</b></div>
+              <div class="arc-bar"><div id="car-ehp" class="arc-bar-fill enemy" style="width:100%"></div></div>
+            </div>
           </div>
           <div class="car-table">
             <div id="car-attack" class="car-attack"></div>
@@ -336,31 +393,38 @@
 
     deal() {
       this.locked = false;
-      const a = this.rounds[this.round];
-      this.cur = a;
-      U.$('car-round').textContent = `Ronda ${this.round + 1}/${this.rounds.length}`;
+      const d = this.rounds[this.round];
+      this.cur = d;
+      U.$('car-round').textContent = `Ronda ${this.round + 1} / ${this.rounds.length}`;
       U.$('car-attack').innerHTML = `
-        <div class="car-card attack in"><div class="car-card-e">${a.e}</div><h3>${U.esc(a.n)}</h3><p>${U.esc(a.t)}</p><div class="car-tag">ATAQUE</div></div>`;
-      U.$('car-msg').innerHTML = '<em>Elige tu carta de defensa:</em>';
+        <div class="car-card attack in">
+          <div class="car-attack-pill">${U.esc(d.tag)}</div>
+          <div class="car-card-e">${d.e}</div>
+          <h3>${U.esc(d.n)}</h3>
+          <p>${U.esc(d.t)}</p>
+        </div>`;
+      U.$('car-msg').innerHTML = '<div class="car-prompt">👇 Haz clic en la <strong>única carta correcta</strong> para detener este ataque:</div>';
       U.$('car-next').innerHTML = '';
-      const best = U.pick(a.best);
-      const others = Object.keys(DEF).filter((k) => !a.best.includes(k) && !a.part.includes(k));
-      const hand = [best];
-      if (a.part.length) hand.push(U.pick(a.part));
-      const pool = U.shuffle(others);
-      while (hand.length < 4) hand.push(pool.shift());
-      this.hand = U.shuffle(hand);
+
+      // Barajar las 4 cartas de esta ronda garantizando que la respuesta correcta cambie de posición
+      this.hand = window.shuffleOptions
+        ? window.shuffleOptions(d.cards.map((c) => ({ ...c, isCorrect: c.ok })), this)
+        : U.shuffle(d.cards);
+
       const box = U.$('car-hand');
-      box.innerHTML = this.hand.map((k, i) => `
-        <button class="car-card def in" data-i="${i}" style="animation-delay:${i * 0.08}s">
-          <div class="car-card-e">${DEF[k].e}</div><h4>${U.esc(DEF[k].n)}</h4><div class="car-tag">${U.LETTERS[i]}</div>
+      box.innerHTML = this.hand.map((c, i) => `
+        <button class="car-card def in" data-i="${i}" style="animation-delay:${i * 0.06}s">
+          <div class="car-tag">${U.LETTERS[i]}</div>
+          <div class="car-card-e">${c.e}</div>
+          <h4>${U.esc(c.title)}</h4>
+          <p class="car-card-sub">${U.esc(c.sub)}</p>
         </button>`).join('');
       box.querySelectorAll('.car-card').forEach((el) => {
         el.addEventListener('click', () => this.play(parseInt(el.getAttribute('data-i'), 10)));
         el.addEventListener('mousemove', (e) => {
           const r = el.getBoundingClientRect();
-          el.style.setProperty('--ry', `${((e.clientX - r.left) / (r.width || 1) - 0.5) * 22}deg`);
-          el.style.setProperty('--rx', `${-((e.clientY - r.top) / (r.height || 1) - 0.5) * 22}deg`);
+          el.style.setProperty('--ry', `${((e.clientX - r.left) / (r.width || 1) - 0.5) * 18}deg`);
+          el.style.setProperty('--rx', `${-((e.clientY - r.top) / (r.height || 1) - 0.5) * 18}deg`);
         });
         el.addEventListener('mouseleave', () => { el.style.setProperty('--ry', '0deg'); el.style.setProperty('--rx', '0deg'); });
       });
@@ -370,38 +434,55 @@
     play(i) {
       if (this.locked || !this.playing) return;
       this.locked = true;
-      const a = this.cur, k = this.hand[i], card = DEF[k];
-      let res, msg;
-      if (a.best.includes(k)) {
-        const dmg = 22 + Math.min(this.streak, 3) * 4;
+      const d = this.cur;
+      const picked = this.hand[i];
+      const ok = Boolean(picked && picked.ok);
+
+      let msgHtml;
+      if (ok) {
+        const dmg = 25;
         this.ehp = Math.max(0, this.ehp - dmg);
-        this.streak++; this.correct++; res = 'best';
-        msg = `✅ <b>¡Defensa perfecta!</b> Bloqueaste el ataque y dañaste el plan del Estafador (−${dmg}).${this.streak > 1 ? ` 🔥 Racha x${this.streak}` : ''}`;
+        this.streak++;
+        this.correct++;
         U.snd('correct');
-      } else if (a.part.includes(k)) {
-        this.hp = Math.max(0, this.hp - 10); this.ehp = Math.max(0, this.ehp - 8); this.streak = 0; res = 'partial';
-        msg = '🟨 <b>Defensa parcial.</b> Ayuda, pero no es lo ideal: recibiste −10 de escudo.';
-        U.snd('click');
+        msgHtml = `
+          <div class="car-feedback ok">
+            <strong>✅ ¡Bloqueo Perfecto! (💥 −${dmg} al Estafador${this.streak > 1 ? ` · 🔥 Racha x${this.streak}` : ''})</strong>
+            <p>${U.esc(picked.why)}</p>
+          </div>`;
       } else {
-        const d = card.trap ? 30 : 25;
-        this.hp = Math.max(0, this.hp - d); this.streak = 0; res = 'wrong';
-        msg = `❌ <b>${card.trap ? '¡Carta trampa!' : 'Esa carta no sirve aquí.'}</b> El ataque te golpeó (−${d} de escudo).`;
+        const dmg = 20;
+        this.hp = Math.max(0, this.hp - dmg);
+        this.streak = 0;
         U.snd('incorrect');
+        const rightCard = this.hand.find((c) => c.ok);
+        msgHtml = `
+          <div class="car-feedback bad">
+            <strong>❌ ¡El Estafador te golpeó! (−${dmg} a tu escudo)</strong>
+            <p><b>Por qué falló tu carta:</b> ${U.esc(picked.why)}</p>
+            <p><b>✅ La carta correcta era:</b> ${rightCard.e} ${U.esc(rightCard.title)} — ${U.esc(rightCard.why)}</p>
+          </div>`;
       }
-      this.log.push({ a, res });
-      const idealNames = a.best.map((b) => `${DEF[b].e} ${DEF[b].n}`).join(' · ');
+
+      this.log.push({ d, ok });
       document.querySelectorAll('#car-hand .car-card').forEach((el, idx) => {
-        const kk = this.hand[idx];
+        const c = this.hand[idx];
         el.classList.remove('in');
-        el.classList.add(idx === i ? (res === 'wrong' ? 'hit' : 'played') : 'dim');
-        if (a.best.includes(kk)) el.classList.add('ideal');
+        if (c.ok) el.classList.add('ideal');
+        else if (idx === i) el.classList.add('hit');
+        else el.classList.add('dim');
         el.disabled = true;
       });
-      U.$('car-msg').innerHTML = `${msg}<br><span class="car-x">💡 Ideal: ${U.esc(idealNames)}. ${U.esc(a.x)}</span>`;
+      U.$('car-msg').innerHTML = msgHtml;
       this.updateBars();
-      const over = this.hp <= 0 || this.ehp <= 0 || this.round >= this.rounds.length - 1;
-      U.$('car-next').innerHTML = `<button class="btn btn-primary" id="car-nx">${over ? 'Ver resultado →' : 'Siguiente ataque →'}</button>`;
-      U.$('car-nx').addEventListener('click', () => { U.snd('click'); if (over) this.finish(); else { this.round++; this.deal(); } });
+
+      const over = this.hp <= 0 || this.round >= this.rounds.length - 1;
+      U.$('car-next').innerHTML = `<button class="btn btn-primary" id="car-nx">${over ? 'Ver resultado final →' : 'Siguiente Ronda →'}</button>`;
+      U.$('car-nx').addEventListener('click', () => {
+        U.snd('click');
+        if (over) this.finish();
+        else { this.round++; this.deal(); }
+      });
     }
 
     updateBars() {
@@ -409,24 +490,29 @@
       if (hp) { hp.style.width = `${this.hp}%`; hp.style.background = this.hp > 60 ? '#22c55e' : this.hp > 30 ? '#f59e0b' : '#ef4444'; }
       if (ehp) ehp.style.width = `${this.ehp}%`;
       const set = (id, v) => { const el = U.$(id); if (el) el.textContent = v; };
-      set('car-hp-t', this.hp); set('car-ehp-t', this.ehp);
-      set('car-streak', this.streak > 1 ? `🔥 Racha x${this.streak}` : '');
+      set('car-hp-t', `${this.hp} / 100`);
+      set('car-ehp-t', `${this.ehp} / 100`);
+      set('car-streak', this.streak > 1 ? `🔥 Racha x${this.streak}` : 'VS');
     }
 
     async finish() {
       this.playing = false;
-      const win = this.hp > 0;
-      const raw = this.correct * 18 + this.hp * 0.6 + (win ? 20 : 0) + (this.ehp <= 0 ? 10 : 0);
+      const win = this.hp > 0 && this.correct >= 4;
+      const raw = Math.min(200, Math.round(this.correct * 28 + (this.ehp <= 0 ? 32 : 0)));
       const awarded = await window.arcade.award(this.key, raw);
       U.snd(win ? 'complete' : 'incorrect');
       const lessons = [];
-      this.log.filter((l) => l.res !== 'best').forEach((l) => { const t = `<b>${U.esc(l.a.n)}</b>: ${U.esc(l.a.x)}`; if (!lessons.includes(t)) lessons.push(t); });
+      this.log.filter((l) => !l.ok).forEach((l) => {
+        const t = `<b>${U.esc(l.d.n)}</b>: ${U.esc(l.d.lesson)}`;
+        if (!lessons.includes(t)) lessons.push(t);
+      });
+      if (!lessons.length) lessons.push('¡Excelente criterio! Bloqueaste todos los engaños de El Estafador en Corporación Suiche 7B.');
       const root = window.arcade.root(this.key);
       root.innerHTML = window.arcade.headerHTML('🃏 Caza-Fraudes — Resultado') + window.arcade.resultHTML({
         emoji: this.ehp <= 0 ? '🏆' : win ? '🛡️' : '💥',
-        title: this.ehp <= 0 ? '¡Derrotaste al Estafador!' : win ? 'Resististe los ataques' : 'El Estafador ganó esta vez',
-        subtitle: `Defensas perfectas: ${this.correct} de ${this.log.length}.`,
-        stats: [['Escudo final', this.hp], ['Plan del Estafador', this.ehp], ['Defensas ideales', this.correct], ['Rondas', this.log.length]],
+        title: this.ehp <= 0 ? '¡Derrotaste por completo a El Estafador!' : win ? '¡Buen Duelo! Protegiste la empresa' : 'El Estafador te superó esta vez',
+        subtitle: `Acertaste ${this.correct} de ${this.log.length} rondas.`,
+        stats: [['Aciertos', `${this.correct}/${this.log.length}`], ['Tu Escudo', `${this.hp}%`], ['Estafador', `${this.ehp}%`], ['Puntaje', raw]],
         lessons: lessons.slice(0, 5), awarded, win, retryJs: 'arcade.games.arcade_cartas.open()'
       });
     }
