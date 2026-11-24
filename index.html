@@ -13,6 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
+  <link rel="stylesheet" href="style.css?v=3.6">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -383,6 +384,9 @@
                   <h3>7. Protección de Tarjetas y Clientes</h3>
                   <p>Gira una tarjeta bancaria en 3D (frente y reverso) y toca directamente sus partes para ocultar
                     números de tarjeta y códigos secretos en reportes, reclamos y correos.</p>
+                  <h3>7. Protección de Datos de Tarjetas</h3>
+                  <p>Gira una tarjeta de pago en 3D (frente y reverso) y toca directamente sus partes para ocultar
+                    números de tarjeta y códigos secretos en reportes de la red interbancaria y correos.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -492,29 +496,29 @@
             </div>
 
             <div class="modules-grid" id="arcade-cards-grid">
-              <!-- Propuesta A: Jornada Crítica -->
+              <!-- Propuesta A: Escudo de Red 3D -->
               <div class="game-card game-card-phase2" style="--accent-color: #38bdf8">
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
-                    <div class="game-icon-wrapper pulse-3d-icon">🏢</div>
-                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">OFICINA ISOMÉTRICA 3D ·
-                      RECOMENDADO</span>
+                    <div class="game-icon-wrapper pulse-3d-icon">🛡️</div>
+                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">ACCIÓN 3D · 75
+                      SEGUNDOS</span>
                   </div>
-                  <h3>A. Jornada Crítica: Un Día en Suiche 7B</h3>
-                  <p>Simulador de un día laboral completo (8:00 AM a 5:00 PM) en una oficina 3D interactiva. Elige tu
-                    departamento (Finanzas, RR.HH., Atención, Operaciones o Gerencia), atiende alertas simultáneas y
-                    evita consecuencias en cadena.</p>
+                  <h3>A. Escudo de Red 3D: Defiende el Suiche</h3>
+                  <p>Defiende el núcleo 3D de Corporación Suiche 7B en 3 oleadas rápidas sin esperas ni cuestionarios.
+                    Destruye con láser las amenazas (Falso Jefe, Factura .EXE, USB, QR trampa) y deja pasar las
+                    operaciones legítimas (Pago Móvil S7B, QR S7B, NFC S7B).</p>
                 </div>
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: #38bdf8">
-                      <span class="difficulty-dot"></span> Simulador 3D · +300 PTS Máx
+                      <span class="difficulty-dot"></span> Defensa 3D · +300 PTS Máx
                     </span>
                     <span id="status-arcade_jornada" class="game-status-badge status-pending">Disponible</span>
                   </div>
                   <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
                     onclick="app.startArcadeGame('arcade_jornada')">
-                    Jugar Jornada Crítica 3D
+                    Jugar Escudo de Red 3D
                   </button>
                 </div>
               </div>
@@ -584,6 +588,9 @@
                     escritorio
                     desordenado, llamada sospechosa y pago urgente) para descubrir el código de 5 dígitos y abrir la
                     puerta.</p>
+                  <p>Gira la bóveda de datos 3D de Corporación Suiche 7B y resuelve sus 5 candados interactivos (claves,
+                    correo falso, escritorio desordenado, llamada sospechosa y pago urgente) para descubrir el código de
+                    5 dígitos y abrir la puerta.</p>
                 </div>
                 <div>
                   <div class="game-meta">
@@ -1087,6 +1094,7 @@
           <div style="padding:1rem; background:rgba(0,0,0,0.35); border-top:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex; justify-content:space-between; font-size:0.78rem; margin-bottom:0.35rem;">
               <span style="color:var(--text-muted);">Riesgo de exponer información de Suiche 7B:</span>
+              <span style="color:var(--text-muted);">Riesgo de exponer información de Corporación Suiche 7B:</span>
               <strong id="ai-dlp-risk-value" style="color:#ef4444; font-family:var(--font-mono);">100% PELIGRO</strong>
             </div>
             <div style="height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
@@ -1166,6 +1174,7 @@
 
       <div class="sim3d-split-layout">
         <!-- Escenario 3D: Tarjeta Bancaria Rotable con Partes Tocables -->
+        <!-- Escenario 3D: Tarjeta Rotable con Partes Tocables -->
         <div class="sim3d-visualizer-box"
           style="padding:1.2rem; display:flex; flex-direction:column; align-items:center; justify-content:space-between;">
           <div
@@ -1194,6 +1203,9 @@
                   <span
                     style="font-size:0.65rem; padding:0.15rem 0.4rem; background:rgba(53,126,50,0.3); border:1px solid #4ade80; border-radius:4px; color:#bbf7d0;">TARJETA
                     CLIENTE</span>
+                  style="font-size:0.65rem; padding:0.15rem 0.4rem; background:rgba(53,126,50,0.3); border:1px solid
+                  #4ade80; border-radius:4px; color:#bbf7d0;">RED
+                  INTERBANCARIA</span>
                 </div>
                 <div class="card3d-chip-row" onclick="games.pci_dss.selectZone('chip')" style="cursor:pointer;"
                   title="Toca para inspeccionar el Chip y la Clave del Cajero">
@@ -1294,6 +1306,7 @@
             <div class="phone-3d-notch"></div>
             <div class="phone-3d-statusbar">
               <span>Suiche7B Móvil</span>
+              <span>Corporación Suiche 7B</span>
               <span id="qmfa-phone-time">11:48 PM</span>
               <span>🔋 94%</span>
             </div>
@@ -1490,6 +1503,7 @@
                   style="padding:0.4rem 0.75rem; font-size:0.76rem; flex:1;"
                   onclick="games.remote_vpn.toggleTunnelSwitch('aes')">
                   ⬜ Escudo 1: Encender VPN de Suiche 7B
+                  ⬜ Escudo 1: Encender VPN de Corporación Suiche 7B
                 </button>
                 <button type="button" class="btn btn-secondary" id="vpn-toggle-killswitch"
                   style="padding:0.4rem 0.75rem; font-size:0.76rem; flex:1;"
@@ -1808,12 +1822,12 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js?v=3.4"></script>
-  <script src="arcade-core.js?v=3.4"></script>
-  <script src="arcade-jornada.js?v=3.4"></script>
-  <script src="arcade-games.js?v=3.4"></script>
-  <script src="customizer.js?v=3.4"></script>
-  <script src="app.js?v=3.4"></script>
+  <script src="games.js?v=3.6"></script>
+  <script src="arcade-core.js?v=3.6"></script>
+  <script src="arcade-jornada.js?v=3.6"></script>
+  <script src="arcade-games.js?v=3.6"></script>
+  <script src="customizer.js?v=3.6"></script>
+  <script src="app.js?v=3.6"></script>
 </body>
 
 </html>

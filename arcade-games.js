@@ -18,6 +18,7 @@
     { type: 'phish', from: 'presidente.suiche7b@gmail.com', subj: 'Transferencia urgente y confidencial', prev: 'Haz el pago hoy a esta cuenta y no se lo comentes a nadie.', clue: 'Los directivos no ordenan pagos desde Gmail ni piden mantenerlo en secreto.' },
     { type: 'phish', from: 'premios@sorteo-empleados.xyz', subj: '¡Ganaste un bono de comida!', prev: 'Reclámalo hoy escaneando el código QR e ingresando tu usuario del trabajo.', clue: 'Los premios inesperados que piden tu clave son un engaño.' },
     { type: 'phish', from: 'auditoria.externa@revision-bancaria.org', subj: 'Envíe la nómina completa en 20 minutos', prev: 'Necesitamos cédulas, sueldos y cuentas de todo el personal de inmediato.', clue: 'Nadie legítimo pide datos de todo el personal por correo y con apuro.' },
+    { type: 'phish', from: 'auditoria.externa@revision-corporativa.org', subj: 'Envíe la nómina completa en 20 minutos', prev: 'Necesitamos cédulas, sueldos y cuentas de todo el personal de inmediato.', clue: 'Nadie legítimo pide datos de todo el personal por correo y con apuro.' },
     { type: 'phish', from: 'cobranzas@proveedor-oficina.com.ve', subj: 'Nueva cuenta bancaria para sus pagos', prev: 'Desde hoy deposite en la cuenta adjunta, a nombre de otra persona.', clue: 'Los cambios de cuenta se confirman llamando al teléfono guardado, nunca por el mismo correo.' },
     { type: 'phish', from: 'no-reply@seguridad-microsoft.info', subj: 'Inicio de sesión sospechoso: confirme su clave', prev: 'Alguien entró a su cuenta. Escriba su contraseña para protegerla.', clue: 'Ninguna empresa pide tu clave por correo; el dominio .info es raro.' },
     { type: 'phish', from: 'rrhh@suiche7b-ve.com', subj: 'Nuevo reglamento: descargue y firme', prev: 'Ejecute el archivo reglamento_2026.exe para firmar digitalmente.', clue: 'Un archivo .exe es un programa; un reglamento llegaría como PDF. Dominio falso.' },
@@ -25,23 +26,34 @@
     { type: 'phish', from: 'asistente.presidencia@outlook.com', subj: '¿Estás en tu escritorio? Necesito un favor', prev: 'Compra 5 tarjetas de regalo y envíame los códigos. Es una sorpresa.', clue: 'Pedir tarjetas de regalo y códigos es una estafa clásica de falso jefe.' },
     { type: 'phish', from: 'soporte@suiche7b.com.ve.verifica-cuenta.com', subj: 'Actualización de su buzón', prev: 'Inicie sesión para evitar la suspensión del buzón corporativo.', clue: 'El dominio real termina en ".verifica-cuenta.com", no en "suiche7b.com.ve".' },
     { type: 'phish', from: 'banco-seguro@notificacion-pagos.com', subj: 'Cuenta suspendida: ingrese su clave del cajero', prev: 'Para reactivar su cuenta escriba su clave de 4 dígitos.', clue: 'Ningún banco pide la clave del cajero por correo.' },
+    { type: 'phish', from: 'notificaciones@red-interbancaria-ve.com', subj: 'Acceso suspendido: ingrese su clave corporativa', prev: 'Para reactivar su acceso a los sistemas de la red escriba su contraseña.', clue: 'Dominio falso: Corporación Suiche 7B nunca pide contraseñas por correo.' },
     { type: 'phish', from: 'teletrabajo@suiche7b-vpn.net', subj: 'Instale esta nueva VPN hoy', prev: 'Descargue el programa desde este enlace para seguir trabajando desde casa.', clue: 'Los programas de la empresa los instala Tecnología, no se descargan de un correo.' },
     { type: 'phish', from: 'tesoreria@suiche7b.com.ve', subj: 'Aprobación urgente: ingrese sus datos', prev: 'Ingrese a http://pagos-urgentes.link/entrar para aprobar el pago de las 3 PM.', clue: 'Aunque el remitente parece oficial, el enlace es externo y sin candado (http).' },
     { type: 'phish', from: 'cliente.reclamos@gmail.com', subj: 'Fotos de mi reclamo', prev: 'Abra el adjunto fotos_reclamo.scr para ver mi tarjeta.', clue: 'La extensión .scr es un programa; las fotos son .jpg o .png.' },
+    { type: 'phish', from: 'finanzas@suiche7b.com.ve', subj: 'Aprobación urgente: ingrese sus datos', prev: 'Ingrese a http://pagos-urgentes.link/entrar para aprobar el pago de las 3 PM.', clue: 'Aunque el remitente parece oficial, el enlace es externo y sin candado (http).' },
+    { type: 'phish', from: 'soporte.aliado@gmail.com', subj: 'Capturas del caso Pago Móvil Interbancario', prev: 'Abra el adjunto captura_pagomovil.scr para ver el error.', clue: 'La extensión .scr es un programa; las imágenes reales son .jpg o .png.' },
     { type: 'phish', from: 'avisos@linkdin-mail.com', subj: 'Tienes 5 mensajes sin leer', prev: 'Inicia sesión aquí para verlos ahora.', clue: '"linkdin" está mal escrito: es un sitio imitador.' },
     // --- Seguros ---
     { type: 'safe', from: 'talento@suiche7b.com.ve', subj: 'Simulacro anual de evacuación', prev: 'Registra tu asistencia en https://portal.suiche7b.com.ve/simulacro', clue: 'Dominio oficial y enlace seguro (https) a la intranet.' },
+    { type: 'safe', from: 'capital.humano@suiche7b.com.ve', subj: 'Simulacro anual de evacuación', prev: 'Registra tu asistencia en https://portal.suiche7b.com.ve/simulacro', clue: 'Dominio oficial y enlace seguro (https) a la intranet.' },
     { type: 'safe', from: 'finanzas@suiche7b.com.ve', subj: 'Cierre mensual: reporte en PDF', prev: 'Adjunto el reporte del mes para la reunión del lunes.', clue: 'Remitente interno, adjunto normal y sin pedir claves ni pagos.' },
     { type: 'safe', from: 'seguridad@suiche7b.com.ve', subj: 'Recordatorio: cursos de la Academia CiberSegura', prev: 'Quedan módulos pendientes en la Academia. Ingresa desde tu panel de siempre.', clue: 'Comunicado interno sin enlaces raros ni urgencias.' },
     { type: 'safe', from: 'gerencia.operaciones@suiche7b.com.ve', subj: 'Agenda de la reunión del lunes 10:00', prev: 'Temas: indicadores del mes y plan de capacitación.', clue: 'Correo interno rutinario.' },
     { type: 'safe', from: 'soporte@suiche7b.com.ve', subj: 'Mantenimiento programado: viernes 6 PM', prev: 'Se reiniciarán los equipos. No se requiere ninguna acción ni clave.', clue: 'Informa sin pedir datos y viene del canal oficial.' },
     { type: 'safe', from: 'comunicaciones@suiche7b.com.ve', subj: 'Boletín interno de septiembre', prev: 'Resumen de logros del mes y cumpleaños del personal.', clue: 'Boletín interno habitual.' },
+    { type: 'safe', from: 'operaciones@suiche7b.com.ve', subj: 'Agenda de la reunión del lunes 10:00', prev: 'Temas: indicadores de la red interbancaria y servicio al cliente.', clue: 'Correo interno rutinario.' },
+    { type: 'safe', from: 'tecnologia@suiche7b.com.ve', subj: 'Mantenimiento programado: viernes 6 PM', prev: 'Se reiniciarán los equipos. No se requiere ninguna acción ni clave.', clue: 'Informa sin pedir datos y viene del canal oficial.' },
+    { type: 'safe', from: 'gestion.estrategica@suiche7b.com.ve', subj: 'Boletín interno ISO 9001:2015', prev: 'Resumen de logros del mes y avances de calidad de Corporación Suiche 7B.', clue: 'Boletín interno habitual.' },
     { type: 'safe', from: 'maria.perez@suiche7b.com.ve', subj: 'Minuta de la reunión de ayer', prev: 'Te dejo la minuta en Word para tus comentarios.', clue: 'Colega interna, adjunto esperado y tono normal.' },
     { type: 'safe', from: 'nomina@suiche7b.com.ve', subj: 'Tu recibo de pago ya está disponible', prev: 'Consúltalo en el portal de empleados al que accedes siempre.', clue: 'No pide clave ni trae enlaces extraños; remite al portal conocido.' },
+    { type: 'safe', from: 'nuevos.negocios@suiche7b.com.ve', subj: 'Presentación oficial de QR S7B y NFC S7B', prev: 'Consúltala en la carpeta compartida interna de siempre.', clue: 'No pide clave ni trae enlaces extraños; remite al portal conocido.' },
     { type: 'safe', from: 'cumplimiento@suiche7b.com.ve', subj: 'Recordatorio: declaración anual', prev: 'Actualiza tu declaración en la intranet antes del viernes.', clue: 'Recordatorio interno de un trámite habitual.' },
     { type: 'safe', from: 'tecnologia@suiche7b.com.ve', subj: 'Nueva versión del sistema de reportes', prev: 'Ya está disponible; no necesitas hacer nada.', clue: 'Aviso informativo sin acciones sospechosas.' },
     { type: 'safe', from: 'capacitacion@suiche7b.com.ve', subj: 'Taller de atención al cliente (martes)', prev: 'Confirma tu asistencia respondiendo este correo.', clue: 'Invitación interna normal.' },
     { type: 'safe', from: 'presidencia@suiche7b.com.ve', subj: 'Felicitaciones por el cierre del trimestre', prev: 'Gracias por el esfuerzo de todos los equipos.', clue: 'Mensaje de reconocimiento sin pedir nada.' },
+    { type: 'safe', from: 'auditoria.sistemas@suiche7b.com.ve', subj: 'Cronograma de revisión anual', prev: 'Ya está publicado en la intranet; no necesitas enviar claves.', clue: 'Aviso informativo sin acciones sospechosas.' },
+    { type: 'safe', from: 'capital.humano@suiche7b.com.ve', subj: 'Taller de atención a instituciones afiliadas (martes)', prev: 'Confirma tu asistencia respondiendo este correo.', clue: 'Invitación interna normal.' },
+    { type: 'safe', from: 'presidencia@suiche7b.com.ve', subj: 'Felicitaciones por el cierre del trimestre', prev: 'Gracias por el esfuerzo de todos los equipos de Corporación Suiche 7B.', clue: 'Mensaje de reconocimiento sin pedir nada.' },
     { type: 'safe', from: 'juan.rodriguez@suiche7b.com.ve', subj: '¿Almorzamos hoy?', prev: 'Te espero en la cafetería a las 12:00.', clue: 'Mensaje cotidiano entre compañeros.' },
     { type: 'safe', from: 'seguridad@suiche7b.com.ve', subj: 'Aviso: Seguridad nunca te pedirá tu clave', prev: 'Si alguien te la pide, repórtalo. Gracias por mantenerte alerta.', clue: 'Mensaje preventivo oficial, sin enlaces ni peticiones.' }
   ];
@@ -449,6 +461,7 @@
           <div class="arc-intro-text">
             <h2>Escapa abriendo la bóveda</h2>
             <p>La bóveda de datos de Suiche 7B tiene <strong>5 candados</strong>. Cada uno esconde un acertijo de ciberseguridad.
+            <p>La bóveda de datos de Corporación Suiche 7B tiene <strong>5 candados</strong>. Cada uno esconde un acertijo de ciberseguridad.
               Al resolverlo, el candado se enciende en verde en la bóveda 3D y te revela <strong>un dígito</strong>.
               Con los 5 dígitos abres la puerta.</p>
             <ul>
@@ -836,6 +849,7 @@
         emoji: win ? '🏆' : '⏰',
         title: win ? '¡Bóveda abierta!' : 'Se acabó el tiempo',
         subtitle: win ? 'Protegiste los datos de Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
+        subtitle: win ? 'Protegiste los datos de Corporación Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
         stats: [['Tiempo restante', mm], ['Errores', this.mistakes], ['Pistas usadas', this.hints], ['Candados', `${this.solved.filter(Boolean).length}/5`]],
         lessons: ['Usa claves largas y únicas con palabras, números y símbolos.', 'Revisa remitente, enlace y prisa antes de confiar en un correo.', 'Mantén el escritorio limpio y la pantalla bloqueada.', 'Ante una llamada sospechosa: no des datos, cuelga, anota y reporta.', 'Los pagos urgentes se verifican por otro canal y con doble firma.'],
         awarded, win, retryJs: 'arcade.games.arcade_boveda.open()'

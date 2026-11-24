@@ -20,7 +20,7 @@ const MODULE_LABELS = {
   quishing_mfa: '8. Quishing QR y Fatiga MFA (F2)',
   bec_fraud: '9. Fraude Ejecutivo BEC (F2)',
   remote_vpn: '10. Teletrabajo, VPN y Wi-Fi (F2)',
-  arcade_jornada: 'A. Jornada Crítica 3D (Arcade)',
+  arcade_jornada: 'A. Escudo de Red 3D: Defiende el Suiche (Arcade)',
   arcade_bandeja: 'B. Bandeja Blindada 3D (Arcade)',
   arcade_cartas: 'C. Caza-Fraudes Duelo Cartas (Arcade)',
   arcade_boveda: 'D. La Bóveda Digital 3D (Arcade)'
@@ -74,13 +74,18 @@ class AppController {
     this.audioCtx = null;
     this.adminUsers = [];
     this.leaderboardData = [
-      { dept: 'Dirección Tecnología', correctPercent: 94, totalScore: 1250, count: 12 },
       { dept: 'Gerencia Seguridad de la Información', correctPercent: 98, totalScore: 980, count: 6 },
+      { dept: 'Dirección Tecnología', correctPercent: 94, totalScore: 1250, count: 12 },
+      { dept: 'Oficial de Cumplimiento', correctPercent: 92, totalScore: 760, count: 6 },
+      { dept: 'Auditoría de Sistemas', correctPercent: 91, totalScore: 680, count: 4 },
+      { dept: 'Comité de Riesgos', correctPercent: 90, totalScore: 620, count: 5 },
       { dept: 'Gerencia Operaciones y Servicio al Cliente', correctPercent: 89, totalScore: 1420, count: 18 },
-      { dept: 'Oficial de Cumplimiento', correctPercent: 91, totalScore: 760, count: 6 },
-      { dept: 'Dirección Finanzas', correctPercent: 85, totalScore: 890, count: 9 },
-      { dept: 'Presidencia Ejecutiva', correctPercent: 84, totalScore: 720, count: 11 },
-      { dept: 'Gerencia Capital Humano', correctPercent: 82, totalScore: 640, count: 7 }
+      { dept: 'Dirección Finanzas', correctPercent: 86, totalScore: 890, count: 9 },
+      { dept: 'Dirección Desarrollo Nuevos Negocios', correctPercent: 85, totalScore: 710, count: 6 },
+      { dept: 'Presidencia Ejecutiva', correctPercent: 85, totalScore: 720, count: 8 },
+      { dept: 'Gerencia Gestión Estratégica', correctPercent: 84, totalScore: 670, count: 5 },
+      { dept: 'Gerencia Capital Humano', correctPercent: 83, totalScore: 640, count: 7 },
+      { dept: 'Junta Directiva', correctPercent: 88, totalScore: 540, count: 5 }
     ];
   }
 
@@ -672,7 +677,7 @@ class AppController {
         resultBox.innerHTML = `
           <div style="padding:0.6rem; border-radius:6px; background:rgba(53,126,50,0.18); border:1px solid var(--accent-green); color:#bbf7d0;">
             ✅ <strong>Certificado Válido:</strong> ${c.certificate_code}<br>
-            👤 <strong>Colaborador:</strong> ${c.full_name} (${c.department || 'Suiche 7B'})<br>
+            👤 <strong>Colaborador:</strong> ${c.full_name} (${c.department || 'Corporación Suiche 7B'})<br>
             🏅 <strong>Nivel:</strong> ${phaseLabel} | <strong>Puntaje:</strong> ${c.score_at_issue} PTS | <strong>Fecha:</strong> ${new Date(c.issued_at).toLocaleDateString('es-VE')}
           </div>
         `;
@@ -1140,8 +1145,8 @@ class AppController {
   }
 
   getSecurityLevel(score) {
-    if (score >= 1000) return 'Maestro CiberSeguro Suiche 7B (Élite F1+F2)';
-    if (score >= 600) return 'Centinela de La Corporación Suiche 7B';
+    if (score >= 1000) return 'Maestro CiberSeguro Corporación Suiche 7B (Élite F1+F2)';
+    if (score >= 600) return 'Centinela de Corporación Suiche 7B';
     if (score >= 380) return 'Guardián de Datos Transaccionales';
     if (score >= 220) return 'Analista de Defensa';
     if (score >= 100) return 'Operador Alerta';

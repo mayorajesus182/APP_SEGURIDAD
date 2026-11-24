@@ -1,280 +1,54 @@
 /**
- * ARCADE A — "Jornada Crítica: Un Día en Suiche 7B"
- * Simulación 3D isométrica (Mini3D) de una jornada laboral completa (8:00-17:00) con eventos al azar,
- * decisiones bajo presión, consecuencias en cadena y reporte final del CISO.
+ * ARCADE A — "Escudo de Red 3D: Defiende el Suiche"
+ * Juego de acción 3D en tiempo real (Mini3D) para Corporación Suiche 7B.
+ * 3 oleadas rápidas (75 s total), sin tiempos muertos ni cuestionarios largos:
+ * - Haz clic sobre las amenazas 3D para destruirlas con láser antes de que golpeen el núcleo.
+ * - Deja pasar las operaciones legítimas de la red interbancaria (Pago Móvil S7B, QR S7B, NFC S7B, etc.).
+ * - Cada 5 bloqueos seguidos carga el Pulso de Seguridad (limpia todas las amenazas en pantalla).
  */
 (function () {
   'use strict';
   const { U, Mini3D } = window.arcade;
 
-  const SPOTS = {
-    pc: { label: 'Tu computadora', icon: '💻', pos: [0, 2.7, 0] },
-    phone: { label: 'Teléfono de escritorio', icon: '☎️', pos: [1.25, 2.2, 0.25] },
-    recepcion: { label: 'Recepción', icon: '🛎️', pos: [-4, 3.1, 3] },
-    usb: { label: 'Pasillo', icon: '🔌', pos: [4.2, 1.3, 3.2] },
-    cafe: { label: 'Cafetería', icon: '☕', pos: [-5.5, 3.4, -3.4] },
-    printer: { label: 'Impresora', icon: '🖨️', pos: [4.5, 2.6, -3.5] }
-  };
-
-  const ROLES = {
-    finanzas: '💼 Finanzas',
-    rrhh: '🧑‍💼 Capital Humano',
-    atencion: '🎧 Atención al Cliente',
-    operaciones: '⚙️ Operaciones',
-    gerencia: '🏛️ Gerencia'
-  };
-
-  // Banco de eventos (lenguaje cotidiano, sin tecnicismos). ok = única respuesta correcta.
-  const EVENTS = [
-    {
-      id: 'e_phish', spot: 'pc', role: ['todos'], dmg: 20, then: 'c_cred',
-      title: 'Correo: "Tu cuenta se bloqueará en 2 horas"',
-      text: 'Te llega un correo de "soporte-ti@suiche7b-ve.com" que dice: "Verifica tu contraseña en este enlace o perderás el acceso hoy mismo".',
-      opts: [
-        { t: 'No tocar el enlace y reportar el correo a Seguridad de la Información', ok: true },
-        { t: 'Entrar al enlace y escribir mi clave rápido para no perder el acceso', fb: 'Entregaste tu clave a un estafador. El dominio "suiche7b-ve.com" no es el de la empresa.' },
-        { t: 'Responder el correo preguntando si es verdad', fb: 'Responder confirma al estafador que tu correo está activo y lo anima a insistir.' }
-      ],
-      lesson: 'Los mensajes con apuro y amenaza ("hoy mismo") son una señal de fraude. Nunca escribas tu clave desde un enlace de correo.'
-    },
-    {
-      id: 'e_usb', spot: 'usb', role: ['todos'], dmg: 20, then: 'c_virus',
-      title: 'Una memoria USB tirada en el pasillo',
-      text: 'Encuentras una memoria USB con una etiqueta que dice "Sueldos 2026". No hay nadie cerca.',
-      opts: [
-        { t: 'Entregarla a Seguridad de la Información sin conectarla a ninguna computadora', ok: true },
-        { t: 'Conectarla a mi computadora para ver de quién es', fb: 'Muchas memorias "perdidas" instalan virus apenas se conectan. Es una trampa muy común.' },
-        { t: 'Guardarla en mi gaveta para revisarla después', fb: 'Quedarte con ella solo retrasa el problema: alguien podría conectarla por curiosidad.' }
-      ],
-      lesson: 'Un dispositivo desconocido nunca se conecta. Se entrega a Seguridad para que lo revisen en un entorno aislado.'
-    },
-    {
-      id: 'e_code', spot: 'phone', role: ['todos'], dmg: 20, then: 'c_cod',
-      title: 'Llamada de "Soporte Técnico"',
-      text: 'Una voz amable dice: "Soy de Soporte Técnico. Te llegó un código por mensaje de texto; léemelo para actualizar tu perfil".',
-      opts: [
-        { t: 'Colgar sin dar el código y avisar a Seguridad de la Información', ok: true },
-        { t: 'Leerle el código; suena muy profesional', fb: 'Ese código es la llave de tu cuenta. Quien lo recibe puede entrar como si fuera tú.' },
-        { t: 'Darle solo la mitad de los números', fb: 'Con la mitad ya hacen intentos y presión. Nunca se comparte ni parcialmente.' }
-      ],
-      lesson: 'Soporte legítimo jamás pide códigos ni claves por teléfono o chat. Cuelga y reporta.'
-    },
-    {
-      id: 'e_visit', spot: 'recepcion', role: ['todos'], dmg: 18,
-      title: 'Visitante con chaleco de "mantenimiento"',
-      text: 'Una persona sin cita dice que viene "a revisar las computadoras de todos los pisos" y pide pasar rápido porque está atrasada.',
-      opts: [
-        { t: 'Pedirle que espere y confirmar con Seguridad o con quien lo contrató', ok: true },
-        { t: 'Dejarlo pasar; trae chaleco y parece de confianza', fb: 'El uniforme se compra fácil. Muchos intrusos físicos entran así.' },
-        { t: 'Acompañarlo yo mismo sin preguntar nada', fb: 'Acompañar no sustituye verificar. Igual tendría acceso a equipos y documentos.' }
-      ],
-      lesson: 'Toda visita se valida antes de entrar, aunque tenga prisa o uniforme.'
-    },
-    {
-      id: 'e_qr', spot: 'cafe', role: ['todos'], dmg: 15,
-      title: 'Cartel con código QR en la cafetería',
-      text: 'Hay un cartel pegado en la pared: "Escanea y gana un bono de comida. Solo para empleados". No lo conoces.',
-      opts: [
-        { t: 'No escanearlo y avisar a Seguridad para que retiren el cartel', ok: true },
-        { t: 'Escanearlo con mi celular solo para ver qué es', fb: 'Un QR falso lleva a páginas que roban claves o instalan programas dañinos.' },
-        { t: 'Escanearlo y poner mi usuario del trabajo para cobrar el bono', fb: 'Entregaste tu usuario y clave del trabajo a una página falsa.' }
-      ],
-      lesson: 'Un QR pegado por desconocidos es como un enlace sospechoso: no se escanea.'
-    },
-    {
-      id: 'e_print', spot: 'printer', role: ['todos'], dmg: 12,
-      title: 'Documentos con datos de personal en la impresora',
-      text: 'Alguien dejó impresas varias hojas con cédulas y sueldos en la bandeja. Nadie las reclama.',
-      opts: [
-        { t: 'Recogerlas, llevarlas a su dueño o triturarlas, y avisar al área responsable', ok: true },
-        { t: 'Dejarlas ahí; ya volverá su dueño', fb: 'Cualquier persona que pase puede leerlas o fotografiarlas.' },
-        { t: 'Leerlas y comentarlas con compañeros', fb: 'Divulgar datos de personal es una falta grave de confidencialidad.' }
-      ],
-      lesson: 'Escritorio limpio: lo impreso con datos personales no se abandona; se resguarda o se tritura.'
-    },
-    {
-      id: 'e_legit', spot: 'pc', role: ['todos'], dmg: 6, legit: true,
-      title: 'Correo de Capital Humano: simulacro de evacuación',
-      text: 'Llega un correo desde la dirección oficial de Capital Humano invitando a registrar tu asistencia en el portal interno de la empresa (dirección segura, la de siempre).',
-      opts: [
-        { t: 'Registrar mi asistencia entrando por el portal interno que ya conozco', ok: true },
-        { t: 'Marcarlo como fraude y borrarlo; todo correo es sospechoso', fb: 'Desconfiar de todo también es un error: este correo era legítimo y perdiste un trámite.' },
-        { t: 'Ignorarlo porque seguro lo atiende otro', fb: 'La participación era obligatoria y quedaste sin registrar.' }
-      ],
-      lesson: 'No todo es un ataque. Revisa remitente y enlace; si todo coincide con lo oficial, actúa con normalidad.'
-    },
-    {
-      id: 'e_pass', spot: 'pc', role: ['todos'], dmg: 15,
-      title: 'Un compañero te pide tu clave',
-      text: 'Un compañero te escribe por chat: "Se me olvidó mi clave y tengo un reporte urgente. Pásame la tuya solo por hoy".',
-      opts: [
-        { t: 'No compartir mi clave y orientarlo para que pida el restablecimiento a Soporte', ok: true },
-        { t: 'Dársela solo por hoy; es de confianza', fb: 'Todo lo que se haga con tu clave queda a tu nombre. Las claves son personales.' },
-        { t: 'Prestarle mi computadora con mi sesión abierta', fb: 'Es lo mismo que darle tu clave: todo quedará registrado como si lo hubieras hecho tú.' }
-      ],
-      lesson: 'Tu clave es personal e intransferible, aunque sea un colega de confianza.'
-    },
-    {
-      id: 'e_update', spot: 'pc', role: ['todos'], dmg: 8, legit: true,
-      title: 'Aviso oficial de Soporte: reinicio por actualización',
-      text: 'Soporte TI (contacto conocido, extensión interna) avisa que hay una actualización programada y pide reiniciar la computadora al terminar el día.',
-      opts: [
-        { t: 'Guardar mi trabajo y reiniciar al final del día como indican', ok: true },
-        { t: 'Desactivar el antivirus para que sea más rápido', fb: 'Apagar la protección te deja vulnerable justo durante la actualización.' },
-        { t: 'Ignorarlo durante semanas', fb: 'Las actualizaciones corrigen fallas de seguridad; posponerlas indefinidamente es un riesgo.' }
-      ],
-      lesson: 'Las actualizaciones oficiales protegen. Verifica que vengan del canal conocido y cúmplelas.'
-    },
-    {
-      id: 'e_ceo', spot: 'pc', role: ['finanzas', 'gerencia', 'operaciones'], dmg: 25, then: 'c_pago',
-      title: 'El "Presidente" pide un pago urgente y secreto',
-      text: 'Son las 4:40 PM del viernes. Un correo desde un @gmail dice ser del Presidente: "Transfiere hoy este anticipo a esta cuenta nueva y no se lo comentes a nadie".',
-      opts: [
-        { t: 'No pagar; confirmar por teléfono interno y exigir las firmas de autorización', ok: true },
-        { t: 'Hacer la transferencia rápido por miedo a que se moleste', fb: 'Perdiste dinero de la empresa: es el clásico "fraude del falso jefe".' },
-        { t: 'Responder al @gmail preguntando a nombre de quién va', fb: 'Hablas con el estafador; solo lo ayudas a convencerte.' }
-      ],
-      lesson: 'Pagos urgentes y "secretos" siempre se verifican por otro canal y con doble firma.'
-    },
-    {
-      id: 'e_vendor', spot: 'pc', role: ['finanzas', 'operaciones'], dmg: 25, then: 'c_pago',
-      title: 'Proveedor cambia su cuenta bancaria',
-      text: 'Un proveedor habitual envía un PDF: "Cambiamos de banco; deposite la factura de este mes en esta nueva cuenta a nombre de otra persona".',
-      opts: [
-        { t: 'Llamar al teléfono que ya teníamos guardado del proveedor antes de cambiar nada', ok: true },
-        { t: 'Cambiar la cuenta en el sistema y pagar', fb: 'El pago salió a la cuenta del estafador; difícil de recuperar.' },
-        { t: 'Llamar al número de celular que viene dentro de la carta', fb: 'Ese número es del estafador, que te confirmó la mentira.' }
-      ],
-      lesson: 'Los cambios de cuenta se confirman llamando al contacto original, nunca al dato que viene en el mismo mensaje.'
-    },
-    {
-      id: 'e_cvv', spot: 'phone', role: ['finanzas', 'atencion'], dmg: 15,
-      title: 'Cliente quiere dictar los 3 números de atrás de su tarjeta',
-      text: 'Un cliente llama por un reclamo y empieza a leerte los 16 dígitos y el código de 3 números del reverso para que los anotes.',
-      opts: [
-        { t: 'Detenerlo amablemente: no anotar ni pedir el código de atrás ni la clave del cajero', ok: true },
-        { t: 'Anotarlos todos en el expediente por si hacen falta', fb: 'Guardar esos datos expone al cliente y a la empresa; está prohibido.' },
-        { t: 'Pedirle que envíe una foto de la tarjeta por correo', fb: 'La foto de ambos lados de la tarjeta es justo lo que buscan los delincuentes.' }
-      ],
-      lesson: 'Jamás se anotan ni se piden el código de atrás (CVV) ni la clave (PIN) de una tarjeta.'
-    },
-    {
-      id: 'e_audit', spot: 'pc', role: ['rrhh', 'finanzas'], dmg: 22,
-      title: '"Auditores externos" piden la nómina completa',
-      text: 'Un correo de "auditoria.externa@revision-bancaria.org" exige el Excel con cédulas, sueldos y cuentas de todo el personal en 20 minutos.',
-      opts: [
-        { t: 'Negarme y reportar el correo a Seguridad de la Información y a Cumplimiento', ok: true },
-        { t: 'Enviar el archivo para salir del paso', fb: 'Entregaste la identidad y datos bancarios de todo el personal.' },
-        { t: 'Enviar solo la mitad de la lista', fb: 'Igual filtraste datos privados a un desconocido.' }
-      ],
-      lesson: 'Los datos de personal solo se entregan por canales formales y a quien está autorizado, nunca por presión.'
-    },
-    {
-      id: 'e_cv', spot: 'pc', role: ['rrhh'], dmg: 18, then: 'c_virus',
-      title: 'Un "candidato" envía su currículo en un archivo extraño',
-      text: 'Llega un correo con el archivo "curriculo_final.exe" y el mensaje "Ábralo, es mi hoja de vida".',
-      opts: [
-        { t: 'No abrirlo; pedir el currículo en PDF por el canal oficial y avisar a Seguridad', ok: true },
-        { t: 'Abrirlo; es parte de mi trabajo revisar currículos', fb: 'Los archivos .exe son programas: abrirlo pudo infectar tu equipo.' },
-        { t: 'Reenviarlo a mi correo personal para abrirlo en casa', fb: 'Llevaste el riesgo a tu casa y sacaste información de la empresa.' }
-      ],
-      lesson: 'Un currículo es un PDF o documento; un archivo ejecutable (.exe, .zip dudoso) nunca se abre.'
-    },
-    {
-      id: 'e_family', spot: 'phone', role: ['rrhh'], dmg: 15,
-      title: 'Llamada: "Soy el esposo de una empleada"',
-      text: 'Un hombre pregunta por la dirección y el sueldo de una compañera "porque es una emergencia familiar".',
-      opts: [
-        { t: 'No dar datos personales; ofrecer pasar el mensaje y que ella lo llame', ok: true },
-        { t: 'Darle la dirección, parece una emergencia real', fb: 'Podría ser alguien peligroso; los datos personales no se dan por teléfono.' },
-        { t: 'Darle solo el sueldo pero no la dirección', fb: 'El sueldo también es confidencial.' }
-      ],
-      lesson: 'Los datos personales de empleados son confidenciales; se ofrece contactarla, no se entregan.'
-    },
-    {
-      id: 'e_chat', spot: 'pc', role: ['atencion'], dmg: 18,
-      title: 'Chat: "Dime el saldo de la cuenta de mi mamá"',
-      text: 'Un cliente escribe pidiendo saldo y últimos movimientos de una cuenta de otra persona: "Es mi mamá, está enferma y no puede llamar".',
-      opts: [
-        { t: 'Explicar que solo el titular puede consultar y ofrecer el procedimiento formal', ok: true },
-        { t: 'Dar el saldo; parece buena persona', fb: 'Compartiste información financiera de un tercero sin autorización.' },
-        { t: 'Dar los movimientos pero no el saldo', fb: 'Cualquier dato de la cuenta es confidencial.' }
-      ],
-      lesson: 'La identidad del titular se verifica siempre; la compasión no reemplaza al procedimiento.'
-    },
-    {
-      id: 'e_gift', spot: 'recepcion', role: ['operaciones', 'gerencia'], dmg: 18,
-      title: 'Mensajero deja un "regalo" para el gerente',
-      text: 'Un mensajero entrega una caja con una memoria USB promocional y una nota: "Cortesía de un proveedor; el gerente debe conectarla hoy".',
-      opts: [
-        { t: 'No entregarla al gerente para conectarla; llevarla a Seguridad para revisión', ok: true },
-        { t: 'Dejarla en el escritorio del gerente tal cual', fb: 'Si la conecta por cortesía, puede infectar toda la red.' },
-        { t: 'Conectarla yo antes para verificar que funciona', fb: 'Tú habrías activado el programa dañino.' }
-      ],
-      lesson: 'Los "regalos" con dispositivos se revisan en Seguridad, nunca se conectan por cortesía.'
-    },
-    {
-      id: 'e_wifi', spot: 'cafe', role: ['gerencia', 'operaciones', 'atencion'], dmg: 14,
-      title: 'Wi-Fi gratis en un viaje de trabajo',
-      text: 'Estás en una cafetería por trabajo y ves "WiFi_Gratis_Sin_Clave". Necesitas enviar un archivo de la empresa.',
-      opts: [
-        { t: 'Usar los datos de mi celular con la VPN de la empresa y no el Wi-Fi abierto', ok: true },
-        { t: 'Conectarme al Wi-Fi gratis; es más rápido', fb: 'En redes abiertas pueden espiar lo que envías.' },
-        { t: 'Pedirle la computadora prestada a otra persona del café', fb: 'Dejaste tus datos en un equipo ajeno.' }
-      ],
-      lesson: 'Fuera de la oficina, usa datos móviles y VPN; evita redes abiertas.'
-    }
+  const THREATS = [
+    { e: '🎭', t: 'Falso Jefe @gmail', why: 'Presidencia Ejecutiva nunca ordena pagos urgentes desde Gmail.' },
+    { e: '📎', t: 'Factura .EXE', why: 'Una factura legítima jamás es un programa ejecutable (.exe).' },
+    { e: '🔌', t: 'USB del Pasillo', why: 'Las memorias USB desconocidas pueden contener virus automáticos.' },
+    { e: '🔳', t: 'QR Trampa "Bono"', why: 'Los códigos QR con premios falsos roban contraseñas corporativas.' },
+    { e: '☎️', t: 'Falso Soporte SMS', why: 'Tecnología jamás pide códigos de verificación por teléfono.' },
+    { e: '🏦', t: 'Cambio Cuenta PDF', why: 'Todo cambio de cuenta de proveedor se valida por teléfono conocido.' },
+    { e: '📡', t: 'Wi-Fi Gratis Café', why: 'Las redes abiertas permiten espiar archivos y contraseñas.' },
+    { e: '🌙', t: '7 Avisos 11:48 PM', why: 'Si no iniciaste sesión, rechaza siempre los avisos nocturnos.' },
+    { e: '📝', t: 'Clave en Post-it', why: 'Las contraseñas nunca se anotan en notas adhesivas visibles.' },
+    { e: '📊', t: 'Nómina a Externo', why: 'Los datos de nómina jamás se envían a correos externos desconocidos.' },
+    { e: '🤖', t: 'Sueldos en ChatGPT', why: 'Nunca pegues cédulas, sueldos ni datos privados en IA pública.' },
+    { e: '💳', t: 'Foto Reverso CVV', why: 'Los 3 números del reverso (CVV) nunca se piden ni se guardan.' },
+    { e: '🔗', t: 'suiche7b-ve.com', why: 'Dominio clonado: el oficial es @suiche7b.com.ve.' },
+    { e: '🦺', t: 'Visita Sin Carnet', why: 'Toda persona externa debe validarse antes de ingresar.' }
   ];
 
-  // Consecuencias en cadena (aparecen más tarde si fallaste el evento original)
-  const CONSEQUENCES = {
-    c_cred: {
-      id: 'c_cred', spot: 'pc', dmg: 25, urgent: true,
-      title: '⚠️ Consecuencia: alguien entró a tu cuenta',
-      text: 'Por el correo falso de hoy, el sistema avisa que tu cuenta se abrió desde otro país. Un colega nota correos extraños enviados a tu nombre.',
-      opts: [
-        { t: 'Avisar de inmediato a Seguridad y cambiar mi clave', ok: true },
-        { t: 'Esperar a ver si se arregla solo', fb: 'Cada minuto que pasa el atacante avanza más.' },
-        { t: 'Borrar los correos raros para que nadie se entere', fb: 'Borrar pruebas dificulta la investigación y empeora el daño.' }
-      ],
-      lesson: 'Reportar rápido reduce el daño: es lo más valioso que puedes hacer tras un error.'
-    },
-    c_virus: {
-      id: 'c_virus', spot: 'pc', dmg: 25, urgent: true,
-      title: '⚠️ Consecuencia: tu computadora muestra un mensaje de rescate',
-      text: 'Tu computadora está muy lenta y aparece un mensaje: "Tus archivos fueron secuestrados. Paga para recuperarlos".',
-      opts: [
-        { t: 'Desconectar el cable de red o Wi-Fi y llamar de inmediato a Seguridad', ok: true },
-        { t: 'Pagar para recuperar los archivos', fb: 'Pagar financia al delincuente y no garantiza nada.' },
-        { t: 'Apagarla y no decirle a nadie', fb: 'El virus pudo extenderse a la red; callar lo agrava.' }
-      ],
-      lesson: 'Ante un virus: aislar el equipo de la red y avisar al instante.'
-    },
-    c_cod: {
-      id: 'c_cod', spot: 'phone', dmg: 22, urgent: true,
-      title: '⚠️ Consecuencia: mensajes raros salen desde tu cuenta',
-      text: 'Compañeros avisan que desde tu cuenta de mensajería se piden transferencias de dinero. Alguien tomó el control con el código que entregaste.',
-      opts: [
-        { t: 'Avisar a mis contactos y a Seguridad, y recuperar el control de mi cuenta', ok: true },
-        { t: 'No decir nada; tal vez se corte solo', fb: 'Seguirán pidiendo dinero con tu identidad.' },
-        { t: 'Reenviar el mensaje a mi grupo para preguntar', fb: 'Propagaste el problema.' }
-      ],
-      lesson: 'Cuando tu cuenta es tomada, avisar rápido a todos protege a tus compañeros.'
-    },
-    c_pago: {
-      id: 'c_pago', spot: 'phone', dmg: 30, urgent: true,
-      title: '⚠️ Consecuencia: el banco llama por una transferencia sospechosa',
-      text: 'El banco informa de una transferencia grande saliente de la empresa hacia una cuenta desconocida, hecha a raíz del pedido falso.',
-      opts: [
-        { t: 'Pedir detener la operación y reportar de inmediato a Tesorería y Seguridad con todos los detalles', ok: true },
-        { t: 'Decir que fue una operación normal', fb: 'Autorizaste un pago fraudulento por segunda vez.' },
-        { t: 'No contestar la llamada para evitar problemas', fb: 'Se perdió la única ventana de tiempo para frenar el dinero.' }
-      ],
-      lesson: 'En fraudes de pago, las primeras horas son clave: el banco puede frenar o recuperar fondos.'
-    }
-  };
+  const LEGITS = [
+    { e: '📱', t: 'Pago Móvil S7B', why: 'Operación legítima de Pago Móvil Interbancario.' },
+    { e: '📲', t: 'Código QR S7B', why: 'Transacción oficial con estándar QR S7B.' },
+    { e: '📶', t: 'Pago NFC S7B', why: 'Operación oficial sin contacto NFC S7B.' },
+    { e: '🤝', t: 'Conciliación Aliado', why: 'Reporte oficial por canal validado con banco aliado.' },
+    { e: '📧', t: 'Capital Humano', why: 'Comunicado interno oficial desde @suiche7b.com.ve.' },
+    { e: '🔒', t: 'Pantalla Win + L', why: 'Buena práctica: bloquear el equipo al levantarse.' },
+    { e: '🛡️', t: 'VPN Corporativa', why: 'Conexión cifrada oficial de Corporación Suiche 7B.' },
+    { e: '💳', t: '4509 12** **** 4421', why: 'Número de tarjeta enmascarado correctamente en reportes.' },
+    { e: '📋', t: 'Boletín ISO 9001', why: 'Comunicación oficial de Gerencia Gestión Estratégica.' },
+    { e: '📞', t: 'Extensión Interna', why: 'Verificación telefónica por canal oficial interno.' }
+  ];
 
-  class JornadaGame {
+  const WAVES = [
+    { name: 'Oleada 1 · Mañana Activa', start: 0, spawn: 2.35, speed: 0.72, threatChance: 0.62 },
+    { name: 'Oleada 2 · Hora Pico Interbancaria', start: 25, spawn: 1.75, speed: 0.96, threatChance: 0.68 },
+    { name: 'Oleada 3 · ¡Ataque Coordinado!', start: 50, spawn: 1.32, speed: 1.18, threatChance: 0.74 }
+  ];
+
+  const TOTAL_TIME = 75;
+
+  class EscudoRedGame {
     constructor() {
       this.running = false;
       this.raf = null;
@@ -285,218 +59,176 @@
       this.running = false;
       if (this.raf) cancelAnimationFrame(this.raf);
       this.raf = null;
-      this._clean && this._clean();
-      this._clean = null;
+      if (this._key) document.removeEventListener('keydown', this._key);
+      this._key = null;
     }
 
     open() {
       this.stop();
       const root = window.arcade.root(this.key);
       if (!root) return;
-      const dept = (window.app && window.app.state && window.app.state.user.department || '').toLowerCase();
-      const guess = dept.includes('finanz') ? 'finanzas' : dept.includes('humano') ? 'rrhh'
-        : (dept.includes('cliente') || dept.includes('servicio')) ? 'atencion'
-          : (dept.includes('presidencia') || dept.includes('gerencia')) ? 'gerencia' : 'operaciones';
       const best = window.arcade.getBest(this.key);
       root.innerHTML = `
-        ${window.arcade.headerHTML('🏢 Jornada Crítica: Un Día en Suiche 7B', best ? `Mejor puntaje: <strong>${best}</strong>` : '')}
+        ${window.arcade.headerHTML('🛡️ Escudo de Red 3D: Defiende el Suiche', best ? `Mejor puntaje: <strong>${best}</strong>` : '')}
         <div class="arc-intro">
           <div class="arc-intro-text">
-            <h2>Sobrevive a una jornada completa de oficina</h2>
-            <p>Son las <strong>8:00 AM</strong>. Durante el día aparecerán situaciones en distintos puntos de la oficina 3D
-              (<strong>❗ marcadores rojos</strong>). Haz clic en cada una, decide qué hacer y protege el <strong>Escudo de la Empresa</strong>.
-              Algunas decisiones tienen <strong>consecuencias más tarde</strong>… y no todo es un ataque.</p>
+            <h2>Protege el núcleo de Corporación Suiche 7B en 75 segundos</h2>
+            <p>Hacia el núcleo 3D viajan operaciones y amenazas. <strong>Sin esperas ni cuestionarios largos</strong>:
+              demuestra tus reflejos y criterio en 3 oleadas rápidas.</p>
             <ul>
-              <li>⏱️ El reloj corre solo mientras no estás decidiendo. Si dejas pasar una situación, cuenta como error.</li>
-              <li>🛡️ Si el escudo llega a 0, la jornada termina en una brecha.</li>
-              <li>📋 Al final recibes el <strong>Informe del CISO</strong> con tu línea de tiempo.</li>
+              <li>🎯 <strong>Haz clic sobre las amenazas</strong> (rojas/sospechosas) para destruirlas con el láser antes de que toquen el núcleo.</li>
+              <li>✅ <strong>Deja pasar las operaciones legítimas</strong> (Pago Móvil S7B, QR S7B, NFC S7B, correos oficiales) para sumar puntos y recargar escudo.</li>
+              <li>⚡ <strong>Pulso de Seguridad:</strong> bloquea 5 amenazas seguidas para cargar un pulso que limpia la pantalla (clic o barra espaciadora).</li>
             </ul>
-            <h4>¿En qué área trabajas hoy?</h4>
-            <div class="arc-role-grid" id="jor-roles">
-              ${Object.keys(ROLES).map((k) => `<button class="btn ${k === guess ? 'btn-primary' : 'btn-secondary'}" data-role="${k}">${ROLES[k]}</button>`).join('')}
-            </div>
+            <button class="btn btn-primary" id="esc-go" style="padding:0.85rem 1.8rem; font-size:0.95rem;">
+              ▶ Iniciar Defensa 3D (75 seg)
+            </button>
           </div>
-          <div class="arc-intro-visual"><canvas id="jor-preview" width="520" height="340"></canvas></div>
+          <div class="arc-intro-visual"><canvas id="esc-preview" width="520" height="340"></canvas></div>
         </div>`;
-      const roleBtns = root.querySelectorAll('#jor-roles button');
-      roleBtns.forEach((b) => b.addEventListener('click', () => this.start(b.getAttribute('data-role'))));
+      U.$('esc-go').addEventListener('click', () => this.start());
       this._previewLoop();
     }
 
     _previewLoop() {
-      const c = U.$('jor-preview');
+      const c = U.$('esc-preview');
       if (!c) return;
-      const eng = new Mini3D(c, { scale: 34, cy: 0.6 });
+      const eng = new Mini3D(c, { scale: 42, persp: 28, pitch: 0.56, yaw: 0, cy: 0.54 });
+      this.running = true;
       let t = 0;
       const loop = () => {
-        const cv = U.$('jor-preview');
-        if (!cv) return;
-        t += 0.016;
-        eng.yaw = Math.PI / 4 + Math.sin(t * 0.6) * 0.18;
+        const cv = U.$('esc-preview');
+        if (!cv || !this.running) return;
+        t += 0.02;
+        eng.yaw = t * 0.45;
         eng.clear();
-        this._buildScene(eng, { t, pending: {}, shield: 100 });
-        eng.ctx.clearRect(0, 0, cv.width, cv.height);
-        this._bg(eng.ctx, cv, 120);
+        this._buildCore(eng, t, 100);
+        // Cápsulas de muestra orbitando
+        for (let i = 0; i < 4; i++) {
+          const a = t * 0.8 + (i * Math.PI) / 2;
+          const isT = i % 2 === 0;
+          const x = Math.cos(a) * 3.8, z = Math.sin(a) * 3.8;
+          eng.addBox(x, 0.35 + 0.15 * Math.sin(t * 4 + i), z, 0.8, 0.8, 0.8, isT ? '#ef4444' : '#22c55e', null, { emissive: 0.25 });
+        }
+        this._bg(eng.ctx, cv, t, 100);
         eng.render();
         this.raf = requestAnimationFrame(loop);
       };
-      this.running = true;
       loop();
     }
 
-    _bg(ctx, cv, clock) {
-      const f = U.clamp(clock / 540, 0, 1);
-      const warm = Math.sin(f * Math.PI);
-      const g = ctx.createLinearGradient(0, 0, 0, cv.height);
-      g.addColorStop(0, `rgb(${Math.round(18 + 22 * (1 - warm))},${Math.round(30 + 18 * warm)},${Math.round(58 + 20 * warm)})`);
-      g.addColorStop(1, '#0a1020');
+    _bg(ctx, cv, t, shield) {
+      const g = ctx.createRadialGradient(cv.width / 2, cv.height * 0.54, 30, cv.width / 2, cv.height * 0.54, cv.width * 0.65);
+      g.addColorStop(0, shield < 35 ? '#2b1020' : '#0f2242');
+      g.addColorStop(1, '#060a14');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, cv.width, cv.height);
+      // Anillos de radar en el plano
+      ctx.save();
+      ctx.strokeStyle = 'rgba(56,189,248,0.12)';
+      ctx.lineWidth = 1;
+      [110, 210, 320].forEach((r) => {
+        ctx.beginPath();
+        ctx.ellipse(cv.width / 2, cv.height * 0.55, r, r * 0.52, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.restore();
     }
 
-    // ---------------- Escena 3D de la oficina ----------------
-    _figure(e, x, z, shirt, skin, id) {
-      e.addBox(x, 0, z, 0.55, 0.9, 0.35, '#2b3550', id);
-      e.addBox(x, 0.9, z, 0.7, 0.85, 0.42, shirt, id);
-      e.addBox(x, 1.75, z, 0.45, 0.45, 0.45, skin, id);
-    }
-
-    _buildScene(e, s) {
-      const L = { layer: -2 };
-      for (let i = -3; i < 3; i++) {
-        for (let j = -3; j < 2; j++) {
-          e.addBox(i * 2 + 1, -0.1, j * 2 + 1, 2, 0.1, 2, (i + j) % 2 === 0 ? '#3b4a68' : '#33415c', null, L);
-        }
+    _buildCore(e, t, shield) {
+      // Plataforma base octogonal
+      const baseCol = shield > 60 ? '#1e3a5f' : shield > 30 ? '#5c4314' : '#5c1824';
+      e.addBox(0, -0.35, 0, 2.5, 0.35, 2.5, baseCol, null, { layer: -2 });
+      // Núcleo 3D rotando
+      const a = t * 1.1;
+      const c = Math.cos(a), s = Math.sin(a);
+      const xf = (v) => [v[0] * c - v[2] * s, v[1], v[0] * s + v[2] * c];
+      const nf = (n) => [n[0] * c - n[2] * s, n[1], n[0] * s + n[2] * c];
+      const coreCol = shield > 60 ? '#0ea5e9' : shield > 30 ? '#fbba0a' : '#ef4444';
+      const yBob = 0.25 + 0.14 * Math.sin(t * 3);
+      e.addBox(0, yBob, 0, 1.35, 1.35, 1.35, coreCol, 'core', { xf, nf, emissive: 0.28, layer: 1 });
+      // Anillo dorado superior
+      const a2 = -t * 1.6;
+      const c2 = Math.cos(a2), s2 = Math.sin(a2);
+      const xf2 = (v) => [v[0] * c2 - v[2] * s2, v[1], v[0] * s2 + v[2] * c2];
+      const nf2 = (n) => [n[0] * c2 - n[2] * s2, n[1], n[0] * s2 + n[2] * c2];
+      e.addBox(0, yBob + 0.55, 0, 2.1, 0.16, 0.22, '#fbba0a', null, { xf: xf2, nf: nf2, emissive: 0.35, layer: 2 });
+      e.addBox(0, yBob + 0.55, 0, 0.22, 0.16, 2.1, '#b60e80', null, { xf: xf2, nf: nf2, emissive: 0.35, layer: 2 });
+      // 4 nodos orbitales (Pago Móvil, QR, NFC, Cajeros)
+      for (let i = 0; i < 4; i++) {
+        const oa = t * 0.9 + (i * Math.PI) / 2;
+        e.addBox(Math.cos(oa) * 1.9, 0.15, Math.sin(oa) * 1.9, 0.34, 0.34, 0.34, '#38bdf8', null, { emissive: 0.3, layer: 0 });
       }
-      const W = { layer: -1 };
-      e.addBox(-6.15, 0, -1, 0.3, 4.2, 10.4, '#566684', null, W);
-      e.addBox(0, 0, -5.15, 12.6, 4.2, 0.3, '#4b5a78', null, W);
-      // Ventanas
-      e.addBox(-5.95, 1.8, 0.5, 0.1, 1.5, 2.2, '#7dd3fc', null, { layer: -0.5, emissive: 0.15 });
-      e.addBox(-1.5, 1.8, -4.95, 2.4, 1.5, 0.1, '#7dd3fc', null, { layer: -0.5, emissive: 0.15 });
-      // Puerta
-      e.addBox(3.6, 0, -4.9, 1.6, 3.1, 0.2, '#8a5a3a', null, { layer: -0.5 });
-      e.addBox(4.2, 1.4, -4.78, 0.12, 0.12, 0.12, '#fde047', null, { layer: -0.4 });
-
-      // Escritorio principal
-      const D = (x, z, w, d) => e.addBox(x, 0, z, w, 1, d, '#6b4f3a');
-      D(-1.4, -0.65, 0.12, 0.12); D(1.4, -0.65, 0.12, 0.12); D(-1.4, 0.65, 0.12, 0.12); D(1.4, 0.65, 0.12, 0.12);
-      e.addBox(0, 1, 0, 3.2, 0.14, 1.7, '#8a6a4d');
-      // Monitor (PC)
-      const pcHot = s.pending.pc;
-      e.addBox(-0.3, 1.14, -0.1, 0.35, 0.25, 0.35, '#1f2937', 'pc');
-      e.addBox(-0.3, 1.39, -0.1, 1.35, 0.85, 0.1, pcHot ? '#60a5fa' : '#1e293b', 'pc', { emissive: pcHot ? 0.3 + 0.2 * Math.sin(s.t * 6) : 0 });
-      e.addBox(-0.3, 1.14, 0.45, 0.9, 0.06, 0.32, '#475569', 'pc');
-      // Teléfono
-      e.addBox(1.2, 1.14, 0.3, 0.55, 0.22, 0.5, '#111827', 'phone', { emissive: s.pending.phone ? 0.3 + 0.3 * Math.sin(s.t * 12) : 0 });
-      // Silla y empleado
-      e.addBox(0, 0.5, -1.35, 0.9, 0.12, 0.9, '#334155');
-      e.addBox(0, 0, -1.35, 0.14, 0.5, 0.14, '#1f2937');
-      this._figure(e, 0, -1.35, '#2563eb', '#e8b98d');
-
-      // Recepción
-      e.addBox(-4, 0, 3, 2.6, 1.1, 1, '#7c5a43', 'recepcion');
-      e.addBox(-4, 1.1, 3, 2.7, 0.1, 1.1, '#a7794f', 'recepcion');
-      e.addBox(-3.4, 1.2, 3, 0.35, 0.3, 0.3, '#fde047', 'recepcion', { emissive: s.pending.recepcion ? 0.3 : 0 });
-      if (s.pending.recepcion) this._figure(e, -4, 1.7, '#f59e0b', '#c68a5c', 'recepcion');
-
-      // USB en el suelo
-      e.addBox(4.2, 0, 3.2, 0.5, 0.1, 0.25, s.pending.usb ? '#ef4444' : '#94a3b8', 'usb', { emissive: s.pending.usb ? 0.4 : 0 });
-      e.addBox(4.5, 0.1, 3.2, 0.14, 0.07, 0.14, '#e5e7eb', 'usb');
-
-      // Cafetería + cartel QR
-      e.addBox(-4.8, 0, -3.4, 1.4, 1, 1.4, '#6b7280');
-      e.addBox(-4.8, 1, -3.4, 1.5, 0.1, 1.5, '#9ca3af');
-      e.addBox(-4.7, 1.1, -3.3, 0.4, 0.4, 0.4, '#fafafa');
-      e.addBox(-5.95, 1.6, -3.4, 0.1, 1.4, 1.2, '#f8fafc', 'cafe', { emissive: s.pending.cafe ? 0.25 : 0 });
-      e.addBox(-5.88, 1.9, -3.4, 0.05, 0.7, 0.7, '#0f172a', 'cafe');
-
-      // Impresora y papeles
-      e.addBox(4.5, 0, -3.5, 1.3, 1, 1.1, '#9ca3af', 'printer');
-      e.addBox(4.5, 1, -3.5, 1.1, 0.25, 0.9, '#d1d5db', 'printer');
-      e.addBox(4.5, 1.25, -3.5, 0.7, 0.08, 0.5, s.pending.printer ? '#fef08a' : '#ffffff', 'printer', { emissive: s.pending.printer ? 0.3 : 0 });
-
-      // Planta decorativa
-      e.addBox(-1.8, 0, 4, 0.5, 0.5, 0.5, '#7c4a2d');
-      e.addBox(-1.8, 0.5, 4, 0.8, 0.9, 0.8, '#16a34a');
     }
 
-    // ---------------- Lógica de la partida ----------------
-    start(role) {
-      const root = window.arcade.root(this.key);
+    start() {
       this.stop();
-      this.role = role;
-      // Selección de eventos: los del rol + completar con los generales
-      const roleSpecific = U.shuffle(EVENTS.filter((e) => e.role.includes(role) && !e.role.includes('todos')));
-      const general = U.shuffle(EVENTS.filter((e) => e.role.includes('todos')));
-      const base = roleSpecific.slice(0, 4);
-      const chosen = U.shuffle([...base, ...general.slice(0, 10 - base.length)]);
-      this.queue = chosen.map((ev, i) => ({ ev, at: 18 + i * 46 + U.rnd(-6, 6) })).sort((a, b) => a.at - b.at);
-      this.pending = [];
-      this.log = [];
-      this.clock = 0;
-      this.shield = 100;
-      this.correct = 0;
-      this.wrong = 0;
-      this.missed = 0;
-      this.flash = 0;
-      this.state = 'running';
-      this.current = null;
+      this.elapsed = 0;
       this.t = 0;
-      this.lastTick = 0;
+      this.shield = 100;
+      this.score = 0;
+      this.blocked = 0;
+      this.legitPassed = 0;
+      this.friendlyFire = 0;
+      this.leaked = 0;
+      this.streak = 0;
+      this.bestStreak = 0;
+      this.empCharge = 0;
+      this.empUsed = 0;
+      this.spawnTimer = 0.4;
+      this.nextId = 1;
+      this.packets = [];
+      this.lasers = [];
+      this.particles = [];
+      this.floaters = [];
+      this.empWave = 0;
+      this.flash = 0;
+      this.shake = 0;
+      this.mistakes = [];
+      this.waveIdx = 0;
+      this.ended = false;
+      this.dragYaw = 0;
 
+      const root = window.arcade.root(this.key);
       root.innerHTML = `
-        ${window.arcade.headerHTML(`🏢 Jornada Crítica — ${ROLES[role]}`, '<span id="jor-clock" class="arc-clock">08:00</span>')}
-        <div class="arc-jornada">
-          <div class="arc-stage">
-            <canvas id="jor-canvas" width="900" height="560"></canvas>
-            <div class="arc-stage-hint">🖱️ Haz clic en los marcadores <strong>❗</strong> de la oficina 3D · Arrastra sobre la escena para girar un poco la cámara</div>
-          </div>
-          <div class="arc-side">
-            <div class="arc-hud">
-              <div class="arc-hud-row"><span>🛡️ Escudo de la Empresa</span><strong id="jor-shield-txt">100%</strong></div>
-              <div class="arc-bar"><div id="jor-shield" class="arc-bar-fill" style="width:100%"></div></div>
-              <div class="arc-hud-mini">
-                <span>✅ <b id="jor-ok">0</b></span><span>❌ <b id="jor-bad">0</b></span><span>⏱️ <b id="jor-miss">0</b></span>
-              </div>
-              <div class="arc-bar thin"><div id="jor-day" class="arc-bar-fill day" style="width:0%"></div></div>
+        ${window.arcade.headerHTML('🛡️ Escudo de Red 3D: Defiende el Suiche', '<span id="esc-time" class="arc-clock">01:15</span>')}
+        <div class="esc-wrap">
+          <div class="esc-hud">
+            <div class="esc-hud-item">
+              <span>🛡️ Núcleo</span>
+              <div class="arc-bar" style="width:120px; margin:0;"><div id="esc-shield" class="arc-bar-fill" style="width:100%"></div></div>
+              <strong id="esc-shield-t">100%</strong>
             </div>
-            <div id="jor-pending" class="arc-pending"></div>
-            <div id="jor-event" class="arc-event"><div class="arc-event-empty">Todo tranquilo… por ahora. Cuando algo ocurra, aparecerá un <strong>❗</strong> en la oficina.</div></div>
+            <div class="esc-hud-item"><span id="esc-wave" class="esc-wave-pill">Oleada 1 · Mañana Activa</span></div>
+            <div class="esc-hud-item"><span>⭐ <b id="esc-score">0</b></span><span>🔥 Racha <b id="esc-streak">0</b></span><span>🚫 <b id="esc-blk">0</b></span></div>
+            <button type="button" id="esc-emp" class="btn btn-secondary esc-emp-btn" disabled>⚡ Pulso (0/5)</button>
+          </div>
+          <div class="arc-stage esc-stage">
+            <canvas id="esc-canvas" width="920" height="520"></canvas>
+            <div id="esc-toast" class="esc-toast">🎯 Haz clic en las cápsulas de <b>AMENAZA</b> para destruirlas · Deja pasar las operaciones <b>LEGÍTIMAS</b></div>
           </div>
         </div>`;
 
-      const canvas = U.$('jor-canvas');
-      this.engine = new Mini3D(canvas, { scale: 46, cy: 0.62 });
-      this._drag = 0;
-      this._dragStart = null;
-      const onDown = (ev) => {
-        const p = Mini3D.canvasPoint(canvas, ev);
-        this._dragStart = { x: p.x, yaw: this._drag, moved: false, p };
+      const cv = U.$('esc-canvas');
+      this.engine = new Mini3D(cv, { scale: 44, persp: 30, pitch: 0.56, yaw: 0, cy: 0.55 });
+      U.$('esc-emp').addEventListener('click', () => this.fireEmp());
+
+      this._key = (e) => {
+        if (!this.running || this.ended) return;
+        if (e.code === 'Space') { e.preventDefault(); this.fireEmp(); }
       };
-      const onMove = (ev) => {
-        if (!this._dragStart) return;
-        const p = Mini3D.canvasPoint(canvas, ev);
-        if (Math.abs(p.x - this._dragStart.x) > 4) this._dragStart.moved = true;
-        this._drag = U.clamp(this._dragStart.yaw + (p.x - this._dragStart.x) * 0.004, -0.35, 0.35);
-      };
-      const onUp = (ev) => {
-        const st = this._dragStart;
-        this._dragStart = null;
-        if (st && !st.moved) {
-          const id = this.engine.pick(st.p.x, st.p.y);
-          if (id) this.clickSpot(id);
-        }
-      };
-      canvas.addEventListener('pointerdown', onDown);
-      canvas.addEventListener('pointermove', onMove);
-      canvas.addEventListener('pointerup', onUp);
-      canvas.addEventListener('pointerleave', () => { this._dragStart = null; });
+      document.addEventListener('keydown', this._key);
+
+      cv.addEventListener('pointerdown', (ev) => {
+        if (!this.running || this.ended) return;
+        const p = Mini3D.canvasPoint(cv, ev);
+        this.handleClick(p.x, p.y);
+      });
 
       this.running = true;
       this.lastTs = performance.now();
       const loop = (ts) => {
-        if (!this.running || !U.$('jor-canvas')) return;
+        if (!this.running || !U.$('esc-canvas')) return;
         const dt = Math.min(0.1, (ts - this.lastTs) / 1000);
         this.lastTs = ts;
         this.tick(dt);
@@ -506,238 +238,321 @@
       this.raf = requestAnimationFrame(loop);
     }
 
-    pendingSpots() {
-      const m = {};
-      this.pending.forEach((p) => { m[p.ev.spot] = p; });
-      return m;
+    spawnPacket() {
+      const w = WAVES[this.waveIdx] || WAVES[2];
+      const isThreat = Math.random() < w.threatChance;
+      const item = U.pick(isThreat ? THREATS : LEGITS);
+      // Elegir un ángulo que no se monte encima de otro paquete recién creado
+      let angle = U.rnd(0, Math.PI * 2);
+      for (let tries = 0; tries < 6; tries++) {
+        const clash = this.packets.some((p) => p.dist > 5.2 && Math.abs(Math.atan2(Math.sin(p.angle - angle), Math.cos(p.angle - angle))) < 0.65);
+        if (!clash) break;
+        angle = U.rnd(0, Math.PI * 2);
+      }
+      this.packets.push({
+        id: this.nextId++,
+        isThreat,
+        e: item.e,
+        t: item.t,
+        why: item.why,
+        angle,
+        dist: 7.4,
+        speed: w.speed * U.rnd(0.92, 1.12),
+        spin: U.rnd(0, Math.PI * 2),
+        sx: 0,
+        sy: 0
+      });
+    }
+
+    handleClick(px, py) {
+      // Buscar la cápsula más cercana al clic (radio amplio para clic cómodo en la cápsula o su etiqueta)
+      let hit = null, bestD = 58;
+      for (const pk of this.packets) {
+        const d = Math.hypot(px - pk.sx, py - pk.sy);
+        const dLbl = Math.hypot(px - pk.sx, py - (pk.sy + 24));
+        const minD = Math.min(d, dLbl);
+        if (minD < bestD) { bestD = minD; hit = pk; }
+      }
+      if (!hit) return;
+
+      const coreP = this.engine.project([0, 0.9, 0]);
+      this.lasers.push({ x1: coreP.x, y1: coreP.y, x2: hit.sx, y2: hit.sy, col: hit.isThreat ? '#38bdf8' : '#f59e0b', life: 0.25 });
+      this.packets = this.packets.filter((x) => x !== hit);
+
+      if (hit.isThreat) {
+        this.blocked++;
+        this.streak++;
+        this.bestStreak = Math.max(this.bestStreak, this.streak);
+        this.empCharge = Math.min(5, this.empCharge + 1);
+        const mult = Math.min(3, 1 + Math.floor(this.streak / 4));
+        const pts = 15 * mult;
+        this.score += pts;
+        this.burst(hit.sx, hit.sy, '#38bdf8', 18);
+        this.floaters.push({ x: hit.sx, y: hit.sy - 10, text: `+${pts}${mult > 1 ? ` x${mult}` : ''}`, col: '#4ade80', life: 0.95 });
+        U.snd('correct');
+        this.toast(`✅ Bloqueaste "${hit.t}": ${hit.why}`, 'ok');
+      } else {
+        this.friendlyFire++;
+        this.streak = 0;
+        this.score = Math.max(0, this.score - 5);
+        this.burst(hit.sx, hit.sy, '#fbba0a', 12);
+        this.floaters.push({ x: hit.sx, y: hit.sy - 10, text: '¡Era legítimo! -5', col: '#fbba0a', life: 1.1 });
+        U.snd('incorrect');
+        this.toast(`⚠️ ¡Era legítimo! "${hit.t}" debía pasar: ${hit.why}`, 'warn');
+        this.mistakes.push(`No bloquees <b>${U.esc(hit.t)}</b>: ${U.esc(hit.why)}`);
+      }
+      this.updateHud();
+    }
+
+    fireEmp() {
+      if (!this.running || this.ended || this.empCharge < 5) return;
+      this.empCharge = 0;
+      this.empUsed++;
+      this.empWave = 1;
+      U.snd('complete');
+      let cleared = 0;
+      const keep = [];
+      for (const pk of this.packets) {
+        if (pk.isThreat) {
+          cleared++;
+          this.blocked++;
+          this.score += 15;
+          this.burst(pk.sx, pk.sy, '#fbba0a', 20);
+          this.floaters.push({ x: pk.sx, y: pk.sy, text: '⚡ +15', col: '#fde047', life: 1 });
+        } else {
+          keep.push(pk);
+        }
+      }
+      this.packets = keep;
+      this.toast(`⚡ ¡Pulso de Seguridad activado! ${cleared} amenazas neutralizadas sin afectar el tráfico legítimo.`, 'ok');
+      this.updateHud();
+    }
+
+    burst(x, y, col, n) {
+      for (let i = 0; i < n; i++) {
+        const a = U.rnd(0, Math.PI * 2), sp = U.rnd(60, 220);
+        this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col, life: U.rnd(0.35, 0.75) });
+      }
+    }
+
+    toast(msg, kind) {
+      const el = U.$('esc-toast');
+      if (el) { el.className = `esc-toast ${kind || ''}`; el.textContent = msg; }
     }
 
     tick(dt) {
+      if (this.ended) return;
       this.t += dt;
-      this.flash = Math.max(0, this.flash - dt * 1.5);
-      if (this.state !== 'running') return;
-      this.clock += dt * 2; // 1 s real = 2 min de la jornada (9 h ≈ 4 min 30 s)
-      // Aparición de eventos
-      while (this.queue.length && this.queue[0].at <= this.clock) {
-        const spotsBusy = this.pendingSpots();
-        const next = this.queue[0];
-        if (this.pending.length >= 3 || spotsBusy[next.ev.spot]) {
-          next.at = this.clock + 6; // se difiere un poco si la oficina está saturada
-          this.queue.sort((a, b) => a.at - b.at);
-          break;
-        }
-        this.queue.shift();
-        this.spawn(next.ev);
+      this.elapsed += dt;
+      this.flash = Math.max(0, this.flash - dt * 2.2);
+      this.shake = Math.max(0, this.shake - dt * 3);
+      this.empWave = Math.max(0, this.empWave - dt * 1.4);
+
+      // Cambio de oleada
+      const newWave = this.elapsed >= 50 ? 2 : this.elapsed >= 25 ? 1 : 0;
+      if (newWave !== this.waveIdx) {
+        this.waveIdx = newWave;
+        U.snd('incident_alert');
+        this.toast(`🚀 ¡${WAVES[newWave].name}! Mantente alerta.`, 'warn');
+        const wEl = U.$('esc-wave');
+        if (wEl) wEl.textContent = WAVES[newWave].name;
       }
-      // Vencimientos
-      for (const p of [...this.pending]) {
-        if (this.clock >= p.deadline && this.current !== p) this.expire(p);
+
+      // Generación de cápsulas
+      this.spawnTimer -= dt;
+      if (this.spawnTimer <= 0 && this.packets.length < 7) {
+        this.spawnPacket();
+        this.spawnTimer = WAVES[this.waveIdx].spawn * U.rnd(0.85, 1.15);
       }
-      if (this.clock >= 540) this.finish(false);
-    }
 
-    spawn(ev) {
-      const life = ev.urgent ? 55 : 75;
-      this.pending.push({ ev, born: this.clock, deadline: this.clock + life, life });
-      U.snd('incident_alert');
-      this.updatePending(true);
-    }
-
-    expire(p) {
-      this.pending = this.pending.filter((x) => x !== p);
-      this.missed++;
-      const dmg = Math.round(p.ev.dmg * 0.8);
-      this.hit(dmg);
-      this.log.push({ time: U.fmtClock(this.clock), title: p.ev.title, res: 'expired', lesson: p.ev.lesson, dmg });
-      U.snd('incorrect');
-      this.toast(`⏱️ Dejaste pasar: "${p.ev.title}" (−${dmg}%)`);
-      this.updateHud();
-      this.updatePending(true);
-      if (this.shield <= 0) this.finish(true);
-    }
-
-    hit(d) {
-      this.shield = Math.max(0, this.shield - d);
-      this.flash = 1;
-    }
-
-    toast(msg) {
-      const box = U.$('jor-event');
-      if (box && this.state === 'running' && !this.current) {
-        box.innerHTML = `<div class="arc-event-empty warn">${U.esc(msg)}</div>`;
-      }
-    }
-
-    clickSpot(id) {
-      if (this.state !== 'running') return;
-      const p = this.pending.find((x) => x.ev.spot === id);
-      if (p) this.openEvent(p);
-    }
-
-    openEvent(p) {
-      this.state = 'deciding';
-      this.current = p;
-      U.snd('click');
-      const ev = p.ev;
-      const opts = window.shuffleOptions ? window.shuffleOptions(ev.opts.map((o) => ({ ...o, isCorrect: !!o.ok }))) : U.shuffle(ev.opts);
-      this.curOpts = opts;
-      const box = U.$('jor-event');
-      box.innerHTML = `
-        <div class="jor-ev-tag">${SPOTS[ev.spot].icon} ${SPOTS[ev.spot].label} · ${U.fmtClock(this.clock)}${ev.urgent ? ' · <b class="urg">URGENTE</b>' : ''}</div>
-        <h3>${U.esc(ev.title)}</h3>
-        <p>${U.esc(ev.text)}</p>
-        <div class="jor-opts">
-          ${opts.map((o, i) => `<button class="jor-opt" data-i="${i}"><span class="jor-opt-l">${U.LETTERS[i]}</span><span>${U.esc(o.t)}</span></button>`).join('')}
-        </div>
-        <div class="arc-paused">⏸️ El reloj está en pausa mientras decides</div>`;
-      box.querySelectorAll('.jor-opt').forEach((b) => b.addEventListener('click', () => this.choose(parseInt(b.getAttribute('data-i'), 10))));
-    }
-
-    choose(i) {
-      if (this.state !== 'deciding' || !this.current) return;
-      const p = this.current;
-      const ev = p.ev;
-      const o = this.curOpts[i];
-      const ok = !!(o && (o.ok || o.isCorrect));
-      this.pending = this.pending.filter((x) => x !== p);
-      let fb;
-      if (ok) {
-        this.correct++;
-        this.shield = Math.min(100, this.shield + 2);
-        U.snd('correct');
-        fb = `<div class="jor-fb ok"><b>✅ ¡Buena decisión!</b><p>${U.esc(ev.lesson)}</p></div>`;
-        this.log.push({ time: U.fmtClock(this.clock), title: ev.title, res: 'ok', lesson: ev.lesson, dmg: 0 });
-      } else {
-        this.wrong++;
-        this.hit(ev.dmg);
-        U.snd('incorrect');
-        const bad = ev.opts.find((x) => x.t === o.t);
-        fb = `<div class="jor-fb bad"><b>❌ Decisión riesgosa (−${ev.dmg}% de escudo)</b><p>${U.esc((bad && bad.fb) || 'Esa opción pone en riesgo a la empresa.')}</p><p><b>Lo correcto:</b> ${U.esc(ev.opts.find((x) => x.ok).t)}</p><p>${U.esc(ev.lesson)}</p></div>`;
-        this.log.push({ time: U.fmtClock(this.clock), title: ev.title, res: 'bad', lesson: ev.lesson, dmg: ev.dmg });
-        if (ev.then && CONSEQUENCES[ev.then] && this.clock < 455) {
-          this.queue.push({ ev: CONSEQUENCES[ev.then], at: this.clock + U.rnd(40, 70) });
-          this.queue.sort((a, b) => a.at - b.at);
+      // Movimiento hacia el núcleo
+      for (const pk of [...this.packets]) {
+        pk.dist -= pk.speed * dt;
+        pk.spin += dt * 2.2;
+        if (pk.dist <= 1.25) {
+          this.packets = this.packets.filter((x) => x !== pk);
+          const cp = this.engine.project([0, 0.8, 0]);
+          if (pk.isThreat) {
+            this.leaked++;
+            this.streak = 0;
+            this.shield = Math.max(0, this.shield - 16);
+            this.flash = 1;
+            this.shake = 1;
+            this.burst(cp.x, cp.y, '#ef4444', 22);
+            this.floaters.push({ x: cp.x, y: cp.y - 25, text: `💥 -16% (${pk.t})`, col: '#f87171', life: 1.3 });
+            U.snd('incorrect');
+            this.toast(`🚨 Impacto de "${pk.t}": ${pk.why}`, 'bad');
+            this.mistakes.push(`<b>${U.esc(pk.t)}</b>: ${U.esc(pk.why)}`);
+            if (this.shield <= 0) { this.finish(false); return; }
+          } else {
+            this.legitPassed++;
+            this.score += 12;
+            this.shield = Math.min(100, this.shield + 2);
+            this.burst(cp.x, cp.y, '#22c55e', 10);
+            this.floaters.push({ x: cp.x, y: cp.y - 20, text: `✅ +12`, col: '#86efac', life: 0.85 });
+          }
+          this.updateHud();
         }
       }
-      const box = U.$('jor-event');
-      box.innerHTML = fb + '<button class="btn btn-primary" id="jor-continue" style="width:100%; margin-top:0.8rem;">Continuar la jornada →</button>';
-      U.$('jor-continue').addEventListener('click', () => this.resume());
-      this.updateHud();
-      this.updatePending(true);
-    }
 
-    resume() {
-      U.snd('click');
-      this.current = null;
-      if (this.shield <= 0) { this.finish(true); return; }
-      this.state = 'running';
-      const box = U.$('jor-event');
-      if (box) box.innerHTML = '<div class="arc-event-empty">Sigue el día… vigila los marcadores <strong>❗</strong>.</div>';
-      this.updatePending(true);
+      this.lasers.forEach((l) => { l.life -= dt; });
+      this.lasers = this.lasers.filter((l) => l.life > 0);
+      this.particles.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; });
+      this.particles = this.particles.filter((p) => p.life > 0);
+      this.floaters.forEach((f) => { f.y -= 32 * dt; f.life -= dt; });
+      this.floaters = this.floaters.filter((f) => f.life > 0);
+
+      if (this.elapsed >= TOTAL_TIME) this.finish(true);
     }
 
     updateHud() {
       const s = Math.round(this.shield);
-      const bar = U.$('jor-shield');
-      if (bar) {
-        bar.style.width = `${s}%`;
-        bar.style.background = s > 60 ? '#22c55e' : s > 30 ? '#f59e0b' : '#ef4444';
-      }
+      const bar = U.$('esc-shield');
+      if (bar) { bar.style.width = `${s}%`; bar.style.background = s > 60 ? '#22c55e' : s > 30 ? '#f59e0b' : '#ef4444'; }
       const set = (id, v) => { const el = U.$(id); if (el) el.textContent = v; };
-      set('jor-shield-txt', `${s}%`);
-      set('jor-ok', this.correct);
-      set('jor-bad', this.wrong);
-      set('jor-miss', this.missed);
-    }
-
-    updatePending(force) {
-      const now = performance.now();
-      if (!force && now - (this._lastPend || 0) < 400) return;
-      this._lastPend = now;
-      const el = U.$('jor-pending');
-      if (!el) return;
-      if (!this.pending.length) { el.innerHTML = '<span class="arc-pend-none">Sin situaciones pendientes</span>'; return; }
-      el.innerHTML = this.pending.map((p, i) => {
-        const left = Math.max(0, Math.round((p.deadline - this.clock) / 2));
-        return `<button class="arc-pend ${left < 12 ? 'urgent' : ''}" data-i="${i}">${SPOTS[p.ev.spot].icon} ${SPOTS[p.ev.spot].label} <span>⏱ ${left}s</span></button>`;
-      }).join('');
-      el.querySelectorAll('.arc-pend').forEach((b) => b.addEventListener('click', () => {
-        const p = this.pending[parseInt(b.getAttribute('data-i'), 10)];
-        if (p && this.state === 'running') this.openEvent(p);
-      }));
+      set('esc-shield-t', `${s}%`);
+      set('esc-score', this.score);
+      set('esc-streak', this.streak);
+      set('esc-blk', this.blocked);
+      const emp = U.$('esc-emp');
+      if (emp) {
+        const ready = this.empCharge >= 5;
+        emp.disabled = !ready;
+        emp.textContent = ready ? '⚡ ¡LANZAR PULSO!' : `⚡ Pulso (${this.empCharge}/5)`;
+        emp.className = `btn ${ready ? 'btn-primary esc-emp-ready' : 'btn-secondary'} esc-emp-btn`;
+      }
     }
 
     draw() {
-      const e = this.engine;
-      const cv = e.canvas;
-      e.yaw = Math.PI / 4 + this._drag + Math.sin(this.t * 0.4) * 0.04;
+      const e = this.engine, cv = e.canvas, ctx = e.ctx;
+      e.yaw = Math.sin(this.t * 0.25) * 0.14;
       e.clear();
-      const pendMap = this.pendingSpots();
-      this._buildScene(e, { t: this.t, pending: pendMap, shield: this.shield });
-      this.pending.forEach((p) => {
-        const sp = SPOTS[p.ev.spot];
-        const ratio = (p.deadline - this.clock) / p.life;
-        e.addSprite(sp.pos[0], sp.pos[1] + 0.15 * Math.sin(this.t * 4), sp.pos[2], {
-          id: p.ev.spot, text: p.ev.urgent ? '‼' : '!', r: 16, pulse: this.t * 7, ring: ratio,
-          ringColor: ratio < 0.3 ? '#ef4444' : '#fbba0a', label: sp.label,
-          bg: p.ev.urgent ? 'rgba(220,38,38,0.95)' : 'rgba(234,88,12,0.95)'
-        });
-      });
-      const ctx = e.ctx;
+      this._buildCore(e, this.t, this.shield);
+
+      // Agregar cápsulas 3D
+      for (const pk of this.packets) {
+        const x = Math.cos(pk.angle) * pk.dist;
+        const z = Math.sin(pk.angle) * pk.dist;
+        const y = 0.45 + 0.12 * Math.sin(this.t * 5 + pk.id);
+        const c = Math.cos(pk.spin), s = Math.sin(pk.spin);
+        const xf = (v) => {
+          const dx = v[0] - x, dz = v[2] - z;
+          return [x + dx * c - dz * s, v[1], z + dx * s + dz * c];
+        };
+        const nf = (n) => [n[0] * c - n[2] * s, n[1], n[0] * s + n[2] * c];
+        // Todas las cápsulas usan el mismo color holográfico neutro para que el jugador decida por el contenido
+        e.addBox(x, y, z, 0.78, 0.78, 0.78, '#1d4ed8', `pk_${pk.id}`, { xf, nf, emissive: 0.25, layer: 2 });
+        const pr = e.project([x, y + 0.4, z]);
+        pk.sx = pr.x;
+        pk.sy = pr.y;
+      }
+
+      ctx.save();
+      if (this.shake > 0) {
+        ctx.translate(U.rnd(-6, 6) * this.shake, U.rnd(-4, 4) * this.shake);
+      }
       ctx.clearRect(0, 0, cv.width, cv.height);
-      this._bg(ctx, cv, this.clock);
+      this._bg(ctx, cv, this.t, this.shield);
       e.render();
-      // Domo del escudo alrededor del escritorio
-      const c = e.project([0, 0.6, 0]);
-      const col = this.shield > 60 ? '34,197,94' : this.shield > 30 ? '245,158,11' : '239,68,68';
-      ctx.beginPath();
-      ctx.ellipse(c.x, c.y + 8, 190, 120, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${col},${0.25 + 0.25 * Math.sin(this.t * 3)})`;
-      ctx.lineWidth = 3;
-      ctx.setLineDash([10, 8]);
-      ctx.stroke();
-      ctx.setLineDash([]);
+
+      // Etiquetas limpias sobre cada cápsula 3D
+      for (const pk of this.packets) {
+        const lbl = `${pk.e} ${pk.t}`;
+        ctx.font = '700 12px Inter, sans-serif';
+        const w = ctx.measureText(lbl).width + 18;
+        const bx = pk.sx - w / 2, by = pk.sy + 14;
+        ctx.fillStyle = 'rgba(10, 18, 36, 0.92)';
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.55)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(bx, by, w, 24, 6) : ctx.rect(bx, by, w, 24);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(lbl, pk.sx, by + 12);
+      }
+
+      // Rayos láser 3D
+      for (const l of this.lasers) {
+        ctx.strokeStyle = l.col;
+        ctx.lineWidth = 4 * (l.life / 0.25);
+        ctx.beginPath();
+        ctx.moveTo(l.x1, l.y1);
+        ctx.lineTo(l.x2, l.y2);
+        ctx.stroke();
+      }
+
+      // Onda expansiva EMP
+      if (this.empWave > 0) {
+        const cp = e.project([0, 0.5, 0]);
+        const r = (1 - this.empWave) * 440;
+        ctx.strokeStyle = `rgba(251, 186, 10, ${this.empWave})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(cp.x, cp.y, r, r * 0.54, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Partículas y textos flotantes
+      for (const p of this.particles) {
+        ctx.fillStyle = p.col;
+        ctx.globalAlpha = Math.min(1, p.life * 1.5);
+        ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
+      }
+      ctx.globalAlpha = 1;
+      ctx.font = '800 14px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      for (const f of this.floaters) {
+        ctx.fillStyle = f.col;
+        ctx.globalAlpha = Math.min(1, f.life);
+        ctx.fillText(f.text, f.x, f.y);
+      }
+      ctx.globalAlpha = 1;
+
       if (this.flash > 0) {
-        ctx.fillStyle = `rgba(239,68,68,${this.flash * 0.35})`;
+        ctx.fillStyle = `rgba(239,68,68,${this.flash * 0.3})`;
         ctx.fillRect(0, 0, cv.width, cv.height);
       }
-      // Reloj y barra del día
-      const clk = U.$('jor-clock');
-      if (clk) clk.textContent = U.fmtClock(Math.min(540, this.clock));
-      const day = U.$('jor-day');
-      if (day) day.style.width = `${Math.min(100, (this.clock / 540) * 100)}%`;
-      this.updateHud();
-      this.updatePending(false);
+      ctx.restore();
+
+      const rem = Math.max(0, Math.ceil(TOTAL_TIME - this.elapsed));
+      const tEl = U.$('esc-time');
+      if (tEl) tEl.textContent = `${String(Math.floor(rem / 60)).padStart(2, '0')}:${String(rem % 60).padStart(2, '0')}`;
     }
 
-    async finish(breach) {
-      if (this.state === 'ended') return;
-      this.state = 'ended';
+    async finish(win) {
+      if (this.ended) return;
+      this.ended = true;
       this.running = false;
       if (this.raf) cancelAnimationFrame(this.raf);
       const shield = Math.round(this.shield);
-      const raw = breach ? this.correct * 12 : shield * 1.2 + this.correct * 14;
+      const raw = win ? Math.min(300, Math.round(this.score * 0.8 + shield)) : Math.min(140, Math.round(this.score * 0.5));
       const awarded = await window.arcade.award(this.key, raw);
-      U.snd(breach ? 'incorrect' : 'complete');
-      const grade = breach ? 'Brecha de seguridad' : shield >= 85 ? 'Centinela Ejemplar' : shield >= 60 ? 'Guardián Atento' : shield >= 35 ? 'Aprendiz en Riesgo' : 'Día Crítico';
-      const lessons = [];
-      this.log.filter((l) => l.res !== 'ok').forEach((l) => { if (!lessons.includes(l.lesson)) lessons.push(U.esc(l.lesson)); });
-      const timeline = this.log.map((l) => `
-        <div class="arc-tl ${l.res}"><span class="tl-time">${l.time}</span><span class="tl-ico">${l.res === 'ok' ? '✅' : l.res === 'bad' ? '❌' : '⏱️'}</span>
-        <span class="tl-txt">${U.esc(l.title)}${l.dmg ? ` <em>(−${l.dmg}%)</em>` : ''}</span></div>`).join('');
+      U.snd(win ? 'complete' : 'incorrect');
+      const lessons = [...new Set(this.mistakes)].slice(0, 5);
+      if (!lessons.length) {
+        lessons.push('¡Reflejos impecables! Distinguiste las amenazas de las operaciones oficiales de Corporación Suiche 7B.');
+      }
       const root = window.arcade.root(this.key);
-      root.innerHTML = window.arcade.headerHTML('📋 Informe del CISO — Jornada Crítica') +
-        window.arcade.resultHTML({
-          emoji: breach ? '🚨' : shield >= 60 ? '🏆' : '🛡️',
-          title: grade,
-          subtitle: breach ? 'El escudo de la empresa se agotó y ocurrió una brecha.' : `Terminaste la jornada con el ${shield}% del escudo.`,
-          stats: [['Escudo final', `${shield}%`], ['Aciertos', this.correct], ['Errores', this.wrong], ['Ignoradas', this.missed]],
-          lessons: lessons.slice(0, 5),
-          extra: `<div class="arc-timeline"><h4>🕒 Línea de tiempo de tu jornada</h4>${timeline || '<em>Sin eventos</em>'}</div>`,
-          awarded, win: !breach, retryJs: "arcade.games.arcade_jornada.open()"
-        });
+      root.innerHTML = window.arcade.headerHTML('🛡️ Escudo de Red 3D — Resultado') + window.arcade.resultHTML({
+        emoji: win ? (shield >= 80 ? '🏆' : '🛡️') : '💥',
+        title: win ? '¡Red Interbancaria Protegida!' : 'El Núcleo sufrió demasiados impactos',
+        subtitle: win ? `Completaste las 3 oleadas defendiendo a Corporación Suiche 7B con ${shield}% de escudo.` : 'Algunas amenazas lograron pasar. ¡Inténtalo de nuevo y mejora tu racha!',
+        stats: [
+          ['Escudo final', `${shield}%`],
+          ['Amenazas bloqueadas', this.blocked],
+          ['Operaciones legítimas', this.legitPassed],
+          ['Mejor racha', this.bestStreak]
+        ],
+        lessons,
+        awarded,
+        win,
+        retryJs: 'arcade.games.arcade_jornada.open()'
+      });
     }
   }
 
-  window.arcade.register('arcade_jornada', new JornadaGame());
+  window.arcade.register('arcade_jornada', new EscudoRedGame());
 })();

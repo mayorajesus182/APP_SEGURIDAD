@@ -1180,26 +1180,26 @@ class AiSecurityGame {
       {
         id: 1,
         context: "Carta de Trabajo y Aumento de Sueldo en Capital Humano",
-        department: "Gerencia Capital Humano / Administración",
+        department: "Gerencia Capital Humano",
         template: `Hola ChatGPT, ayúdame a redactar una carta de felicitación con un <span class="dlp-token" data-token="t_rc" data-sensitive="false">[Tono Cordial y Motivador]</span> por <span class="dlp-token" data-token="t_mti" data-sensitive="false">[Buen Desempeño Anual]</span>.<br><br>Aquí están los datos del trabajador para que armes el texto:<br>• Colaborador: <span class="dlp-token" data-token="t_pan" data-sensitive="true">[María Gómez — Cédula V-15.442.910]</span><br>• Nuevo Sueldo Confidencial: <span class="dlp-token" data-token="t_track2" data-sensitive="true">[Sueldo Mensual + Bono Ejecutivo Confidencial]</span><br>• Cuenta Nómina: <span class="dlp-token" data-token="t_cred" data-sensitive="true">[Cuenta Bancaria 0134-0092-18-9928371]</span>`,
         sensitiveKeys: ['t_pan', 't_track2', 't_cred'],
-        explanation: "<strong>¡Excelente!</strong> Puedes usar ChatGPT para que te ayude a redactar una carta con buen tono, pero <strong>siempre debes tapar u omitir nombres reales, números de cédula, sueldos y cuentas bancarias</strong> del personal de Suiche 7B."
+        explanation: "<strong>¡Excelente!</strong> Puedes usar ChatGPT para que te ayude a redactar una carta con buen tono, pero <strong>siempre debes tapar u omitir nombres reales, números de cédula, sueldos y cuentas bancarias</strong> del personal de Corporación Suiche 7B."
       },
       {
         id: 2,
         context: "Resumen de Reunión de Finanzas y Presupuesto Anual",
-        department: "Dirección Finanzas / Gestión Estratégica",
-        template: `Por favor hazme un <span class="dlp-token" data-token="t_tone" data-sensitive="false">[Resumen en 3 Puntos Clave]</span> de esta nota de reunión:<br><br>"En el cierre trimestral de Suiche 7B obtuvimos <span class="dlp-token" data-token="t_oficio" data-sensitive="true">[Ingresos Internos Confidenciales por $1.850.000]</span>. Además, el archivo Excel de presupuesto quedó guardado con la <span class="dlp-token" data-token="t_fw" data-sensitive="true">[Contraseña: FinanzasSuiche2026*]</span> para presentarlo en la <span class="dlp-token" data-token="t_patch" data-sensitive="false">[Próxima Reunión del Lunes]</span>."`,
+        department: "Dirección Finanzas / Gerencia Gestión Estratégica",
+        template: `Por favor hazme un <span class="dlp-token" data-token="t_tone" data-sensitive="false">[Resumen en 3 Puntos Clave]</span> de esta nota de reunión:<br><br>"En el cierre trimestral de Corporación Suiche 7B obtuvimos <span class="dlp-token" data-token="t_oficio" data-sensitive="true">[Ingresos Internos Confidenciales por $1.850.000]</span>. Además, el archivo Excel de presupuesto quedó guardado con la <span class="dlp-token" data-token="t_fw" data-sensitive="true">[Contraseña: FinanzasSuiche2026*]</span> para presentarlo en la <span class="dlp-token" data-token="t_patch" data-sensitive="false">[Próxima Reunión del Lunes]</span>."`,
         sensitiveKeys: ['t_oficio', 't_fw'],
         explanation: "<strong>¡Muy bien hecho!</strong> Todo lo que escribes en un chat de IA gratuito queda guardado en servidores externos. Jamás pongas cifras financieras secretas de la empresa ni contraseñas de tus archivos Excel."
       },
       {
         id: 3,
-        context: "Respuesta a un Reclamo de un Cliente por un Cobro en Punto de Venta",
+        context: "Respuesta a un Banco Aliado sobre Conciliación en la Red Interbancaria",
         department: "Gerencia Operaciones y Servicio al Cliente",
-        template: `Ayúdame a escribir un correo de respuesta con <span class="dlp-token" data-token="t_sql" data-sensitive="false">[Disculpas y Explicación Amable]</span> para un cliente:<br><br>El caso pertenece al tarjetahabiente <span class="dlp-token" data-token="t_vip" data-sensitive="true">[Tarjeta de Débito N° 4509-1288-3910-4421 de Carlos Rivas]</span> quien reportó un cobro duplicado y nos dejó su <span class="dlp-token" data-token="t_key" data-sensitive="true">[Teléfono 0414-5559922 y Dirección de Habitación]</span>.`,
+        template: `Ayúdame a escribir un correo de respuesta con <span class="dlp-token" data-token="t_sql" data-sensitive="false">[Tono Formal y Colaborativo]</span> para un banco aliado de nuestra red:<br><br>El caso pertenece a una operación interbancaria con la <span class="dlp-token" data-token="t_vip" data-sensitive="true">[Tarjeta N° 4509-1288-3910-4421 de Carlos Rivas]</span> reportada en conciliación junto con su <span class="dlp-token" data-token="t_key" data-sensitive="true">[Teléfono 0414-5559922 y Cédula V-14.882.910]</span>.`,
         sensitiveKeys: ['t_vip', 't_key'],
-        explanation: "<strong>¡Protección Total al Cliente!</strong> Nunca pegues números completos de tarjetas de débito/crédito ni teléfonos o direcciones personales de clientes en herramientas de Inteligencia Artificial."
+        explanation: "<strong>¡Protección Total de Datos!</strong> Aunque Corporación Suiche 7B interconecta instituciones financieras, nunca debes pegar números completos de tarjetas, teléfonos ni cédulas de usuarios finales en herramientas de Inteligencia Artificial."
       }
     ];
   }
@@ -1423,9 +1423,9 @@ class PciDssGame {
     this.items = [
       {
         id: 'pan_mask',
-        reqBadge: 'Situación 1 · Reportes de Excel y Correos Internos',
+        reqBadge: 'Situación 1 · Reportes de Conciliación y Correos Internos',
         title: 'Ocultar los Números del Medio de la Tarjeta en Reportes',
-        desc: 'En Finanzas o Atención al Cliente debes enviar un cuadro de Excel con varios casos de reclamos. Mira la Tarjeta 3D a la izquierda: tiene los 16 números completamente visibles (`4509 1288 3910 4421`). ¿Cómo debes escribir ese número de tarjeta en tu reporte o correo?',
+        desc: 'En Dirección Finanzas o Gerencia Operaciones y Servicio al Cliente debes enviar un cuadro de Excel con casos de conciliación de la red interbancaria. Mira la Tarjeta 3D a la izquierda: tiene los 16 números visibles (`4509 1288 3910 4421`). ¿Cómo debes escribir ese número en tu reporte?',
         cardSide: 'front',
         targetZone: 'pan',
         rawStream: '⚠️ En tu Excel dice: 4509 1288 3910 4421 (¡Peligro: Número completo expuesto!)',
@@ -1433,57 +1433,57 @@ class PciDssGame {
         options: [
           { text: 'Poner asteriscos en los números del medio y dejar solo los primeros 6 y últimos 4 (4509 12** **** 4421)', isCorrect: true },
           { text: 'Escribir los 16 números completos de la tarjeta en el correo para que todos los vean', isCorrect: false },
-          { text: 'Mandar una foto de la tarjeta completa por el grupo de WhatsApp de la oficina', isCorrect: false }
+          { text: 'Mandar una captura de los datos completos por el grupo de WhatsApp de la oficina', isCorrect: false }
         ],
-        explanation: '<strong>¡Regla de Oro con Tarjetas!</strong> En cualquier reporte, correo o cuadro de Excel administrativo, jamás escribas los 16 dígitos completos: tapa siempre los dígitos centrales con asteriscos (`4509 12** **** 4421`).'
+        explanation: '<strong>¡Regla de Oro en Corporación Suiche 7B!</strong> En cualquier reporte de conciliación, correo o cuadro de Excel administrativo, jamás escribas los 16 dígitos completos: tapa siempre los dígitos centrales con asteriscos (`4509 12** **** 4421`).'
       },
       {
         id: 'sad_purge',
         reqBadge: 'Situación 2 · Los 3 Números Secretos del Reverso (CVV)',
-        title: '¿Se pueden anotar los 3 numeritos de atrás de la tarjeta?',
-        desc: 'La Tarjeta 3D acaba de girar mostrando la parte de atrás. Un cliente llama para una consulta y te quiere dictar los 3 numeritos de seguridad del reverso (`891`) para que los anotes en el expediente. ¿Qué debes hacer?',
+        title: '¿Se pueden anotar los 3 numeritos de atrás de una tarjeta?',
+        desc: 'La Tarjeta 3D acaba de girar mostrando la parte de atrás. En una consulta operativa con una institución afiliada, alguien intenta dictarte o enviarte los 3 numeritos de seguridad del reverso (`891`) para anotarlos en el caso. ¿Qué debes hacer?',
         cardSide: 'back',
         targetZone: 'cvv',
         rawStream: '⚠️ Reverso de la Tarjeta: Código Secreto [ 891 ] visible',
         protectedStream: '✅ Código Secreto [ *** ] oculto — ¡Jamás se pide ni se anota!',
         options: [
-          { text: 'Indicarle al cliente que NO nos dicte esos 3 números y jamás anotarlos en papel, correo ni computadora', isCorrect: true },
+          { text: 'Indicar que NO envíen ni dicten esos 3 números y jamás anotarlos en papel, correo ni computadora', isCorrect: true },
           { text: 'Anotar los 3 números en una libreta o archivo Word por si los necesitamos mañana', isCorrect: false },
-          { text: 'Pedirle que nos mande una foto de la parte de atrás de su tarjeta por correo', isCorrect: false }
+          { text: 'Pedir que nos manden una foto de la parte de atrás de la tarjeta por correo', isCorrect: false }
         ],
-        explanation: 'Los <strong>3 números del reverso de la tarjeta (código CVV)</strong> son ultra secretos para compras por internet. Ningún trabajador de Suiche 7B debe pedirlos ni anotarlos nunca.'
+        explanation: 'Los <strong>3 números del reverso de la tarjeta (código CVV)</strong> jamás deben guardarse ni anotarse. Aunque procesamos transacciones de la red interbancaria, ningún trabajador de Corporación Suiche 7B debe pedirlos ni almacenarlos.'
       },
       {
         id: 'hsm_pin',
-        reqBadge: 'Situación 3 · La Clave Secreta de 4 Dígitos del Cajero / Punto de Venta',
-        title: '¿Podemos pedir o guardar la Clave del Cajero (PIN) de un cliente?',
-        desc: 'Mira el Chip Dorado en la Tarjeta 3D. Para resolver un reclamo de un cajero automático o punto de venta, un compañero sugiere preguntarle al cliente cuál es su clave secreta de 4 dígitos. ¿Es correcto?',
+        reqBadge: 'Situación 3 · La Clave Secreta de 4 Dígitos del Cajero (PIN)',
+        title: '¿Podemos pedir o guardar la Clave del Cajero (PIN)?',
+        desc: 'Mira el Chip Dorado en la Tarjeta 3D. Para revisar una falla reportada en un cajero automático interconectado, alguien sugiere pedir la clave secreta de 4 dígitos para hacer pruebas. ¿Es correcto?',
         cardSide: 'iso',
         targetZone: 'chip',
-        rawStream: '⚠️ Consulta: ¿Solicitar clave secreta de 4 dígitos al cliente?',
-        protectedStream: '✅ Clave Secreta 100% Privada — Ningún empleado debe conocerla',
+        rawStream: '⚠️ Consulta: ¿Solicitar clave secreta de 4 dígitos para una prueba?',
+        protectedStream: '✅ Clave Secreta 100% Privada — Ningún empleado de la red debe conocerla',
         options: [
-          { text: 'Prohibido: La clave de 4 dígitos (PIN) es secreta del cliente y ningún empleado debe pedirla ni conocerla', isCorrect: true },
-          { text: 'Pedirle la clave solo por teléfono para probar su tarjeta rápidamente', isCorrect: false },
-          { text: 'Anotar la clave del cliente en el ticket de atención al cliente', isCorrect: false }
+          { text: 'Prohibido: La clave de 4 dígitos (PIN) es secreta y en Corporación Suiche 7B nadie debe pedirla ni conocerla', isCorrect: true },
+          { text: 'Pedir la clave solo por teléfono para probar la transacción rápidamente', isCorrect: false },
+          { text: 'Anotar la clave en el ticket de Operaciones y Servicio al Cliente', isCorrect: false }
         ],
-        explanation: 'La <strong>clave secreta (PIN)</strong> del cajero o punto de venta es exclusivamente del dueño de la tarjeta. En Suiche 7B ningún área administrativa ni técnica solicita jamás la clave de un tarjetahabiente.'
+        explanation: 'La <strong>clave secreta (PIN)</strong> es exclusivamente del dueño de la tarjeta. En Corporación Suiche 7B ningún área administrativa, operativa ni técnica solicita jamás la clave de un tarjetahabiente.'
       },
       {
         id: 'qa_anonymize',
-        reqBadge: 'Situación 4 · Presentaciones, Capacitaciones y Ejemplos',
-        title: '¿Qué tarjetas usamos para hacer una presentación o manual de oficina?',
-        desc: 'Debes preparar unas láminas de PowerPoint o un manual para entrenar a nuevos compañeros de tu departamento. ¿Qué números de tarjeta debes poner en las capturas de ejemplo?',
+        reqBadge: 'Situación 4 · Presentaciones, Capacitaciones y Manuales',
+        title: '¿Qué datos usamos para hacer una presentación o manual de oficina?',
+        desc: 'Debes preparar unas láminas de PowerPoint o un manual para entrenar a nuevos compañeros de tu gerencia. ¿Qué números de tarjeta debes poner en las capturas de ejemplo?',
         cardSide: 'front',
         targetZone: 'pan',
-        rawStream: '⚠️ Lámina de PowerPoint con datos de un cliente real de un banco',
+        rawStream: '⚠️ Lámina de PowerPoint con datos reales de un tarjetahabiente de la red',
         protectedStream: '✅ Lámina de PowerPoint con datos inventados de ejemplo (4000 00** **** 0001)',
         options: [
           { text: 'Usar siempre nombres y números de tarjetas inventados (ficticios) o tapados en manuales y presentaciones', isCorrect: true },
-          { text: 'Tomar la foto de una tarjeta real de un cliente verdadero y pegarla en el PowerPoint', isCorrect: false },
+          { text: 'Tomar datos reales de una transacción de un banco aliado y pegarlos en el PowerPoint', isCorrect: false },
           { text: 'Poner la foto de mi propia tarjeta de débito personal en el manual', isCorrect: false }
         ],
-        explanation: 'En manuales, presentaciones de PowerPoint y capacitaciones internas siempre debemos usar <strong>datos ficticios de ejemplo</strong>, nunca datos de clientes reales.'
+        explanation: 'En manuales, presentaciones de PowerPoint y capacitaciones internas siempre debemos usar <strong>datos ficticios de ejemplo</strong>, nunca datos reales que transiten por la red.'
       }
     ];
   }
@@ -1647,7 +1647,7 @@ class QuishingMfaGame {
         visualTitle: "🔎 Lupa Detectora: ¿Quién intenta entrar a esta hora?",
         visualMeta: "Haz clic en '🔎 Ver Pista Oculta' para descubrir desde dónde están intentando abrir tu correo...",
         xrayRevealed: "⚠️ PISTA DESCUBIERTA: Alguien en otro país adivinó tu contraseña y te está mandando muchos avisos seguidos a las 11:48 PM para que presiones 'Aceptar' por cansancio.",
-        scenarioDesc: "Estás en tu casa descansando a las 11:48 de la noche. De pronto tu celular empieza a vibrar muchas veces seguidas preguntando: '¿Le das permiso a otra computadora para entrar a tu cuenta de Suiche 7B?'. ¡Toca el botón correcto en la pantalla del Celular 3D a la izquierda!",
+        scenarioDesc: "Estás en tu casa descansando a las 11:48 de la noche. De pronto tu celular empieza a vibrar muchas veces seguidas preguntando: '¿Le das permiso a otra computadora para entrar a tu cuenta de Corporación Suiche 7B?'. ¡Toca el botón correcto en la pantalla del Celular 3D a la izquierda!",
         options: [
           { text: "Tocar 'NO FUI YO (BLOQUEAR)' en el celular y avisar a Seguridad para cambiar mi contraseña", isCorrect: true },
           { text: "Tocar 'Sí, Aprobar' para que el celular deje de hacer ruido y seguir durmiendo", isCorrect: false },
@@ -1662,11 +1662,11 @@ class QuishingMfaGame {
         phoneMode: "qr_scanner",
         visualTitle: "🔎 Lupa Detectora: ¿A qué página lleva este Código QR?",
         visualMeta: "Toca el cuadro del Código QR en el celular 3D o el botón '🔎 Ver Pista Oculta' para ver a dónde lleva...",
-        xrayRevealed: "🚨 PISTA DESCUBIERTA: El código QR NO es de Suiche 7B; lleva a una página pirata ('bono-falso-trampa.xyz') diseñada para robarte la contraseña de tu correo.",
+        xrayRevealed: "🚨 PISTA DESCUBIERTA: El código QR NO es de Corporación Suiche 7B; lleva a una página pirata ('bono-falso-trampa.xyz') diseñada para robarte la contraseña de tu correo.",
         scenarioDesc: "Recibes un volante o un correo muy llamativo que dice: '¡Escanea este Código QR con tu celular y escribe tu contraseña del trabajo para cobrar un Bono Especial hoy!'. Mira el visor en el Celular 3D:",
         options: [
           { text: "Tocar 'CERRAR PÁGINA FALSA' en el celular y no escribir jamás mi contraseña en códigos QR dudosos", isCorrect: true },
-          { text: "Escribir mi usuario y contraseña de Suiche 7B rápido para no perderme el bono", isCorrect: false },
+          { text: "Escribir mi usuario y contraseña de Corporación Suiche 7B rápido para no perderme el bono", isCorrect: false },
           { text: "Mandarle foto del código QR por WhatsApp a todos mis compañeros de oficina", isCorrect: false }
         ],
         explanation: "Los estafadores usan <strong>Códigos QR falsos</strong> con promesas de bonos, premios o sorteos para llevarte a páginas engañosas desde tu celular. Nunca ingreses tu clave del trabajo tras escanear un QR desconocido."
@@ -1679,7 +1679,7 @@ class QuishingMfaGame {
         visualTitle: "🔎 Lupa Detectora: Verificando tu propio ingreso",
         visualMeta: "En la pantalla de tu computadora de oficina ves grande el número: [ 84 ].",
         xrayRevealed: "✅ PISTA CONFIRMADA: Fuiste tú mismo quien acaba de abrir el correo en tu escritorio de Corporación Suiche 7B a las 8:30 AM.",
-        scenarioDesc: "Acabas de llegar a tu oficina en Suiche 7B, abres tu correo en tu computadora y la pantalla te dice: 'Toca el número 84 en tu celular para confirmar que eres tú'. ¡Toca el número 84 directamente en el teclado del Celular 3D!",
+        scenarioDesc: "Acabas de llegar a tu oficina en Corporación Suiche 7B, abres tu correo en tu computadora y la pantalla te dice: 'Toca el número 84 en tu celular para confirmar que eres tú'. ¡Toca el número 84 directamente en el teclado del Celular 3D!",
         options: [
           { text: "Tocar el número [ 84 ] en la pantalla del celular porque yo mismo estoy abriendo mi correo", isCorrect: true },
           { text: "Tocar cualquier otro número sin mirar la pantalla de mi computadora", isCorrect: false },
@@ -1792,7 +1792,7 @@ class QuishingMfaGame {
               <button type="button" class="btn btn-secondary" style="padding:0.5rem 0.2rem; font-family:var(--font-mono); font-size:0.9rem;" onclick="games.quishing_mfa.makeDecision(${n.isCorrect})">${n.num}</button>
             `).join('')}
           </div>
-          <div style="font-size:0.64rem; color:#94a3b8;">Oficina Suiche 7B · Caracas</div>
+          <div style="font-size:0.64rem; color:#94a3b8;">Oficina Corporación Suiche 7B · Caracas</div>
         </div>
       `;
     }
@@ -1874,18 +1874,18 @@ class BecFraudGame {
         title: "Caso 1: El 'Presidente' Apurado Pidiendo un Pago Secreto el Viernes",
         sender: "presidente.suiche7b@gmail.com",
         subject: "URGENTE Y CONFIDENCIAL: Haz esta transferencia hoy sin comentarle a nadie",
-        scenarioDesc: "Son las 4:40 PM del viernes. Te llega un correo y una nota de voz que suena igualita al Presidente de Suiche 7B diciendo: 'Estoy en una reunión privada, transfiere urgente este anticipo a esta cuenta nueva y no llames a nadie'. ¡Toca las 3 lupas de la izquierda para averiguar la verdad!",
+        scenarioDesc: "Son las 4:40 PM del viernes. Te llega un correo y una nota de voz que suena igualita a la Presidencia Ejecutiva de Corporación Suiche 7B diciendo: 'Estoy en una reunión privada, transfiere urgente este anticipo a esta cuenta nueva y no llames a nadie'. ¡Toca las 3 lupas de la izquierda para averiguar la verdad!",
         evidences: [
-          "📧 [LUPA 1 · VER CORREO]: ¡Mira la dirección! Dice 'presidente.suiche7b@gmail.com'. Los directivos de Suiche 7B nunca usan correos @gmail.com para ordenar pagos.",
-          "🏦 [LUPA 2 · VER CUENTA]: La cuenta bancaria que pide el mensaje es de un desconocido que no está registrado en Finanzas ni Administración.",
-          "📞 [LUPA 3 · LLAMAR A OFICINA]: Llamaste a la extensión interna de Presidencia y te confirmaron que el Presidente NUNCA envió ese mensaje (su voz fue imitada por computadora)."
+          "📧 [LUPA 1 · VER CORREO]: ¡Mira la dirección! Dice 'presidente.suiche7b@gmail.com'. La Presidencia Ejecutiva de Corporación Suiche 7B nunca usa correos @gmail.com para ordenar pagos.",
+          "🏦 [LUPA 2 · VER CUENTA]: La cuenta destino que pide el mensaje es de un desconocido que no está registrado como proveedor en Dirección Finanzas.",
+          "📞 [LUPA 3 · LLAMAR A OFICINA]: Llamaste a la extensión interna de Presidencia Ejecutiva y te confirmaron que NUNCA enviaron ese mensaje (su voz fue imitada por computadora)."
         ],
         options: [
           { text: "No hacer el pago, confirmar por teléfono interno y pedir siempre las firmas de autorización de la empresa", isCorrect: true },
-          { text: "Hacer la transferencia rápido por miedo a que el jefe se moleste", isCorrect: false },
-          { text: "Responderle al correo @gmail.com preguntando a nombre de quién va el cheque", isCorrect: false }
+          { text: "Hacer la transferencia rápido por miedo a que Presidencia se moleste", isCorrect: false },
+          { text: "Responderle al correo @gmail.com preguntando a nombre de quién va el pago", isCorrect: false }
         ],
-        explanation: "Esta estafa se llama <strong>El Fraude del Falso Jefe</strong>: los delincuentes te presionan un viernes por la tarde y te piden 'mantenerlo en secreto' para que no llames a tu supervisor. <strong>En Suiche 7B ningún pago sale sin seguir las firmas y aprobaciones normales.</strong>"
+        explanation: "Esta estafa se llama <strong>El Fraude del Falso Jefe</strong>: los delincuentes te presionan un viernes por la tarde y te piden 'mantenerlo en secreto' para que no llames a tu supervisor. <strong>En Corporación Suiche 7B ningún pago sale sin seguir las firmas y aprobaciones normales.</strong>"
       },
       {
         title: "Caso 2: El Proveedor que Pide Cambiar su Cuenta Bancaria por Correo",
@@ -1902,17 +1902,17 @@ class BecFraudGame {
           { text: "Cambiar la cuenta en el sistema y transferir el dinero sin llamar", isCorrect: false },
           { text: "Llamar al número de celular extraño que venía escrito dentro de la carta sospechosa", isCorrect: false }
         ],
-        explanation: "Cuando un proveedor pida cambiar su cuenta bancaria para recibir pagos de Suiche 7B, <strong>siempre debes confirmar llamando al teléfono que ya teníamos guardado desde que se firmó el contrato</strong>, nunca al número que venga en el correo nuevo."
+        explanation: "Cuando un proveedor pida cambiar su cuenta para recibir pagos de Corporación Suiche 7B, <strong>siempre debes confirmar llamando al teléfono que ya teníamos guardado desde que se firmó el contrato</strong>, nunca al número que venga en el correo nuevo."
       },
       {
         title: "Caso 3: Correo Falso Pidiendo la Lista de Sueldos y Cédulas del Personal",
-        sender: "auditoria.externa@revision-bancaria.org",
+        sender: "auditoria.externa@revision-corporativa.org",
         subject: "Envío inmediato de nómina, cédulas y teléfonos de todos los empleados",
-        scenarioDesc: "Recibes un correo que dice ser de unos 'Auditores Externos' exigiendo que les envíes en los próximos 20 minutos el archivo Excel con los nombres, cédulas, sueldos y direcciones de todo el personal de Suiche 7B. Usa las 3 lupas:",
+        scenarioDesc: "Recibes un correo que dice ser de unos 'Auditores Externos' exigiendo que les envíes en los próximos 20 minutos el archivo Excel con los nombres, cédulas, sueldos y direcciones de todo el personal de Corporación Suiche 7B. Usa las 3 lupas:",
         evidences: [
-          "📧 [LUPA 1 · VER CORREO]: El remitente '@revision-bancaria.org' es un correo externo desconocido que no pertenece a ninguna institución oficial.",
+          "📧 [LUPA 1 · VER CORREO]: El remitente '@revision-corporativa.org' es un correo externo desconocido que no pertenece a Auditoría de Sistemas ni a ningún ente oficial.",
           "🏦 [LUPA 2 · VER ARCHIVO PEDIDO]: Están pidiendo datos privados de nómina para suplantar la identidad de los trabajadores.",
-          "📞 [LUPA 3 · LLAMAR A OFICINA]: Consultaste con Capital Humano y Cumplimiento, y confirmaron que no existe ninguna auditoría pidiendo esos datos por correo."
+          "📞 [LUPA 3 · LLAMAR A OFICINA]: Consultaste con Gerencia Capital Humano, Auditoría de Sistemas y Oficial de Cumplimiento, y confirmaron que no existe ninguna solicitud por correo."
         ],
         options: [
           { text: "Negarse a enviar el archivo y reportar el correo a Seguridad de la Información", isCorrect: true },
@@ -2079,21 +2079,21 @@ class RemoteVpnGame {
         title: "Situación 1: Conectarse al 'Wi-Fi Gratis' en un Café o Aeropuerto",
         ssid: "WiFi_Gratis_Sin_Clave (🔴 PUNTO ROJO PELIGROSO EN EL RADAR)",
         securitySpec: "Cualquier desconocido conectado a ese Wi-Fi puede espiar lo que haces",
-        scenarioDesc: "Estás en una cafetería o en el aeropuerto y necesitas enviar un correo urgente de Suiche 7B desde tu laptop. En el Radar 3D ves un Wi-Fi abierto sin clave ('WiFi_Gratis_Sin_Clave'). ¡Enciende tus 2 escudos arriba y elige qué hacer!",
+        scenarioDesc: "Estás en una cafetería o en el aeropuerto y necesitas enviar un correo urgente de Corporación Suiche 7B desde tu laptop. En el Radar 3D ves un Wi-Fi abierto sin clave ('WiFi_Gratis_Sin_Clave'). ¡Enciende tus 2 escudos arriba y elige qué hacer!",
         options: [
-          { text: "No usar el Wi-Fi gratis abierto; compartir los datos de mi celular con clave y encender la VPN de Suiche 7B", isCorrect: true },
+          { text: "No usar el Wi-Fi gratis abierto; compartir los datos de mi celular con clave y encender la VPN de Corporación Suiche 7B", isCorrect: true },
           { text: "Conectarme al Wi-Fi gratis sin clave porque es más rápido y cómodo", isCorrect: false },
           { text: "Pedirle prestada la computadora a un desconocido en la cafetería para abrir mi correo", isCorrect: false }
         ],
-        explanation: "Los <strong>Wi-Fi públicos o abiertos sin clave</strong> en cafeterías, centros comerciales o aeropuertos son muy peligrosos porque los atacantes crean redes trampa para robar contraseñas. Usa siempre datos móviles seguros y <strong>enciende la VPN de Suiche 7B</strong>."
+        explanation: "Los <strong>Wi-Fi públicos o abiertos sin clave</strong> en cafeterías, centros comerciales o aeropuertos son muy peligrosos porque los atacantes crean redes trampa para robar contraseñas. Usa siempre datos móviles seguros y <strong>enciende la VPN de Corporación Suiche 7B</strong>."
       },
       {
         title: "Situación 2: Un Familiar en Casa Pide Prestada la Laptop del Trabajo",
-        ssid: "Trabajando desde Casa con la Laptop de Suiche 7B",
+        ssid: "Trabajando desde Casa con la Laptop de Corporación Suiche 7B",
         securitySpec: "Tu sesión de trabajo tiene acceso a las carpetas internas de la empresa",
-        scenarioDesc: "Estás trabajando desde tu casa y un sobrino o familiar te dice: '¿Me prestas tu laptop de Suiche 7B media hora para ver una película en internet y descargar un juego?'. ¿Qué debes responder?",
+        scenarioDesc: "Estás trabajando desde tu casa y un sobrino o familiar te dice: '¿Me prestas tu laptop de Corporación Suiche 7B media hora para ver una película en internet y descargar un juego?'. ¿Qué debes responder?",
         options: [
-          { text: "Decirle amablemente que la laptop de Suiche 7B es solo para trabajar y bloquear la pantalla (Win + L) al levantarme", isCorrect: true },
+          { text: "Decirle amablemente que la laptop de Corporación Suiche 7B es solo para trabajar y bloquear la pantalla (Win + L) al levantarme", isCorrect: true },
           { text: "Prestarle la laptop del trabajo con tal de que no borre mis carpetas", isCorrect: false },
           { text: "Anotarle mi clave de la laptop en un papel para que él entre cuando quiera", isCorrect: false }
         ],
@@ -2103,13 +2103,13 @@ class RemoteVpnGame {
         title: "Situación 3: Mandar Archivos de la Oficina a tu Correo Personal (@gmail)",
         ssid: "Cuidado de Documentos, Excel y Reportes de Trabajo",
         securitySpec: "Los correos y nubes personales no tienen la protección de la empresa",
-        scenarioDesc: "Para terminar de revisar unas facturas, presupuestos o listados el fin de semana, piensas mandarte esos archivos confidenciales de Suiche 7B a tu correo personal `@gmail.com` o a tu WhatsApp personal. ¿Es correcto?",
+        scenarioDesc: "Para terminar de revisar unas facturas, presupuestos o listados el fin de semana, piensas mandarte esos archivos confidenciales de Corporación Suiche 7B a tu correo personal `@gmail.com` o a tu WhatsApp personal. ¿Es correcto?",
         options: [
-          { text: "No: Los documentos de Suiche 7B deben guardarse y revisarse únicamente en el correo y carpetas oficiales de la empresa", isCorrect: true },
+          { text: "No: Los documentos de Corporación Suiche 7B deben guardarse y revisarse únicamente en el correo y carpetas oficiales de la empresa", isCorrect: true },
           { text: "Sí, no pasa nada en mandármelos a mi Gmail personal si luego los borro", isCorrect: false },
           { text: "Subir los archivos de finanzas a una página web pública para bajarlos rápido", isCorrect: false }
         ],
-        explanation: "Enviar documentos internos (facturas, nóminas, presupuestos, reportes) a correos personales (`@gmail`, `@hotmail`) o WhatsApp personal está prohibido porque saca la información del resguardo seguro de Suiche 7B."
+        explanation: "Enviar documentos internos (facturas, nóminas, presupuestos, reportes) a correos personales (`@gmail`, `@hotmail`) o WhatsApp personal está prohibido porque saca la información del resguardo seguro de Corporación Suiche 7B."
       }
     ];
   }
@@ -2186,7 +2186,7 @@ class RemoteVpnGame {
     const pill = document.getElementById('vpn-tunnel-state-pill');
 
     if (aesBtn) {
-      aesBtn.textContent = `${this.tunnelSwitches.aes ? '✅' : '⬜'} Escudo 1: Encender VPN de Suiche 7B`;
+      aesBtn.textContent = `${this.tunnelSwitches.aes ? '✅' : '⬜'} Escudo 1: Encender VPN de Corporación Suiche 7B`;
       aesBtn.style.borderColor = this.tunnelSwitches.aes ? '#4ade80' : '';
     }
     if (ksBtn) {
