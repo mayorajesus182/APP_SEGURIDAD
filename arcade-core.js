@@ -317,6 +317,11 @@
         ? (awarded.first ? `<div class="arc-award ok">🏅 +${awarded.points} puntos registrados · 🔒 Intento único completado (Anti-Farming)</div>`
           : `<div class="arc-award">🔒 Este módulo ya fue completado anteriormente (Anti-Farming: 1 solo intento permitido)</div>`)
         : '<div class="arc-award">🔒 Intento único completado (Anti-Farming activo)</div>';
+      const cm = (window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules) || {};
+      const allPhase2Done = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'].every((k) => Boolean(cm[k]));
+      const certBtn = allPhase2Done
+        ? `<button class="btn btn-success" style="background:linear-gradient(135deg, #b60e80, #6d084d);" onclick="app.navigateTo('dashboard'); app.showCertificate('phase2');">🎖️ Ver / Descargar Certificado Fase 2</button>`
+        : '';
       return `
         <div class="arc-result ${win ? 'win' : 'lose'}">
           <div class="arc-result-emoji">${emoji}</div>
@@ -327,6 +332,7 @@
           ${extra || ''}
           ${lessonHtml}
           <div class="arc-actions">
+            ${certBtn}
             <button class="btn btn-primary" onclick="app.navigateTo('dashboard')">← Volver al Panel</button>
           </div>
         </div>`;

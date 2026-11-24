@@ -461,20 +461,24 @@ class AppController {
 
     // Los 5 módulos anteriores de Fase 2 permanecen ocultos; la nueva Fase 2 son los 4 juegos 3D (#arcade-section-block)
     if (p2LegacyBlock) p2LegacyBlock.style.display = 'none';
+    const statRowP1 = document.getElementById('stat-row-p1');
 
     if (mode === 'phase1') {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'block';
       if (arcBlock) arcBlock.style.display = 'none';
+      if (statRowP1) statRowP1.style.display = 'flex';
       if (phaseBadge) phaseBadge.textContent = '🛡️ Fase 1 Activa (Nivel Básico)';
     } else if (mode === 'phase2') {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'none';
       if (arcBlock) arcBlock.style.display = 'block';
+      if (statRowP1) statRowP1.style.display = 'none';
       if (phaseBadge) phaseBadge.textContent = '🚀 Fase 2 Activa: Juegos Interactivos 3D';
     } else {
       // mode === 'both'
       if (tabsBar) tabsBar.style.display = 'flex';
+      if (statRowP1) statRowP1.style.display = 'flex';
       if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1 y Fase 2 Activas';
 
       if (this.userPhaseFilter === 'phase1') {
@@ -856,12 +860,12 @@ class AppController {
 
     const cm = this.state.user.completedModules;
     const axes = [
-      { label: 'Phishing', val: cm.phishing ? 100 : 25 },
-      { label: 'Física/USB', val: (cm.pci ? 50 : 12) + (cm.usb ? 50 : 13) },
-      { label: 'Vishing/BEC', val: (cm.incident ? 50 : 12) + (cm.bec_fraud ? 50 : 13) },
-      { label: 'Claves/MFA', val: (cm.password ? 50 : 12) + (cm.quishing_mfa ? 50 : 13) },
-      { label: 'PCI-DSS 4.0', val: cm.pci_dss ? 100 : 25 },
-      { label: 'IA / VPN', val: (cm.ai_sec ? 50 : 12) + (cm.remote_vpn ? 50 : 13) }
+      { label: 'Defensa Red', val: cm.arcade_jornada ? 100 : 25 },
+      { label: 'Anti-Phishing', val: (cm.arcade_bandeja || cm.phishing) ? 100 : 25 },
+      { label: 'Fraude BEC', val: cm.arcade_cartas ? 100 : 25 },
+      { label: 'Bóveda/Claves', val: cm.arcade_boveda ? 100 : 25 },
+      { label: 'Criterio 3D', val: Math.min(100, 25 + PHASE2_KEYS.filter(k => cm[k]).length * 19) },
+      { label: 'Cultura S7B', val: PHASE2_KEYS.every(k => cm[k]) ? 100 : (25 + PHASE2_KEYS.filter(k => cm[k]).length * 15) }
     ];
 
     const size = 210;
@@ -1109,13 +1113,12 @@ class AppController {
 
     const cm = this.state.user.completedModules;
     const badges = [
-      { icon: '🕵️', name: 'Cazador de Phishing', unlocked: cm.phishing, desc: 'Módulo Phishing superado' },
-      { icon: '🧹', name: 'Escritorio Blindado', unlocked: cm.pci, desc: 'Política Clean Desk' },
-      { icon: '💳', name: 'Guardián PCI-DSS 4.0', unlocked: cm.pci_dss, desc: 'Protección de Tarjetas' },
-      { icon: '🤖', name: 'Centinela IA / DLP', unlocked: cm.ai_sec, desc: 'Prevención Shadow AI' },
-      { icon: '🏅', name: 'Graduado Fase 1', unlocked: p1Completed === 5, desc: '5/5 Módulos Básicos' },
-      { icon: '🕹️', name: 'Campeón Arcade 3D', unlocked: ARCADE_KEYS.some(k => cm[k]), desc: 'Superó un Juego de la Zona Arcade 3D' },
-      { icon: '👑', name: 'Maestro CiberSeguro', unlocked: p1Completed === 5 && p2Completed === 5, desc: '10/10 Fase 1 + Fase 2' }
+      { icon: '🛡️', name: 'Escudo de Red 3D', unlocked: cm.arcade_jornada, desc: 'Defendió el núcleo de Corporación Suiche 7B' },
+      { icon: '📥', name: 'Bandeja Blindada', unlocked: cm.arcade_bandeja, desc: 'Clasificación rápida de correos 3D' },
+      { icon: '🃏', name: 'Caza-Fraudes', unlocked: cm.arcade_cartas, desc: 'Venció a El Estafador en Duelo de Cartas' },
+      { icon: '🔐', name: 'Maestro Bóveda 3D', unlocked: cm.arcade_boveda, desc: 'Resolvió los 5 candados de La Bóveda Digital' },
+      { icon: '🎖️', name: 'Certificado Fase 2', unlocked: p2Completed === 4, desc: '4/4 Desafíos Fase 2 completados' },
+      { icon: '👑', name: 'Guardián Suiche 7B', unlocked: p2Completed === 4 && this.state.user.score >= 500, desc: 'Excelencia en Ciberseguridad' }
     ];
 
     container.innerHTML = badges.map(b => `

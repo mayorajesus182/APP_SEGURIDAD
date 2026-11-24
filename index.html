@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=3.7">
+  <link rel="stylesheet" href="style.css?v=3.8">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -133,12 +133,14 @@
           <div class="hero-content">
             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap;">
               <span id="dash-campaign-badge" class="phase-pill">Programa Anual de Concientización 2026</span>
-              <span id="dash-active-phase-badge" class="phase-pill phase-pill-cyan">Fase 1 & Fase 2 Activas</span>
+              <span id="dash-active-phase-badge" class="phase-pill phase-pill-cyan">🚀 Fase 2 Activa: Juegos
+                Interactivos 3D</span>
             </div>
             <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
-            <p id="dash-hero-subtitle">Tu misión hoy es salvaguardar el ecosistema transaccional y la información de La
-              Corporación Suiche 7B. Completa los módulos interactivos asignados para obtener tu <strong>Certificado de
-                Ciberseguridad</strong>.</p>
+            <p id="dash-hero-subtitle">Tu misión hoy es salvaguardar el ecosistema transaccional y la información de
+              Corporación Suiche 7B. Completa los 4 desafíos interactivos de la <strong>Fase 2</strong> para obtener tu
+              <strong>Certificado Oficial de Ciberseguridad</strong>.
+            </p>
           </div>
         </div>
         <div style="display:flex; flex-direction:column; gap:0.6rem; align-items:flex-end;">
@@ -622,17 +624,17 @@
               <span class="stat-label">Puntaje Total:</span>
               <span class="stat-val" id="stats-score" style="color:var(--accent-cyan)">0 PTS</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" id="stat-row-p1" style="display:none;">
               <span class="stat-label">Avance Fase 1 (Básico):</span>
               <span class="stat-val" id="stats-modules-p1">0 / 5</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Avance Fase 2 (Avanzado):</span>
-              <span class="stat-val" id="stats-modules-p2">0 / 5</span>
+              <span class="stat-label">Avance Fase 2 (Juegos 3D):</span>
+              <span class="stat-val" id="stats-modules-p2">0 / 4</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Total Módulos Activos:</span>
-              <span class="stat-val" id="stats-modules">0 / 10</span>
+              <span class="stat-val" id="stats-modules">0 / 4</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Porcentaje de Éxito:</span>
@@ -661,11 +663,11 @@
             </div>
           </div>
 
-          <!-- Panel de Ranking Interdepartamental (Reactivado y Conectado a BD) -->
-          <div class="sidebar-panel">
+          <!-- Panel de Ranking Interdepartamental (Oculto) -->
+          <div class="sidebar-panel" id="leaderboard-panel" style="display:none;">
             <h3>🏆 Ranking por Departamento</h3>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.8rem;">Clasificación en vivo de las
-              áreas de La Corporación Suiche 7B.</p>
+              áreas de Corporación Suiche 7B.</p>
             <div id="leaderboard-container" class="leaderboard-list">
               <!-- Renderizado dinámico en app.js -->
             </div>
@@ -1820,12 +1822,12 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js?v=3.7"></script>
-  <script src="arcade-core.js?v=3.7"></script>
-  <script src="arcade-jornada.js?v=3.7"></script>
-  <script src="arcade-games.js?v=3.7"></script>
-  <script src="customizer.js?v=3.7"></script>
-  <script src="app.js?v=3.7"></script>
+  <script src="games.js?v=3.8"></script>
+  <script src="arcade-core.js?v=3.8"></script>
+  <script src="arcade-jornada.js?v=3.8"></script>
+  <script src="arcade-games.js?v=3.8"></script>
+  <script src="customizer.js?v=3.8"></script>
+  <script src="app.js?v=3.8"></script>
 </body>
 
 </html>
