@@ -110,6 +110,30 @@ const updateProgress = async (req, res, next) => {
 
     const prevCompleted = prevModRes.rows.length > 0 ? Boolean(prevModRes.rows[0].is_completed) : false;
     const prevScore = prevModRes.rows.length > 0 ? parseInt(prevModRes.rows[0].score_earned || 0, 10) : 0;
+
+    // Anti-Farming estricto: si el módulo ya fue completado (1 solo intento permitido), no sumar más puntos ni alterar estadísticas
+    if (prevCompleted) {
+      const currentUserRes = await query(
+        'SELECT total_score, correct_answers, total_questions FROM users WHERE id = $1',
+        [userId]
+      );
+      const u = currentUserRes.rows[0] || { total_score: 0, correct_answers: 0, total_questions: 0 };
+      const certificates = await evaluateAndIssueCertificates(userId, parseInt(u.total_score || 0, 10), clientIp);
+      return res.status(200).json({
+        success: true,
+        locked: true,
+        message: 'Módulo ya completado previamente (Anti-Farming: 1 solo intento permitido).',
+        data: {
+          score: parseInt(u.total_score || 0, 10),
+          correctAnswers: parseInt(u.correct_answers || 0, 10),
+          totalQuestions: parseInt(u.total_questions || 0, 10),
+          moduleKey,
+          isCompleted: true,
+          certificates
+        }
+      });
+    }
+
     const alreadyMaxed = prevCompleted && prevScore >= maxCap;
 
     // 1. Actualizar tabla module_progress respetando el tope máximo del módulo

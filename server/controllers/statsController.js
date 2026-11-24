@@ -6,7 +6,7 @@ const { query, logAudit, PHASE1_MODULES, PHASE2_MODULES } = require('../config/d
 const { getAcademyConfigFromDB } = require('./authController');
 
 let inMemoryAcademyConfig = {
-  activePhaseMode: 'both',
+  activePhaseMode: 'phase2',
   campaignName: 'Programa Anual de Concientización 2026',
   requirePhase1ForPhase2: false
 };

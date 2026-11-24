@@ -839,9 +839,9 @@
       this.playing = false;
       if (this.raf) cancelAnimationFrame(this.raf);
       const left = Math.round(this.timeLeft);
-      const raw = win ? 120 + Math.round(left * 0.3) + (this.hints === 0 ? 20 : 0) : 0;
-      let awarded = null;
-      if (win) awarded = await window.arcade.award(this.key, raw);
+      const solvedCount = this.solved.filter(Boolean).length;
+      const raw = win ? 120 + Math.round(left * 0.3) + (this.hints === 0 ? 20 : 0) : solvedCount * 20;
+      const awarded = await window.arcade.award(this.key, raw);
       U.snd(win ? 'complete' : 'incorrect');
       const mm = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
       const root = window.arcade.root(this.key);

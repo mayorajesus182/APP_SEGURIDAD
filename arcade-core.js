@@ -256,6 +256,14 @@
     },
 
     open(key) {
+      if (window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules && window.app.state.user.completedModules[key]) {
+        window.app.showModalAlert({
+          title: '🔒 Módulo Ya Completado (Anti-Farming)',
+          message: 'Ya completaste este desafío de la Fase 2. Por política Anti-Farming solo se permite jugar una vez por colaborador.',
+          type: 'info'
+        }).then(() => window.app.navigateTo('dashboard'));
+        return;
+      }
       Object.keys(this.games).forEach((k) => { if (k !== key) this.games[k].stop && this.games[k].stop(); });
       this.active = key;
       const g = this.games[key];
@@ -306,9 +314,9 @@
       const lessonHtml = (lessons || []).length
         ? `<div class="arc-lessons"><h4>📘 Lo que debes recordar</h4><ul>${lessons.map((l) => `<li>${l}</li>`).join('')}</ul></div>` : '';
       const note = awarded
-        ? (awarded.first ? `<div class="arc-award ok">🏅 +${awarded.points} puntos sumados a tu perfil</div>`
-          : `<div class="arc-award">♻️ Práctica libre: obtuviste ${awarded.points} pts (los puntos solo se suman la primera vez)</div>`)
-        : '';
+        ? (awarded.first ? `<div class="arc-award ok">🏅 +${awarded.points} puntos registrados · 🔒 Intento único completado (Anti-Farming)</div>`
+          : `<div class="arc-award">🔒 Este módulo ya fue completado anteriormente (Anti-Farming: 1 solo intento permitido)</div>`)
+        : '<div class="arc-award">🔒 Intento único completado (Anti-Farming activo)</div>';
       return `
         <div class="arc-result ${win ? 'win' : 'lose'}">
           <div class="arc-result-emoji">${emoji}</div>
@@ -319,8 +327,7 @@
           ${extra || ''}
           ${lessonHtml}
           <div class="arc-actions">
-            <button class="btn btn-primary" onclick="${retryJs}">🔁 Jugar de nuevo</button>
-            <button class="btn btn-secondary" onclick="app.navigateTo('dashboard')">← Volver al Panel</button>
+            <button class="btn btn-primary" onclick="app.navigateTo('dashboard')">← Volver al Panel</button>
           </div>
         </div>`;
     },

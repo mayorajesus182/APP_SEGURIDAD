@@ -5,9 +5,11 @@
  */
 
 const PHASE1_KEYS = ['phishing', 'pci', 'incident', 'password', 'usb'];
-const PHASE2_KEYS = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
+const PHASE2_LEGACY_KEYS = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
 const ARCADE_KEYS = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'];
-const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_KEYS, ...ARCADE_KEYS];
+// Fase 2 oficial: los 4 juegos interactivos 3D (Zona Arcade 3D)
+const PHASE2_KEYS = [...ARCADE_KEYS];
+const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_LEGACY_KEYS, ...ARCADE_KEYS];
 
 const MODULE_LABELS = {
   phishing: '1. Phishing Detective (F1)',
@@ -33,7 +35,7 @@ class AppController {
     this.userPhaseFilter = 'all'; // 'all', 'phase1', 'phase2'
 
     this.academyConfig = {
-      activePhaseMode: 'both', // 'phase1', 'phase2', 'both'
+      activePhaseMode: 'phase2', // 'phase1', 'phase2', 'both'
       campaignName: 'Programa Anual de Concientización 2026',
       requirePhase1ForPhase2: false
     };
@@ -445,9 +447,9 @@ class AppController {
   }
 
   updatePhaseVisibilityUI() {
-    const mode = this.academyConfig.activePhaseMode || 'both';
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
     const p1Block = document.getElementById('phase1-section-block');
-    const p2Block = document.getElementById('phase2-section-block');
+    const p2LegacyBlock = document.getElementById('phase2-section-block');
     const arcBlock = document.getElementById('arcade-section-block');
     const tabsBar = document.getElementById('user-phase-tabs');
     const phaseBadge = document.getElementById('dash-active-phase-badge');
@@ -457,38 +459,32 @@ class AppController {
       campaignBadge.textContent = this.academyConfig.campaignName || 'Programa Anual de Concientización 2026';
     }
 
+    // Los 5 módulos anteriores de Fase 2 permanecen ocultos; la nueva Fase 2 son los 4 juegos 3D (#arcade-section-block)
+    if (p2LegacyBlock) p2LegacyBlock.style.display = 'none';
+
     if (mode === 'phase1') {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'block';
-      if (p2Block) p2Block.style.display = 'none';
-      if (arcBlock) arcBlock.style.display = 'block';
+      if (arcBlock) arcBlock.style.display = 'none';
       if (phaseBadge) phaseBadge.textContent = '🛡️ Fase 1 Activa (Nivel Básico)';
     } else if (mode === 'phase2') {
       if (tabsBar) tabsBar.style.display = 'none';
       if (p1Block) p1Block.style.display = 'none';
-      if (p2Block) p2Block.style.display = 'block';
       if (arcBlock) arcBlock.style.display = 'block';
-      if (phaseBadge) phaseBadge.textContent = '🚀 Fase 2 Activa (Nivel Especialista)';
+      if (phaseBadge) phaseBadge.textContent = '🚀 Fase 2 Activa: Juegos Interactivos 3D';
     } else {
       // mode === 'both'
       if (tabsBar) tabsBar.style.display = 'flex';
-      if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1, Fase 2 y Arcade 3D Activos';
+      if (phaseBadge) phaseBadge.textContent = '⚡ Fase 1 y Fase 2 Activas';
 
       if (this.userPhaseFilter === 'phase1') {
         if (p1Block) p1Block.style.display = 'block';
-        if (p2Block) p2Block.style.display = 'none';
         if (arcBlock) arcBlock.style.display = 'none';
-      } else if (this.userPhaseFilter === 'phase2') {
+      } else if (this.userPhaseFilter === 'phase2' || this.userPhaseFilter === 'arcade') {
         if (p1Block) p1Block.style.display = 'none';
-        if (p2Block) p2Block.style.display = 'block';
-        if (arcBlock) arcBlock.style.display = 'none';
-      } else if (this.userPhaseFilter === 'arcade') {
-        if (p1Block) p1Block.style.display = 'none';
-        if (p2Block) p2Block.style.display = 'none';
         if (arcBlock) arcBlock.style.display = 'block';
       } else {
         if (p1Block) p1Block.style.display = 'block';
-        if (p2Block) p2Block.style.display = 'block';
         if (arcBlock) arcBlock.style.display = 'block';
       }
     }
@@ -614,8 +610,8 @@ class AppController {
         <td style="padding:0.85rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
         <td style="padding:0.85rem; color:var(--accent-cyan); font-weight:bold; font-family:var(--font-mono);">${u.total_score} PTS</td>
         <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p1Count) >= 5 ? 'status-completed' : 'status-pending'}">${p1Count} / 5</span></td>
-        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p2Count) >= 5 ? 'status-completed' : 'status-pending'}">${p2Count} / 5</span></td>
-        <td style="padding:0.85rem; font-weight:600;">${u.modules_completed} / 10</td>
+        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p2Count) >= 4 ? 'status-completed' : 'status-pending'}">${p2Count} / 4</span></td>
+        <td style="padding:0.85rem; font-weight:600;">${u.modules_completed} / 9</td>
         <td style="padding:0.85rem; font-size:0.78rem; color:var(--text-muted);">${lastActivityDate}</td>
         <td style="padding:0.85rem;">
           <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="app.showAdminUserDetail(${u.id})">
@@ -800,10 +796,10 @@ class AppController {
     if (statsP1) statsP1.textContent = `${p1Completed} / 5`;
 
     const statsP2 = document.getElementById('stats-modules-p2');
-    if (statsP2) statsP2.textContent = `${p2Completed} / 5`;
+    if (statsP2) statsP2.textContent = `${p2Completed} / 4`;
 
-    const mode = this.academyConfig.activePhaseMode || 'both';
-    const activeTarget = mode === 'phase1' ? 5 : mode === 'phase2' ? 5 : 10;
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const activeTarget = mode === 'phase1' ? 5 : mode === 'phase2' ? 4 : 9;
     const activeDone = mode === 'phase1' ? p1Completed : mode === 'phase2' ? p2Completed : totalCompleted;
 
     const statsModules = document.getElementById('stats-modules');
@@ -817,15 +813,14 @@ class AppController {
 
     const p2Pill = document.getElementById('phase2-progress-pill');
     if (p2Pill) {
-      p2Pill.textContent = `${p2Completed} / 5 Completados`;
-      p2Pill.className = `game-status-badge ${p2Completed === 5 ? 'status-completed' : 'status-pending'}`;
+      p2Pill.textContent = `${p2Completed} / 4 Completados`;
+      p2Pill.className = `game-status-badge ${p2Completed === 4 ? 'status-completed' : 'status-pending'}`;
     }
 
-    const arcCompleted = ARCADE_KEYS.filter(k => this.state.user.completedModules[k]).length;
     const arcPill = document.getElementById('arcade-progress-pill');
     if (arcPill) {
-      arcPill.textContent = `${arcCompleted} / 4 Jugados`;
-      arcPill.className = `game-status-badge ${arcCompleted === 4 ? 'status-completed' : 'status-pending'}`;
+      arcPill.textContent = `${p2Completed} / 4 Completados`;
+      arcPill.className = `game-status-badge ${p2Completed === 4 ? 'status-completed' : 'status-pending'}`;
     }
 
     const accuracy = this.state.user.totalQuestions > 0
@@ -834,7 +829,7 @@ class AppController {
     const statsAccuracy = document.getElementById('stats-accuracy');
     if (statsAccuracy) statsAccuracy.textContent = `${accuracy}%`;
 
-    // Actualizar badges de estado de los 10 módulos
+    // Actualizar badges de estado y bloqueo anti-farming de todos los módulos
     ALL_MODULE_KEYS.forEach(modKey => {
       this.updateStatusBadge(modKey, Boolean(this.state.user.completedModules[modKey]));
     });
@@ -846,7 +841,7 @@ class AppController {
       certP1.style.display = (p1Completed === 5 && (mode === 'phase1' || mode === 'both')) ? 'block' : 'none';
     }
     if (certP2) {
-      certP2.style.display = (p2Completed === 5 && (mode === 'phase2' || mode === 'both')) ? 'block' : 'none';
+      certP2.style.display = (p2Completed === 4 && (mode === 'phase2' || mode === 'both')) ? 'block' : 'none';
     }
 
     this.updatePhaseVisibilityUI();
@@ -1140,6 +1135,20 @@ class AppController {
       } else {
         badge.textContent = 'Pendiente';
         badge.className = 'game-status-badge status-pending';
+      }
+    }
+    const startBtn = document.getElementById(`btn-start-${gameId}`);
+    if (startBtn) {
+      if (isCompleted) {
+        startBtn.disabled = true;
+        startBtn.textContent = '🔒 Completado (1/1)';
+        startBtn.style.opacity = '0.6';
+        startBtn.style.cursor = 'not-allowed';
+      } else {
+        startBtn.disabled = false;
+        if (startBtn.dataset && startBtn.dataset.label) startBtn.textContent = startBtn.dataset.label;
+        startBtn.style.opacity = '';
+        startBtn.style.cursor = '';
       }
     }
   }
@@ -1531,8 +1540,16 @@ class AppController {
     if (window.games && games.remote_vpn) games.remote_vpn.init();
   }
 
-  // Juegos Arcade (extra, no afectan certificados)
+  // Fase 2 Oficial: Juegos Interactivos 3D (Anti-Farming estricto: 1 solo intento)
   startArcadeGame(key) {
+    if (this.state.user.completedModules[key]) {
+      this.showModalAlert({
+        title: '🔒 Módulo Ya Completado (Anti-Farming)',
+        message: 'Ya completaste este desafío de la Fase 2. Por política Anti-Farming solo se permite un intento por colaborador.',
+        type: 'info'
+      });
+      return;
+    }
     this.navigateTo(key);
     if (window.arcade) window.arcade.open(key);
   }

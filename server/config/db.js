@@ -8,9 +8,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const PHASE1_MODULES = ['phishing', 'pci', 'incident', 'password', 'usb'];
-const PHASE2_MODULES = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
+const PHASE2_LEGACY_MODULES = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
 const ARCADE_MODULES = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'];
-const ALL_MODULES = [...PHASE1_MODULES, ...PHASE2_MODULES, ...ARCADE_MODULES];
+// Fase 2 oficial: los 4 juegos interactivos 3D (Zona Arcade 3D)
+const PHASE2_MODULES = [...ARCADE_MODULES];
+const ALL_MODULES = [...PHASE1_MODULES, ...PHASE2_LEGACY_MODULES, ...ARCADE_MODULES];
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
@@ -97,7 +99,7 @@ const ensureSchema = async () => {
       INSERT INTO system_settings (setting_key, setting_value, updated_by)
       VALUES (
         'academy_config',
-        '{"activePhaseMode": "both", "campaignName": "Programa Anual de Concientización 2026", "requirePhase1ForPhase2": false}'::jsonb,
+        '{"activePhaseMode": "phase2", "campaignName": "Programa Anual de Concientización 2026", "requirePhase1ForPhase2": false}'::jsonb,
         'system'
       )
       ON CONFLICT (setting_key) DO NOTHING;

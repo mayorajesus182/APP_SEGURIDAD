@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=3.6">
+  <link rel="stylesheet" href="style.css?v=3.7">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -176,8 +176,8 @@
         <!-- Columna Principal: Suite de Módulos (Fase 1 y Fase 2) -->
         <div>
 
-          <!-- BLOQUE FASE 1: FUNDAMENTOS DE CIBERSEGURIDAD -->
-          <div id="phase1-section-block" style="margin-bottom: 2.2rem;">
+          <!-- BLOQUE FASE 1: FUNDAMENTOS DE CIBERSEGURIDAD (Oculto cuando solo Fase 2 está activa) -->
+          <div id="phase1-section-block" style="display:none; margin-bottom: 2.2rem;">
             <div
               style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
               <h3 class="modules-title" style="margin-bottom:0;">
@@ -328,8 +328,8 @@
             </div>
           </div>
 
-          <!-- BLOQUE FASE 2: ESPECIALIZACIÓN TRANSACCIONAL Y AMENAZAS AVANZADAS -->
-          <div id="phase2-section-block">
+          <!-- BLOQUE FASE 2 LEGACY (Oculto) -->
+          <div id="phase2-section-block" style="display:none;">
             <div
               style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
               <h3 class="modules-title" style="margin-bottom:0; color:var(--accent-cyan);">
@@ -479,32 +479,32 @@
             </div>
           </div>
 
-          <!-- BLOQUE ARCADE 3D: JUEGOS ESPECIALES PARA OFICINA Y FINANZAS -->
-          <div id="arcade-section-block" style="margin-top: 2.4rem;">
+          <!-- BLOQUE FASE 2 OFICIAL: JUEGOS INTERACTIVOS 3D (ZONA ARCADE 3D) -->
+          <div id="arcade-section-block" style="margin-top: 0;">
             <div
-              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
               <div>
-                <h3 class="modules-title" style="margin-bottom:0.2rem; color:#38bdf8;">
-                  🕹️ Zona Arcade 3D: Juegos Interactivos de Oficina (4 Propuestas Jugables)
+                <h3 class="modules-title" style="margin-bottom:0.25rem; color:#38bdf8;">
+                  🚀 Fase 2: Juegos Interactivos 3D de Ciberseguridad (Corporación Suiche 7B)
                 </h3>
                 <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
-                  Cuatro experiencias distintas y 100% rejugables con motor 3D propio para personal administrativo,
-                  financiero, RR.HH. y atención al cliente.
+                  Completa los 4 desafíos interactivos en 3D para obtener tu Certificado de Fase 2 (1 solo intento por
+                  módulo · Protección Anti-Farming activa).
                 </p>
               </div>
-              <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 4 Jugados</span>
+              <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 4 Completados</span>
             </div>
 
             <div class="modules-grid" id="arcade-cards-grid">
-              <!-- Propuesta A: Escudo de Red 3D -->
+              <!-- Módulo 1 F2: Escudo de Red 3D -->
               <div class="game-card game-card-phase2" style="--accent-color: #38bdf8">
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
                     <div class="game-icon-wrapper pulse-3d-icon">🛡️</div>
-                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">ACCIÓN 3D · 75
-                      SEGUNDOS</span>
+                    <span class="sim3d-badge" style="border-color:#38bdf8; color:#38bdf8;">FASE 2 · ACCIÓN 3D (75
+                      SEG)</span>
                   </div>
-                  <h3>A. Escudo de Red 3D: Defiende el Suiche</h3>
+                  <h3>1. Escudo de Red 3D: Defiende el Suiche</h3>
                   <p>Defiende el núcleo 3D de Corporación Suiche 7B en 3 oleadas rápidas sin esperas ni cuestionarios.
                     Destruye con láser las amenazas (Falso Jefe, Factura .EXE, USB, QR trampa) y deja pasar las
                     operaciones legítimas (Pago Móvil S7B, QR S7B, NFC S7B).</p>
@@ -512,25 +512,25 @@
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: #38bdf8">
-                      <span class="difficulty-dot"></span> Defensa 3D · +300 PTS Máx
+                      <span class="difficulty-dot"></span> 1 Intento · +300 PTS Máx
                     </span>
-                    <span id="status-arcade_jornada" class="game-status-badge status-pending">Disponible</span>
+                    <span id="status-arcade_jornada" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
-                    onclick="app.startArcadeGame('arcade_jornada')">
+                  <button id="btn-start-arcade_jornada" data-label="Jugar Escudo de Red 3D" class="btn btn-primary"
+                    style="width:100%; margin-top:1rem;" onclick="app.startArcadeGame('arcade_jornada')">
                     Jugar Escudo de Red 3D
                   </button>
                 </div>
               </div>
 
-              <!-- Propuesta B: Bandeja Blindada -->
+              <!-- Módulo 2 F2: Bandeja Blindada -->
               <div class="game-card game-card-phase2" style="--accent-color: #fbba0a">
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
                     <div class="game-icon-wrapper pulse-3d-icon">📥</div>
-                    <span class="sim3d-badge">ARCADE SWIPE 3D · 90 SEGUNDOS</span>
+                    <span class="sim3d-badge">FASE 2 · SWIPE 3D (90 SEG)</span>
                   </div>
-                  <h3>B. Bandeja Blindada (Contra Reloj)</h3>
+                  <h3>2. Bandeja Blindada (Contra Reloj)</h3>
                   <p>Arrastra tarjetas 3D de correo hacia la izquierda (<strong>🚫 Es Fraude</strong>) o derecha
                     (<strong>✅ Es Seguro</strong>) antes de que se agote el reloj. Acumula combos x4 y cuida tus 3
                     vidas.</p>
@@ -538,25 +538,26 @@
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: var(--accent-cyan)">
-                      <span class="difficulty-dot"></span> Acción Rápida · +200 PTS Máx
+                      <span class="difficulty-dot"></span> 1 Intento · +200 PTS Máx
                     </span>
-                    <span id="status-arcade_bandeja" class="game-status-badge status-pending">Disponible</span>
+                    <span id="status-arcade_bandeja" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
-                    onclick="app.startArcadeGame('arcade_bandeja')">
+                  <button id="btn-start-arcade_bandeja" data-label="Jugar Bandeja Blindada" class="btn btn-primary"
+                    style="width:100%; margin-top:1rem;" onclick="app.startArcadeGame('arcade_bandeja')">
                     Jugar Bandeja Blindada
                   </button>
                 </div>
               </div>
 
-              <!-- Propuesta C: Caza-Fraudes (Duelo de Cartas) -->
+              <!-- Módulo 3 F2: Caza-Fraudes (Duelo de Cartas) -->
               <div class="game-card game-card-phase2" style="--accent-color: #b60e80">
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
                     <div class="game-icon-wrapper pulse-3d-icon">🃏</div>
-                    <span class="sim3d-badge" style="border-color:#f472b6; color:#f472b6;">DUELO DE CARTAS 3D</span>
+                    <span class="sim3d-badge" style="border-color:#f472b6; color:#f472b6;">FASE 2 · DUELO DE CARTAS
+                      3D</span>
                   </div>
-                  <h3>C. Caza-Fraudes: Duelo de Cartas</h3>
+                  <h3>3. Caza-Fraudes: Duelo de Cartas</h3>
                   <p>Enfréntate a <em>"El Estafador"</em> durante 8 rondas. Cada vez que lance un engaño (falso jefe,
                     cambio de cuenta, llamada trampa), responde con tu mejor carta de defensa 3D y evita las cartas
                     trampa.</p>
@@ -564,30 +565,26 @@
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: #f472b6">
-                      <span class="difficulty-dot"></span> Estrategia 3D · +200 PTS Máx
+                      <span class="difficulty-dot"></span> 1 Intento · +200 PTS Máx
                     </span>
-                    <span id="status-arcade_cartas" class="game-status-badge status-pending">Disponible</span>
+                    <span id="status-arcade_cartas" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
-                    onclick="app.startArcadeGame('arcade_cartas')">
+                  <button id="btn-start-arcade_cartas" data-label="Jugar Duelo de Cartas" class="btn btn-primary"
+                    style="width:100%; margin-top:1rem;" onclick="app.startArcadeGame('arcade_cartas')">
                     Jugar Duelo de Cartas
                   </button>
                 </div>
               </div>
 
-              <!-- Propuesta D: Escape Room La Bóveda Digital -->
+              <!-- Módulo 4 F2: Escape Room La Bóveda Digital -->
               <div class="game-card game-card-phase2" style="--accent-color: #4ade80">
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
                     <div class="game-icon-wrapper pulse-3d-icon">🔐</div>
-                    <span class="sim3d-badge" style="border-color:#4ade80; color:#4ade80;">ESCAPE ROOM · BÓVEDA
+                    <span class="sim3d-badge" style="border-color:#4ade80; color:#4ade80;">FASE 2 · ESCAPE ROOM
                       3D</span>
                   </div>
-                  <h3>D. Escape Room: La Bóveda Digital 3D</h3>
-                  <p>Gira una bóveda bancaria 3D y resuelve sus 5 candados interactivos (claves, correo falso,
-                    escritorio
-                    desordenado, llamada sospechosa y pago urgente) para descubrir el código de 5 dígitos y abrir la
-                    puerta.</p>
+                  <h3>4. Escape Room: La Bóveda Digital 3D</h3>
                   <p>Gira la bóveda de datos 3D de Corporación Suiche 7B y resuelve sus 5 candados interactivos (claves,
                     correo falso, escritorio desordenado, llamada sospechosa y pago urgente) para descubrir el código de
                     5 dígitos y abrir la puerta.</p>
@@ -595,12 +592,12 @@
                 <div>
                   <div class="game-meta">
                     <span class="game-difficulty" style="color: #4ade80">
-                      <span class="difficulty-dot"></span> Escape Room 3D · +250 PTS Máx
+                      <span class="difficulty-dot"></span> 1 Intento · +250 PTS Máx
                     </span>
-                    <span id="status-arcade_boveda" class="game-status-badge status-pending">Disponible</span>
+                    <span id="status-arcade_boveda" class="game-status-badge status-pending">Pendiente</span>
                   </div>
-                  <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
-                    onclick="app.startArcadeGame('arcade_boveda')">
+                  <button id="btn-start-arcade_boveda" data-label="Abrir Bóveda Digital 3D" class="btn btn-primary"
+                    style="width:100%; margin-top:1rem;" onclick="app.startArcadeGame('arcade_boveda')">
                     Abrir Bóveda Digital 3D
                   </button>
                 </div>
@@ -1635,18 +1632,19 @@
               fundamentales (Phishing, Oficina Segura, Vishing, Contraseñas, USB).</p>
           </button>
 
-          <button type="button" class="phase-mode-card" id="mode-btn-phase2" onclick="app.saveAdminPhaseMode('phase2')">
-            <div style="font-weight:700; font-size:0.95rem; color:var(--accent-cyan);">🚀 Solo Fase 2 (Avanzado)</div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 módulos
-              especializados (IA Segura DLP, PCI-DSS 4.0, Quishing/MFA, Fraude BEC, Teletrabajo/VPN).</p>
+          <button type="button" class="phase-mode-card active" id="mode-btn-phase2"
+            onclick="app.saveAdminPhaseMode('phase2')">
+            <div style="font-weight:700; font-size:0.95rem; color:var(--accent-cyan);">🚀 Solo Fase 2 (Juegos 3D)</div>
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 4 juegos
+              interactivos 3D (Escudo de Red 3D, Bandeja Blindada, Caza-Fraudes, La Bóveda Digital) con 1 solo intento.
+            </p>
           </button>
 
-          <button type="button" class="phase-mode-card active" id="mode-btn-both"
-            onclick="app.saveAdminPhaseMode('both')">
+          <button type="button" class="phase-mode-card" id="mode-btn-both" onclick="app.saveAdminPhaseMode('both')">
             <div style="font-weight:700; font-size:0.95rem; color:#4ade80;">⚡ Ambas Fases Activas (Fase 1 + Fase 2)
             </div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Habilita la suite completa de 10
-              módulos interactivos con doble certificación (Básico + Especialista).</p>
+            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Habilita Fase 1 (5 módulos) + Fase
+              2 (4 juegos 3D) con doble certificación.</p>
           </button>
         </div>
 
@@ -1822,12 +1820,12 @@
   </div>
 
   <!-- SCRIPTS DE LÓGICA -->
-  <script src="games.js?v=3.6"></script>
-  <script src="arcade-core.js?v=3.6"></script>
-  <script src="arcade-jornada.js?v=3.6"></script>
-  <script src="arcade-games.js?v=3.6"></script>
-  <script src="customizer.js?v=3.6"></script>
-  <script src="app.js?v=3.6"></script>
+  <script src="games.js?v=3.7"></script>
+  <script src="arcade-core.js?v=3.7"></script>
+  <script src="arcade-jornada.js?v=3.7"></script>
+  <script src="arcade-games.js?v=3.7"></script>
+  <script src="customizer.js?v=3.7"></script>
+  <script src="app.js?v=3.7"></script>
 </body>
 
 </html>
