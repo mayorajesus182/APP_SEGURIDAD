@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=4.0">
+  <link rel="stylesheet" href="style.css?v=4.1">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -23,10 +23,9 @@
   <canvas id="cyber-globe-3d-canvas" aria-hidden="true"></canvas>
 
   <header>
-    <div class="logo-container" aria-label="Corporación Suiche 7B">
+    <div class="logo-container" aria-label="Corporación Suiche 7B" onclick="if(window.app && app.state.user.name) app.navigateTo('dashboard')">
       <!-- Logotipo Oficial Corporación Suiche 7B -->
-      <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B Logo" class="brand-logo-header">
-      <span class="logo-badge">v2.5 F1+F2</span>
+      <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B" class="brand-logo-header">
     </div>
 
     <!-- Navegación SPA -->
