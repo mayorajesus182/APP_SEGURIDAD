@@ -22,7 +22,8 @@ const MODULE_MAX_SCORES = {
   arcade_jornada: 300,
   arcade_bandeja: 200,
   arcade_cartas: 200,
-  arcade_boveda: 250
+  arcade_boveda: 250,
+  arcade_ia: 250
 };
 
 // Generar código único verificable de certificado institucional

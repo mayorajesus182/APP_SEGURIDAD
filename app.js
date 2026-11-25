@@ -6,8 +6,8 @@
 
 const PHASE1_KEYS = ['phishing', 'pci', 'incident', 'password', 'usb'];
 const PHASE2_LEGACY_KEYS = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
-const ARCADE_KEYS = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'];
-// Fase 2 oficial: los 4 juegos interactivos 3D (Zona Arcade 3D)
+const ARCADE_KEYS = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda', 'arcade_ia'];
+// Fase 2 oficial: los 5 juegos interactivos 3D (Zona Arcade 3D + Buen Uso IA)
 const PHASE2_KEYS = [...ARCADE_KEYS];
 const ALL_MODULE_KEYS = [...PHASE1_KEYS, ...PHASE2_LEGACY_KEYS, ...ARCADE_KEYS];
 
@@ -25,7 +25,8 @@ const MODULE_LABELS = {
   arcade_jornada: 'A. Escudo de Red 3D: Defiende el Suiche (Arcade)',
   arcade_bandeja: 'B. Bandeja Blindada 3D (Arcade)',
   arcade_cartas: 'C. Caza-Fraudes Duelo Cartas (Arcade)',
-  arcade_boveda: 'D. La Bóveda Digital 3D (Arcade)'
+  arcade_boveda: 'D. La Bóveda Digital 3D (Arcade)',
+  arcade_ia: 'E. Filtro IA 3D: Buen Uso de la IA (Arcade)'
 };
 
 class AppController {
@@ -63,7 +64,8 @@ class AppController {
           arcade_jornada: false,
           arcade_bandeja: false,
           arcade_cartas: false,
-          arcade_boveda: false
+          arcade_boveda: false,
+          arcade_ia: false
         },
         certificates: {},
         attempts: 0,
@@ -514,8 +516,8 @@ class AppController {
     if (indicator) {
       const labels = {
         phase1: 'Modo Actual: Solo Fase 1 (Básico - 5 Módulos)',
-        phase2: 'Modo Actual: Solo Fase 2 (Juegos 3D - 4 Módulos)',
-        both: 'Modo Actual: Ambas Fases (9 Módulos)'
+        phase2: 'Modo Actual: Solo Fase 2 (Juegos 3D - 5 Módulos)',
+        both: 'Modo Actual: Ambas Fases (10 Módulos)'
       };
       indicator.textContent = labels[mode] || labels.phase2;
     }
@@ -1060,7 +1062,7 @@ class AppController {
       { label: 'Anti-Phishing', val: (cm.arcade_bandeja || cm.phishing) ? 100 : 25 },
       { label: 'Fraude BEC', val: cm.arcade_cartas ? 100 : 25 },
       { label: 'Bóveda/Claves', val: cm.arcade_boveda ? 100 : 25 },
-      { label: 'Criterio 3D', val: Math.min(100, 25 + PHASE2_KEYS.filter(k => cm[k]).length * 19) },
+      { label: 'Buen Uso IA', val: cm.arcade_ia ? 100 : 25 },
       { label: 'Cultura S7B', val: PHASE2_KEYS.every(k => cm[k]) ? 100 : (25 + PHASE2_KEYS.filter(k => cm[k]).length * 15) }
     ];
 
@@ -1313,8 +1315,9 @@ class AppController {
       { icon: '📥', name: 'Bandeja Blindada', unlocked: cm.arcade_bandeja, desc: 'Clasificación rápida de correos 3D' },
       { icon: '🃏', name: 'Caza-Fraudes', unlocked: cm.arcade_cartas, desc: 'Venció a El Estafador en Duelo de Cartas' },
       { icon: '🔐', name: 'Maestro Bóveda 3D', unlocked: cm.arcade_boveda, desc: 'Resolvió los 5 candados de La Bóveda Digital' },
-      { icon: '🎖️', name: 'Certificado Fase 2', unlocked: p2Completed === 4, desc: '4/4 Desafíos Fase 2 completados' },
-      { icon: '👑', name: 'Guardián Suiche 7B', unlocked: p2Completed === 4 && this.state.user.score >= 500, desc: 'Excelencia en Ciberseguridad' }
+      { icon: '🤖', name: 'Guardián IA 3D', unlocked: cm.arcade_ia, desc: 'Dominó el Buen Uso de IA, DLP y Deepfakes' },
+      { icon: '🎖️', name: 'Certificado Fase 2', unlocked: p2Completed === PHASE2_KEYS.length, desc: `${PHASE2_KEYS.length}/${PHASE2_KEYS.length} Desafíos Fase 2 completados` },
+      { icon: '👑', name: 'Guardián Suiche 7B', unlocked: p2Completed === PHASE2_KEYS.length && this.state.user.score >= 600, desc: 'Excelencia en Ciberseguridad' }
     ];
 
     container.innerHTML = badges.map(b => `

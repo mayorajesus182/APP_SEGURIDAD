@@ -240,7 +240,7 @@
   // ---------------------------------------------------------------------------
   // REGISTRO DE JUEGOS ARCADE + PUNTOS
   // ---------------------------------------------------------------------------
-  const CAPS = { arcade_jornada: 300, arcade_bandeja: 200, arcade_cartas: 200, arcade_boveda: 250 };
+  const CAPS = { arcade_jornada: 300, arcade_bandeja: 200, arcade_cartas: 200, arcade_boveda: 250, arcade_ia: 250 };
   const BEST_KEY = 's7b_arcade_best_v1';
 
   const arcade = {
@@ -329,7 +329,7 @@
             : `<div class="arc-award">🔒 Este módulo ya fue completado anteriormente (Anti-Farming: 1 solo intento permitido)</div>`))
         : '<div class="arc-award">🔒 Intento único completado (Anti-Farming activo)</div>';
       const cm = (window.app && window.app.state && window.app.state.user && window.app.state.user.completedModules) || {};
-      const allPhase2Done = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'].every((k) => Boolean(cm[k]));
+      const allPhase2Done = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda', 'arcade_ia'].every((k) => Boolean(cm[k]));
       const certBtn = allPhase2Done
         ? `<button class="btn btn-success" style="background:linear-gradient(135deg, #b60e80, #6d084d);" onclick="app.navigateTo('dashboard'); app.showCertificate('phase2');">🎖️ Ver / Descargar Certificado Fase 2</button>`
         : '';

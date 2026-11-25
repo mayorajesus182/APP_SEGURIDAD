@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=4.2">
+  <link rel="stylesheet" href="style.css?v=4.3">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -138,7 +138,7 @@
             </div>
             <h2>Hola, <span id="dash-user-name" style="color:var(--primary-light)">Colaborador</span> 👋</h2>
             <p id="dash-hero-subtitle">Tu misión hoy es salvaguardar el ecosistema transaccional y la información de
-              Corporación Suiche 7B. Completa los 4 desafíos interactivos de la <strong>Fase 2</strong> para obtener tu
+              Corporación Suiche 7B. Completa los 5 desafíos interactivos de la <strong>Fase 2</strong> para obtener tu
               <strong>Certificado Oficial de Ciberseguridad</strong>.
             </p>
           </div>
@@ -490,11 +490,11 @@
                   🚀 Fase 2: Juegos Interactivos 3D de Ciberseguridad (Corporación Suiche 7B)
                 </h3>
                 <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
-                  Completa los 4 desafíos interactivos en 3D para obtener tu Certificado de Fase 2 (1 solo intento por
-                  módulo ).
+                  Completa los 5 desafíos interactivos en 3D para obtener tu Certificado de Fase 2 (1 solo intento por
+                  módulo).
                 </p>
               </div>
-              <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 4 Completados</span>
+              <span id="arcade-progress-pill" class="game-status-badge status-pending">0 / 5 Completados</span>
             </div>
 
             <div class="modules-grid" id="arcade-cards-grid">
@@ -604,6 +604,34 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Módulo 5 F2: Filtro IA 3D: Buen Uso de la IA -->
+              <div class="game-card game-card-phase2" style="--accent-color: #a855f7">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <div class="game-icon-wrapper pulse-3d-icon">🤖</div>
+                    <span class="sim3d-badge" style="border-color:#c084fc; color:#c084fc;">FASE 2 · FILTRO DLP &amp; IA
+                      3D</span>
+                  </div>
+                  <h3>5. Filtro IA 3D: Buen Uso de la IA</h3>
+                  <p>Controla el escáner DLP 3D entre Corporación Suiche 7B y la Nube de IA. Censura datos sensibles en
+                    tiempo real antes de enviar prompts, bloquea fugas confidenciales y detecta alucinaciones y
+                    deepfakes.</p>
+                </div>
+                <div>
+                  <div class="game-meta">
+                    <span class="game-difficulty" style="color: #c084fc">
+                      <span class="difficulty-dot"></span> 1 Intento · +250 PTS Máx
+                    </span>
+                    <span id="status-arcade_ia" class="game-status-badge status-pending">Pendiente</span>
+                  </div>
+                  <button id="btn-start-arcade_ia" data-label="Jugar Filtro IA 3D" class="btn btn-primary"
+                    style="width:100%; margin-top:1rem; background:linear-gradient(135deg,#7c3aed,#005e9c);"
+                    onclick="app.startArcadeGame('arcade_ia')">
+                    Jugar Filtro IA 3D
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -630,11 +658,11 @@
             </div>
             <div class="stat-item">
               <span class="stat-label">Avance Fase 2 (Juegos 3D):</span>
-              <span class="stat-val" id="stats-modules-p2">0 / 4</span>
+              <span class="stat-val" id="stats-modules-p2">0 / 5</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Total Módulos Activos:</span>
-              <span class="stat-val" id="stats-modules">0 / 4</span>
+              <span class="stat-val" id="stats-modules">0 / 5</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Porcentaje de Éxito:</span>
@@ -1547,6 +1575,10 @@
       <div id="arcade-root-arcade_boveda"></div>
     </section>
 
+    <section id="arcade_ia-view" class="view-section">
+      <div id="arcade-root-arcade_ia"></div>
+    </section>
+
     <!-- VISTA 8: PANEL DE PERSONALIZACIÓN (ADMIN) -->
     <section id="customizer-view" class="view-section">
       <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
@@ -1865,11 +1897,12 @@
 
   <!-- SCRIPTS DE LÓGICA -->
   <script src="games.js?v=4.0"></script>
-  <script src="arcade-core.js?v=4.0"></script>
+  <script src="arcade-core.js?v=4.3"></script>
   <script src="arcade-jornada.js?v=4.0"></script>
   <script src="arcade-games.js?v=4.0"></script>
+  <script src="arcade-ia.js?v=4.3"></script>
   <script src="customizer.js?v=4.0"></script>
-  <script src="app.js?v=4.2"></script>
+  <script src="app.js?v=4.3"></script>
 </body>
 
 </html>

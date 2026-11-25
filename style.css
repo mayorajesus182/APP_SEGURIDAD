@@ -3981,3 +3981,343 @@ main {
 .car-feedback p {
   margin-top: 0.35rem;
 }
+
+
+/* ==========================================================================
+   MÓDULO 5 FASE 2: FILTRO IA 3D (BUEN USO DE LA IA & DLP)
+   ========================================================================== */
+.ia3d-intro .arc-intro-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.ia3d-how {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.ia3d-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.86rem;
+  color: #e2e8f0;
+}
+
+.ia3d-step span {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #0284c7);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ia3d-preview-card {
+  background: rgba(7, 17, 38, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 14px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.ia3d-preview-card canvas,
+.ia3d-canvas-box canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+.ia3d-preview-cap,
+.ia3d-canvas-hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.45rem;
+  text-align: center;
+}
+
+.ia3d-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.ia3d-stage-wrap {
+  background: rgba(8, 16, 36, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 0.85rem;
+}
+
+.ia3d-hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.65rem;
+}
+
+.ia3d-hud-item {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  padding: 0.4rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.ia3d-hud-item strong {
+  font-size: 0.92rem;
+}
+
+.ia3d-panel {
+  background: rgba(10, 18, 38, 0.88);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.ia3d-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ia3d-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #a855f7;
+  color: #d8b4fe;
+  background: rgba(124, 58, 237, 0.14);
+}
+
+.ia3d-area {
+  font-size: 0.8rem;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.ia3d-title {
+  font-size: 1.22rem;
+  margin-bottom: 0.35rem;
+  color: #f8fafc;
+}
+
+.ia3d-context {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.ia3d-prompt-box {
+  background: rgba(6, 12, 26, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ia3d-prompt-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #7dd3fc;
+  margin-bottom: 0.7rem;
+  font-weight: 600;
+}
+
+.ia3d-counter {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #86efac;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+}
+
+.ia3d-prompt-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  line-height: 1.7;
+}
+
+.ia3d-token {
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  color: #f1f5f9;
+  padding: 0.32rem 0.55rem;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  font-family: var(--font-sans);
+}
+
+.ia3d-token:hover {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.18);
+  transform: translateY(-1px);
+}
+
+.ia3d-token.redacted {
+  background: rgba(34, 197, 94, 0.22);
+  border: 1px solid #4ade80;
+  color: #86efac;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.ia3d-token.missed-leak {
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid #f87171;
+  color: #fecaca;
+  animation: pulse 0.6s ease 2;
+}
+
+.ia3d-prompt-tip {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.ia3d-actions {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.ia3d-actions .btn {
+  flex: 1;
+  min-width: 210px;
+}
+
+.ia3d-quote-box {
+  background: rgba(124, 58, 237, 0.12);
+  border-left: 4px solid #a855f7;
+  border-radius: 8px;
+  padding: 0.95rem 1.1rem;
+  font-style: italic;
+  color: #f3e8ff;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.ia3d-verify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ia3d-verify-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ia3d-verify-opt:hover:not(:disabled) {
+  border-color: #a855f7;
+  background: rgba(124, 58, 237, 0.16);
+  transform: translateX(3px);
+}
+
+.ia3d-verify-opt.opt-correct {
+  border-color: #4ade80;
+  background: rgba(34, 197, 94, 0.18);
+  color: #dcfce7;
+}
+
+.ia3d-verify-opt.opt-wrong {
+  border-color: #f87171;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fee2e2;
+}
+
+.ia3d-opt-letter {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(168, 85, 247, 0.25);
+  color: #e9d5ff;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+}
+
+.ia3d-feedback {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ia3d-feedback.ok {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  color: #dcfce7;
+}
+
+.ia3d-feedback.bad {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  color: #fee2e2;
+}
+
+.ia3d-fb-title {
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+@media (max-width: 768px) {
+  .ia3d-intro .arc-intro-grid {
+    grid-template-columns: 1fr;
+  }
+}

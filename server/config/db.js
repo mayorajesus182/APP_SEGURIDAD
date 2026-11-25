@@ -9,8 +9,8 @@ dotenv.config();
 
 const PHASE1_MODULES = ['phishing', 'pci', 'incident', 'password', 'usb'];
 const PHASE2_LEGACY_MODULES = ['ai_sec', 'pci_dss', 'quishing_mfa', 'bec_fraud', 'remote_vpn'];
-const ARCADE_MODULES = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda'];
-// Fase 2 oficial: los 4 juegos interactivos 3D (Zona Arcade 3D)
+const ARCADE_MODULES = ['arcade_jornada', 'arcade_bandeja', 'arcade_cartas', 'arcade_boveda', 'arcade_ia'];
+// Fase 2 oficial: los 5 juegos interactivos 3D (Zona Arcade 3D + Buen Uso IA)
 const PHASE2_MODULES = [...ARCADE_MODULES];
 const ALL_MODULES = [...PHASE1_MODULES, ...PHASE2_LEGACY_MODULES, ...ARCADE_MODULES];
 
