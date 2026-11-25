@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=4.1">
+  <link rel="stylesheet" href="style.css?v=4.2">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -23,7 +23,8 @@
   <canvas id="cyber-globe-3d-canvas" aria-hidden="true"></canvas>
 
   <header>
-    <div class="logo-container" aria-label="Corporación Suiche 7B" onclick="if(window.app && app.state.user.name) app.navigateTo('dashboard')">
+    <div class="logo-container" aria-label="Corporación Suiche 7B"
+      onclick="if(window.app && app.state.user.name) app.navigateTo('dashboard')">
       <!-- Logotipo Oficial Corporación Suiche 7B -->
       <img src="img/logo-suiche7b.png" alt="Corporación Suiche 7B" class="brand-logo-header">
     </div>
@@ -151,7 +152,7 @@
           <div id="cert-grant-phase2" style="display:none;">
             <button class="btn btn-primary" style="background:linear-gradient(135deg, #b60e80, #6d084d);"
               onclick="app.showCertificate('phase2')">
-              🎖️ Certificado Fase 2 (Especialista)
+              🎖️ Certificado Fase 2 (PRO)
             </button>
           </div>
         </div>
@@ -1798,7 +1799,7 @@
 
       <!-- Cuadro Imprimible del Diploma Oficial Canva -->
       <div class="certificate-frame canva-frame">
-        <img src="img/canva_cert_p4.png" alt="Certificado Oficial Suiche 7B" class="cert-canva-bg">
+        <img src="img/canva_cert_p4.png?v=4.2" alt="Certificado Oficial Corporación Suiche 7B" class="cert-canva-bg">
 
         <div class="cert-dynamic-overlay">
           <div class="cert-recipient-name" id="cert-recipient">Nombre del Colaborador</div>

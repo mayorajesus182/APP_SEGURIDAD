@@ -702,7 +702,7 @@ class AppController {
       const data = await res.json();
       if (res.ok && data.valid && data.data) {
         const c = data.data;
-        const phaseLabel = c.phase === 'phase1' ? 'Fase 1 (Básico)' : c.phase === 'phase2' ? 'Fase 2 (Especialista)' : 'Maestro Integral';
+        const phaseLabel = c.phase === 'phase1' ? 'Fase 1 (Básico)' : c.phase === 'phase2' ? 'Fase 2 (PRO)' : 'Maestro Integral';
         resultBox.innerHTML = `
           <div style="padding:0.6rem; border-radius:6px; background:rgba(53,126,50,0.18); border:1px solid var(--accent-green); color:#bbf7d0;">
             ✅ <strong>Certificado Válido:</strong> ${c.certificate_code}<br>

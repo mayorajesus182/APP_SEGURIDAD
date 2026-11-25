@@ -1701,18 +1701,18 @@ main {
 /* Nombre del colaborador caligrafiado sobre la línea de Canva */
 .cert-recipient-name {
   position: absolute;
-  left: 50%;
-  top: 54.2%;
-  transform: translate(-50%, -92%);
+  left: 51.25%;
+  top: 71.3%;
+  transform: translate(-50%, -100%);
   font-family: 'Playball', 'Great Vibes', 'Alex Brush', cursive;
-  font-size: clamp(1.4rem, 4.2cqi, 3.8rem);
+  font-size: clamp(1.1rem, 2.9cqi, 2.5rem);
   font-weight: 400;
-  color: #111111;
+  color: #0e1d4a;
   text-align: center;
   white-space: nowrap;
   letter-spacing: 0.02em;
-  text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
-  max-width: 65%;
+  text-shadow: 0 0 1px rgba(14, 29, 74, 0.15);
+  max-width: 48%;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1;
@@ -1722,12 +1722,12 @@ main {
 .cert-code-stamp {
   position: absolute;
   bottom: 2%;
-  right: 2.5%;
+  right: 2.2%;
   font-family: var(--font-mono, monospace);
   font-size: clamp(0.45rem, 1cqi, 0.7rem);
   font-weight: 600;
-  color: #888888;
-  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.9;
   letter-spacing: 0.08em;
 }
 
@@ -1949,34 +1949,26 @@ main {
 
   .cert-recipient-name {
     position: absolute !important;
-    left: 50% !important;
-    top: 54.2% !important;
-    transform: translate(-50%, -92%) !important;
+    left: 51.25% !important;
+    top: 71.3% !important;
+    transform: translate(-50%, -100%) !important;
     font-family: 'Playball', 'Great Vibes', 'Alex Brush', cursive !important;
-    font-size: clamp(2rem, 4.5cqi, 4rem) !important;
-    color: #111111 !important;
+    font-size: clamp(1.3rem, 3.0cqi, 2.6rem) !important;
+    color: #0e1d4a !important;
+    max-width: 48% !important;
+    line-height: 1 !important;
     display: block !important;
   }
 
   .cert-phase-banner {
-    position: absolute !important;
-    top: 65.1% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    font-size: clamp(0.85rem, 1.55cqi, 1.25rem) !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.055em !important;
-    color: #111111 !important;
-    background: #ffffff !important;
-    display: block !important;
+    display: none !important;
   }
 
   .cert-code-stamp {
     position: absolute !important;
     bottom: 2% !important;
-    right: 2.5% !important;
-    color: #888888 !important;
+    right: 2.2% !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     display: block !important;
   }
 }
@@ -2308,21 +2300,9 @@ body[data-view="admin-dashboard"] {
   font-size: 1.1rem;
 }
 
+/* El nuevo diseño de Canva ya incluye la insignia oficial de Fase 2 */
 .cert-phase-banner {
-  position: absolute;
-  top: 65.1%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(0.7rem, 1.52cqi, 1.06rem);
-  font-weight: 700;
-  letter-spacing: 0.055em;
-  color: #111111;
-  background: #ffffff;
-  padding: 0.05rem 0.45rem;
-  line-height: 1.1;
-  text-transform: none;
-  white-space: nowrap;
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -3900,13 +3880,13 @@ main {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
-.s7b-switch input:checked + .s7b-slider {
+.s7b-switch input:checked+.s7b-slider {
   background: rgba(34, 197, 94, 0.45);
   border-color: #4ade80;
   box-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
 }
 
-.s7b-switch input:checked + .s7b-slider::before {
+.s7b-switch input:checked+.s7b-slider::before {
   transform: translateX(25px);
 }
 
