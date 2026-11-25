@@ -76,6 +76,15 @@ class AppController {
 
     this.audioCtx = null;
     this.adminUsers = [];
+
+    // Control de Cierre de Sesión por Inactividad (15 min estándar PCI-DSS / SUDEBAN, aviso 60s antes)
+    this.INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+    this.INACTIVITY_WARNING_MS = 60 * 1000;
+    this.LAST_ACTIVITY_KEY = 's7b_last_activity_ts';
+    this._inactivityInterval = null;
+    this._inactivityListenersBound = false;
+    this._inactivityWarningShown = false;
+    this._lastActivityWrite = 0;
     this.leaderboardData = [
       { dept: 'Gerencia Seguridad de la Información', correctPercent: 98, totalScore: 980, count: 6 },
       { dept: 'Dirección Tecnología', correctPercent: 94, totalScore: 1250, count: 12 },
@@ -114,6 +123,7 @@ class AppController {
       if (this.state.user.id && !this.state.user.isAdmin) {
         await this.refreshUserProfileFromServer();
       }
+      this.startInactivityMonitor();
       this.showMainLayout();
       this.updateUI();
       if (this.state.user.isAdmin) {
@@ -124,6 +134,17 @@ class AppController {
       }
     } else {
       this.navigateTo('welcome');
+      try {
+        const expiredReason = sessionStorage.getItem('s7b_session_expired_reason');
+        if (expiredReason === 'inactivity') {
+          sessionStorage.removeItem('s7b_session_expired_reason');
+          this.showModalAlert({
+            title: '⏱️ Sesión Cerrada por Inactividad',
+            message: 'Por políticas de seguridad de <strong>Corporación Suiche 7B</strong>, tu sesión se cerró automáticamente tras 15 minutos sin actividad. Inicia sesión nuevamente para continuar.',
+            type: 'warning'
+          });
+        }
+      } catch (e) { /* sessionStorage opcional */ }
     }
 
     this.renderLeaderboard();
@@ -322,7 +343,9 @@ class AppController {
       return;
     }
 
+    this.touchActivity(true);
     this.saveState();
+    this.startInactivityMonitor();
     this.playAudio('complete');
     this.showMainLayout();
     this.updateUI();
@@ -342,10 +365,138 @@ class AppController {
     }
   }
 
-  // --- CIERRE DE SESIÓN ---
-  logout() {
-    localStorage.removeItem('s7b_cybershield_state');
+  // --- CIERRE DE SESIÓN Y CONTROL DE INACTIVIDAD ---
+  logout(reason = null) {
+    this.stopInactivityMonitor();
+    if (window.arcade && typeof window.arcade.onNavigate === 'function') {
+      try { window.arcade.onNavigate('welcome'); } catch (e) { /* noop */ }
+    }
+    try {
+      if (reason === 'inactivity') {
+        sessionStorage.setItem('s7b_session_expired_reason', 'inactivity');
+      } else {
+        sessionStorage.removeItem('s7b_session_expired_reason');
+      }
+      localStorage.removeItem('s7b_cybershield_state');
+      localStorage.removeItem(this.LAST_ACTIVITY_KEY);
+    } catch (e) { /* noop */ }
     location.reload();
+  }
+
+  isJwtExpired(token) {
+    if (!token || typeof token !== 'string') return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    try {
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) base64 += '=';
+      const payload = JSON.parse(atob(base64));
+      return Boolean(payload && payload.exp && (payload.exp * 1000) <= Date.now());
+    } catch (e) {
+      return false;
+    }
+  }
+
+  getLastActivityTs() {
+    try {
+      const raw = parseInt(localStorage.getItem(this.LAST_ACTIVITY_KEY) || '0', 10);
+      if (raw && !isNaN(raw)) return raw;
+    } catch (e) { /* noop */ }
+    return this._lastActivityWrite || Date.now();
+  }
+
+  touchActivity(force = false) {
+    if (!this.state.user || !this.state.user.name) return;
+    const now = Date.now();
+    if (!force && (now - this._lastActivityWrite) < 2000) return;
+    this._lastActivityWrite = now;
+    try {
+      localStorage.setItem(this.LAST_ACTIVITY_KEY, String(now));
+    } catch (e) { /* noop */ }
+  }
+
+  hideInactivityWarning() {
+    this._inactivityWarningShown = false;
+    const modal = document.getElementById('inactivity-warning-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  extendSession() {
+    this.playAudio('click');
+    this.touchActivity(true);
+    this.hideInactivityWarning();
+  }
+
+  checkInactivity() {
+    if (!this.state.user || !this.state.user.name) {
+      this.stopInactivityMonitor();
+      return;
+    }
+    if (this.state.user.token && this.isJwtExpired(this.state.user.token)) {
+      this.logout('inactivity');
+      return;
+    }
+    const elapsed = Date.now() - this.getLastActivityTs();
+    if (elapsed >= this.INACTIVITY_TIMEOUT_MS) {
+      this.logout('inactivity');
+      return;
+    }
+    const remaining = this.INACTIVITY_TIMEOUT_MS - elapsed;
+    if (remaining <= this.INACTIVITY_WARNING_MS) {
+      const secs = Math.max(1, Math.ceil(remaining / 1000));
+      const modal = document.getElementById('inactivity-warning-modal');
+      const cd = document.getElementById('inactivity-countdown');
+      if (cd) cd.textContent = `${secs}s`;
+      if (modal && !this._inactivityWarningShown) {
+        this._inactivityWarningShown = true;
+        modal.classList.add('active');
+        this.playAudio('incident_alert');
+      }
+    } else if (this._inactivityWarningShown) {
+      // Otra pestaña registró actividad reciente
+      this.hideInactivityWarning();
+    }
+  }
+
+  startInactivityMonitor() {
+    if (!this.state.user || !this.state.user.name) return;
+    if (!localStorage.getItem(this.LAST_ACTIVITY_KEY)) {
+      this.touchActivity(true);
+    }
+
+    if (!this._inactivityListenersBound) {
+      this._inactivityListenersBound = true;
+      const onUserActivity = () => {
+        if (!this._inactivityWarningShown) {
+          this.touchActivity(false);
+        }
+      };
+      ['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel', 'mousemove'].forEach(evt => {
+        window.addEventListener(evt, onUserActivity, { passive: true });
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) this.checkInactivity();
+      });
+      window.addEventListener('storage', (e) => {
+        if (e.key === 's7b_cybershield_state' && !e.newValue && this.state.user && this.state.user.name) {
+          this.stopInactivityMonitor();
+          location.reload();
+        } else if (e.key === this.LAST_ACTIVITY_KEY && e.newValue && this._inactivityWarningShown) {
+          this.checkInactivity();
+        }
+      });
+    }
+
+    if (this._inactivityInterval) clearInterval(this._inactivityInterval);
+    this._inactivityInterval = setInterval(() => this.checkInactivity(), 1000);
+  }
+
+  stopInactivityMonitor() {
+    if (this._inactivityInterval) {
+      clearInterval(this._inactivityInterval);
+      this._inactivityInterval = null;
+    }
+    this.hideInactivityWarning();
   }
 
   // --- CONTROL DE FASES DESDE EL PANEL ADMIN ---
@@ -757,6 +908,22 @@ class AppController {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.user && parsed.user.name) {
+          // Validar inactividad acumulada o vencimiento de token JWT antes de restaurar la sesión
+          const lastTs = parseInt(localStorage.getItem(this.LAST_ACTIVITY_KEY) || '0', 10);
+          const inactiveExpired = lastTs > 0 && (Date.now() - lastTs) >= this.INACTIVITY_TIMEOUT_MS;
+          const tokenExpired = parsed.user.token && this.isJwtExpired(parsed.user.token);
+
+          if (inactiveExpired || tokenExpired) {
+            localStorage.removeItem('s7b_cybershield_state');
+            localStorage.removeItem(this.LAST_ACTIVITY_KEY);
+            try { sessionStorage.setItem('s7b_session_expired_reason', 'inactivity'); } catch (e) { /* noop */ }
+            return;
+          }
+
+          if (!lastTs) {
+            try { localStorage.setItem(this.LAST_ACTIVITY_KEY, String(Date.now())); } catch (e) { /* noop */ }
+          }
+
           this.state = {
             ...this.state,
             ...parsed,

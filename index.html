@@ -1838,13 +1838,38 @@
     </div>
   </div>
 
+  <!-- MODAL DEDICADO DE ADVERTENCIA DE INACTIVIDAD (SIN CONFLICTO CON OTROS MODALES) -->
+  <div class="modal-overlay" id="inactivity-warning-modal" style="z-index: 10050;">
+    <div class="modal-content custom-dialog-content dialog-warning" style="max-width: 440px;">
+      <div class="dialog-header">
+        <div class="dialog-icon-wrapper">
+          <span class="dialog-icon">⏱️</span>
+        </div>
+        <h3>Sesión Inactiva</h3>
+      </div>
+      <div class="dialog-body" style="text-align: center;">
+        Por seguridad de <strong>Corporación Suiche 7B</strong>, tu sesión se cerrará automáticamente por inactividad
+        en:
+        <div id="inactivity-countdown"
+          style="font-size: 2rem; font-weight: 800; color: #fbbf24; margin: 0.75rem 0; font-family: var(--font-mono, monospace);">
+          60s</div>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Tu progreso ya completado está guardado de forma
+          segura.</span>
+      </div>
+      <div class="dialog-footer" style="justify-content: center;">
+        <button class="btn btn-primary" onclick="app.extendSession()">Continuar sesión</button>
+        <button class="btn btn-secondary" onclick="app.logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPTS DE LÓGICA -->
   <script src="games.js?v=4.0"></script>
   <script src="arcade-core.js?v=4.0"></script>
   <script src="arcade-jornada.js?v=4.0"></script>
   <script src="arcade-games.js?v=4.0"></script>
   <script src="customizer.js?v=4.0"></script>
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=4.2"></script>
 </body>
 
 </html>
