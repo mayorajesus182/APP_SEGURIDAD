@@ -441,7 +441,6 @@
         panel.innerHTML = `
           <div class="ia3d-head-row">
             <span class="ia3d-badge">${U.esc(round.badge)}</span>
-            <span class="ia3d-area">🏢 ${U.esc(round.area)}</span>
           </div>
           <h3 class="ia3d-title">${U.esc(round.title)}</h3>
           <p class="ia3d-context">${U.esc(round.context)}</p>
@@ -475,7 +474,6 @@
         panel.innerHTML = `
           <div class="ia3d-head-row">
             <span class="ia3d-badge" style="border-color:#f472b6; color:#f9a8d4;">${U.esc(round.badge)}</span>
-            <span class="ia3d-area">🏢 ${U.esc(round.area)}</span>
           </div>
           <h3 class="ia3d-title">${U.esc(round.title)}</h3>
           <p class="ia3d-context">${U.esc(round.context)}</p>
