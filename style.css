@@ -4327,3 +4327,153 @@ main {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   REDISEÑO EJECUTIVO: PANEL DE AUDITORÍA Y CONTROL CISO (ADMIN)
+   ========================================================================== */
+.admin-section-block {
+  margin-bottom: 1.6rem;
+}
+
+.admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.admin-kpi-card {
+  background: rgba(12, 19, 38, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid var(--primary-blue);
+  border-radius: 14px;
+  padding: 1.15rem 1rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.admin-kpi-card.kpi-gold { border-top-color: #fbba0a; }
+.admin-kpi-card.kpi-green { border-top-color: #22c55e; }
+.admin-kpi-card.kpi-magenta { border-top-color: #d946ef; }
+.admin-kpi-card.kpi-blue { border-top-color: #38bdf8; }
+.admin-kpi-card.kpi-cyan { border-top-color: #0ea5e9; }
+.admin-kpi-card.kpi-indigo { border-top-color: #6366f1; }
+
+.admin-kpi-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-kpi-val {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin-top: 0.45rem;
+  line-height: 1.1;
+  font-family: var(--font-mono, monospace);
+}
+
+.admin-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.6rem;
+}
+
+.admin-tool-card {
+  margin-bottom: 0 !important;
+  height: 100%;
+}
+
+.admin-table-card {
+  padding: 1.35rem 1.4rem;
+}
+
+.admin-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-export-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.admin-search-bar {
+  margin-bottom: 1rem;
+}
+
+.admin-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.admin-audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.admin-audit-table thead tr {
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.admin-audit-table th {
+  padding: 0.85rem 1rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+.admin-audit-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s ease;
+}
+
+.admin-audit-table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.admin-audit-table td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+  .admin-tools-grid {
+    grid-template-columns: 1fr;
+  }
+}

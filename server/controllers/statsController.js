@@ -76,6 +76,20 @@ const getGeneralStats = async (req, res) => {
       `SELECT COUNT(*) AS total FROM module_progress WHERE is_completed = TRUE AND module_key = ANY($1)`,
       [PHASE2_MODULES]
     );
+    const phase1ScoreResult = await query(
+      `SELECT COALESCE(SUM(mp.score_earned), 0) AS total
+       FROM module_progress mp
+       JOIN users u ON mp.user_id = u.id
+       WHERE u.is_active = TRUE AND mp.module_key = ANY($1)`,
+      [PHASE1_MODULES]
+    );
+    const phase2ScoreResult = await query(
+      `SELECT COALESCE(SUM(mp.score_earned), 0) AS total
+       FROM module_progress mp
+       JOIN users u ON mp.user_id = u.id
+       WHERE u.is_active = TRUE AND mp.module_key = ANY($1)`,
+      [PHASE2_MODULES]
+    );
     const totalScoreResult = await query('SELECT COALESCE(SUM(total_score), 0) AS total FROM users WHERE is_active = TRUE');
     const successRateResult = await query(`
       SELECT CASE
@@ -88,9 +102,16 @@ const getGeneralStats = async (req, res) => {
     `);
 
     let totalCertificates = 0;
+    let phase1Certificates = 0;
+    let phase2Certificates = 0;
     try {
-      const certRes = await query('SELECT COUNT(*) AS total FROM certificates');
-      totalCertificates = parseInt(certRes.rows[0].total, 10);
+      const certRes = await query('SELECT phase, COUNT(*) AS total FROM certificates GROUP BY phase');
+      certRes.rows.forEach(r => {
+        const cnt = parseInt(r.total, 10);
+        totalCertificates += cnt;
+        if (r.phase === 'phase1') phase1Certificates = cnt;
+        if (r.phase === 'phase2') phase2Certificates = cnt;
+      });
     } catch (e) {
       totalCertificates = 0;
     }
@@ -113,7 +134,11 @@ const getGeneralStats = async (req, res) => {
         totalModulesCompleted: parseInt(completedModulesResult.rows[0].total, 10),
         phase1ModulesCompleted: parseInt(phase1CompletedResult.rows[0].total, 10),
         phase2ModulesCompleted: parseInt(phase2CompletedResult.rows[0].total, 10),
+        phase1Score: parseInt(phase1ScoreResult.rows[0].total, 10),
+        phase2Score: parseInt(phase2ScoreResult.rows[0].total, 10),
         totalCertificates,
+        phase1Certificates,
+        phase2Certificates,
         totalScore: parseInt(totalScoreResult.rows[0].total, 10),
         successRate: parseInt(successRateResult.rows[0].percentage, 10),
         academyConfig: inMemoryAcademyConfig,
@@ -160,6 +185,8 @@ const getUsersAudit = async (req, res) => {
         (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE AND mp.module_key = ANY($1::text[] || $2::text[])) AS modules_completed,
         (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE AND mp.module_key = ANY($1)) AS phase1_completed,
         (SELECT COUNT(*) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE AND mp.module_key = ANY($2)) AS phase2_completed,
+        COALESCE((SELECT SUM(mp.score_earned) FROM module_progress mp WHERE mp.user_id = u.id AND mp.module_key = ANY($1)), 0) AS phase1_score,
+        COALESCE((SELECT SUM(mp.score_earned) FROM module_progress mp WHERE mp.user_id = u.id AND mp.module_key = ANY($2)), 0) AS phase2_score,
         COALESCE(
           (SELECT json_agg(mp.module_key) FROM module_progress mp WHERE mp.user_id = u.id AND mp.is_completed = TRUE),
           '[]'::json

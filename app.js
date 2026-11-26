@@ -696,26 +696,60 @@ class AppController {
     const mode = this.academyConfig.activePhaseMode || 'phase2';
     const showP1 = mode === 'phase1' || mode === 'both';
     const showP2 = mode === 'phase2' || mode === 'both';
+    const phaseName = mode === 'phase1' ? 'Fase 1 (Básico)' : mode === 'phase2' ? 'Fase 2 (Juegos 3D)' : 'Fase 1 + Fase 2';
 
     const kpiP1 = document.getElementById('admin-kpi-p1-card');
     const kpiP2 = document.getElementById('admin-kpi-p2-card');
+    const kpiTotal = document.getElementById('admin-kpi-total-card');
     if (kpiP1) kpiP1.style.display = showP1 ? '' : 'none';
     if (kpiP2) kpiP2.style.display = showP2 ? '' : 'none';
+    if (kpiTotal) kpiTotal.style.display = mode === 'both' ? '' : 'none';
 
     const thP1 = document.getElementById('admin-th-p1');
     const thP2 = document.getElementById('admin-th-p2');
+    const thScore = document.getElementById('admin-th-score');
     if (thP1) thP1.style.display = showP1 ? '' : 'none';
     if (thP2) thP2.style.display = showP2 ? '' : 'none';
+    if (thScore) thScore.textContent = mode === 'both' ? 'Puntuación Total' : `Puntuación (${mode === 'phase1' ? 'Fase 1' : 'Fase 2'})`;
+
+    const metricsHeading = document.getElementById('admin-metrics-heading');
+    const scopeBadge = document.getElementById('admin-metrics-scope-badge');
+    const scoreLabel = document.getElementById('admin-score-label');
+    const certsLabel = document.getElementById('admin-certs-label');
+    const deptHeading = document.getElementById('admin-dept-heading');
+    const tableHeading = document.getElementById('admin-table-heading');
+    if (metricsHeading) metricsHeading.textContent = `📊 Métricas de Auditoría — ${phaseName}`;
+    if (scopeBadge) scopeBadge.textContent = `Vista filtrada: ${mode === 'both' ? 'Ambas Fases' : `Solo ${phaseName}`}`;
+    if (scoreLabel) scoreLabel.textContent = mode === 'both' ? 'Puntaje Acumulado Total' : `Puntaje Acumulado (${mode === 'phase1' ? 'Fase 1' : 'Fase 2'})`;
+    if (certsLabel) certsLabel.textContent = mode === 'both' ? 'Certificados Emitidos' : `Certificados (${mode === 'phase1' ? 'Fase 1' : 'Fase 2'})`;
+    if (deptHeading) deptHeading.textContent = `📊 Cumplimiento y Puntuación por Departamento (${phaseName})`;
+    if (tableHeading) tableHeading.textContent = `Auditoría Detallada de Colaboradores — ${phaseName}`;
 
     if (this.adminSummary) {
-      const p1Done = Number(this.adminSummary.phase1ModulesCompleted || 0);
-      const p2Done = Number(this.adminSummary.phase2ModulesCompleted || 0);
+      const d = this.adminSummary;
+      const p1Done = Number(d.phase1ModulesCompleted || 0);
+      const p2Done = Number(d.phase2ModulesCompleted || 0);
       const activeTotalCompleted = mode === 'phase1' ? p1Done : mode === 'phase2' ? p2Done : (p1Done + p2Done);
+      const activeScore = mode === 'phase1'
+        ? Number(d.phase1Score !== undefined ? d.phase1Score : d.totalScore || 0)
+        : mode === 'phase2'
+          ? Number(d.phase2Score !== undefined ? d.phase2Score : d.totalScore || 0)
+          : Number(d.totalScore || 0);
+      const activeCerts = mode === 'phase1'
+        ? Number(d.phase1Certificates || 0)
+        : mode === 'phase2'
+          ? Number(d.phase2Certificates || 0)
+          : Number(d.totalCertificates || 0);
+
+      const scoreEl = document.getElementById('admin-total-score');
       const totalEl = document.getElementById('admin-total-modules');
+      const certsEl = document.getElementById('admin-certs-count');
+      if (scoreEl) scoreEl.innerText = `${activeScore} PTS`;
       if (totalEl) totalEl.innerText = activeTotalCompleted;
+      if (certsEl) certsEl.innerText = activeCerts;
     }
 
-    if (Array.isArray(this.adminUsers) && this.adminUsers.length > 0) {
+    if (Array.isArray(this.adminUsers)) {
       const filterInput = document.getElementById('admin-user-filter');
       if (filterInput && filterInput.value.trim()) {
         this.filterAdminUsers(filterInput.value);
@@ -724,6 +758,14 @@ class AppController {
       }
       this.renderAdminDeptBreakdown(this.adminUsers);
     }
+  }
+
+  getUserPhaseScore(u, mode) {
+    const p1 = Number(u.phase1_score !== undefined ? u.phase1_score : 0);
+    const p2 = Number(u.phase2_score !== undefined ? u.phase2_score : 0);
+    if (mode === 'phase1') return p1;
+    if (mode === 'phase2') return p2;
+    return Number(u.total_score || (p1 + p2));
   }
 
   async loadAdminDashboard() {
@@ -743,7 +785,6 @@ class AppController {
           this.academyConfig = { ...this.academyConfig, ...d.academyConfig };
           this.updateAdminPhaseButtonsUI();
         }
-        document.getElementById('admin-total-score').innerText = `${d.totalScore || 0} PTS`;
         const p1El = document.getElementById('admin-p1-modules');
         const p2El = document.getElementById('admin-p2-modules');
         if (p1El) p1El.innerText = d.phase1ModulesCompleted || 0;
@@ -784,7 +825,7 @@ class AppController {
       const p2 = parseInt(u.phase2_completed || 0, 10);
       const activeDone = mode === 'phase1' ? p1 : mode === 'phase2' ? p2 : (p1 + p2);
       deptMap[dept].count++;
-      deptMap[dept].totalScore += parseInt(u.total_score || 0, 10);
+      deptMap[dept].totalScore += this.getUserPhaseScore(u, mode);
       deptMap[dept].completedMods += activeDone;
     });
 
@@ -831,31 +872,33 @@ class AppController {
     const p2Total = PHASE2_KEYS.length;
     const activeTotal = (showP1 ? p1Total : 0) + (showP2 ? p2Total : 0);
 
-    users.forEach(u => {
+    const sortedUsers = [...users].sort((a, b) => this.getUserPhaseScore(b, mode) - this.getUserPhaseScore(a, mode));
+
+    sortedUsers.forEach(u => {
       const row = document.createElement('tr');
-      row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
       const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
       const p1Count = Number(u.phase1_completed !== undefined ? u.phase1_completed : 0);
       const p2Count = Number(u.phase2_completed !== undefined ? u.phase2_completed : 0);
       const activeDone = (showP1 ? p1Count : 0) + (showP2 ? p2Count : 0);
+      const activeScore = this.getUserPhaseScore(u, mode);
 
       const p1Td = showP1
-        ? `<td style="padding:0.85rem;"><span class="game-status-badge ${p1Count >= p1Total ? 'status-completed' : 'status-pending'}">${p1Count} / ${p1Total}</span></td>`
+        ? `<td><span class="game-status-badge ${p1Count >= p1Total ? 'status-completed' : 'status-pending'}">${p1Count} / ${p1Total}</span></td>`
         : '';
       const p2Td = showP2
-        ? `<td style="padding:0.85rem;"><span class="game-status-badge ${p2Count >= p2Total ? 'status-completed' : 'status-pending'}">${p2Count} / ${p2Total}</span></td>`
+        ? `<td><span class="game-status-badge ${p2Count >= p2Total ? 'status-completed' : 'status-pending'}">${p2Count} / ${p2Total}</span></td>`
         : '';
 
       row.innerHTML = `
-        <td style="padding:0.85rem; font-weight:600;">${u.full_name}</td>
-        <td style="padding:0.85rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
-        <td style="padding:0.85rem; color:var(--accent-cyan); font-weight:bold; font-family:var(--font-mono);">${u.total_score} PTS</td>
+        <td style="font-weight:600; color:#f8fafc;">${u.full_name}</td>
+        <td style="color:var(--text-muted);">${u.department || 'Área General'}</td>
+        <td style="color:var(--accent-cyan); font-weight:bold; font-family:var(--font-mono); white-space:nowrap;">${activeScore} PTS</td>
         ${p1Td}
         ${p2Td}
-        <td style="padding:0.85rem; font-weight:600;">${activeDone} / ${activeTotal}</td>
-        <td style="padding:0.85rem; font-size:0.78rem; color:var(--text-muted);">${lastActivityDate}</td>
-        <td style="padding:0.85rem;">
-          <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="app.showAdminUserDetail(${u.id})">
+        <td style="font-weight:700; white-space:nowrap;">${activeDone} / ${activeTotal}</td>
+        <td style="font-size:0.78rem; color:var(--text-muted); white-space:nowrap;">${lastActivityDate}</td>
+        <td style="text-align:center;">
+          <button class="btn btn-secondary" style="padding:0.35rem 0.7rem; font-size:0.74rem; white-space:nowrap;" onclick="app.showAdminUserDetail(${u.id})">
             🔍 Ver Módulos
           </button>
         </td>
@@ -871,6 +914,7 @@ class AppController {
     const mode = this.academyConfig.activePhaseMode || 'phase2';
     const showP1 = mode === 'phase1' || mode === 'both';
     const showP2 = mode === 'phase2' || mode === 'both';
+    const activeScore = this.getUserPhaseScore(user, mode);
 
     const completedSet = new Set(Array.isArray(user.completed_keys) ? user.completed_keys : []);
     const p1Html = PHASE1_KEYS.map(k => {
@@ -893,7 +937,7 @@ class AppController {
       title: `👤 Expediente de Auditoría: ${user.full_name}`,
       message: `
         <div style="text-align:left; font-size:0.84rem; line-height:1.5;">
-          <p><strong>Departamento:</strong> ${user.department || 'Área General'} | <strong>Puntaje:</strong> ${user.total_score} PTS</p>
+          <p><strong>Departamento:</strong> ${user.department || 'Área General'} | <strong>Puntaje:</strong> ${activeScore} PTS</p>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:0.6rem 0;">
           ${p1Section}
           ${p2Section}

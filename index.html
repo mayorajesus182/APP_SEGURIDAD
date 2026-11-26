@@ -13,7 +13,7 @@
     rel="stylesheet">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="stylesheet" href="style.css?v=3.4">
-  <link rel="stylesheet" href="style.css?v=4.4">
+  <link rel="stylesheet" href="style.css?v=4.5">
   <script src="/vendor/html2pdf/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -1669,19 +1669,15 @@
           <button type="button" class="phase-mode-card active" id="mode-btn-phase2"
             onclick="app.saveAdminPhaseMode('phase2')">
             <div style="font-weight:700; font-size:0.95rem; color:var(--accent-cyan);">🚀 Solo Fase 2 (Juegos 3D)</div>
-            <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 4 juegos
-              interactivos 3D (Escudo de Red 3D, Bandeja Blindada, Caza-Fraudes, La Bóveda Digital) con 1 solo intento.
             <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Activa únicamente los 5 juegos
-              interactivos 3D (Escudo de Red 3D, Bandeja Blindada, Caza-Fraudes, La Bóveda Digital y Filtro IA 3D).
-            </p>
+              interactivos 3D (Escudo de Red 3D, Bandeja Blindada, Caza-Fraudes, La Bóveda Digital y Filtro IA 3D).</p>
           </button>
 
           <button type="button" class="phase-mode-card" id="mode-btn-both" onclick="app.saveAdminPhaseMode('both')">
             <div style="font-weight:700; font-size:0.95rem; color:#4ade80;">⚡ Ambas Fases Activas (Fase 1 + Fase 2)
             </div>
             <p style="font-size:0.76rem; color:var(--text-muted); margin-top:0.3rem;">Habilita Fase 1 (5 módulos) + Fase
-              2 (4 juegos 3D) con doble certificación.</p>
-            2 (5 juegos 3D) con doble certificación.</p>
+              2 (5 juegos 3D) con doble certificación.</p>
           </button>
         </div>
 
@@ -1722,113 +1718,111 @@
         </div>
       </div>
 
-      <div class="dashboard-grid">
-        <div style="grid-column: 1 / -1;">
-          <h3 class="modules-title">Métricas Generales de la Corporación</h3>
-          <div
-            style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.8rem;">
-            <div class="sidebar-panel" style="text-align:center;">
-              <h4 style="font-size:0.8rem; color:var(--text-muted);">Puntaje Acumulado</h4>
-              <p id="admin-total-score"
-                style="font-size:1.8rem; font-weight:800; color:var(--accent-cyan); margin-top:0.3rem;">0 PTS</p>
-            </div>
-            <div class="sidebar-panel" style="text-align:center;">
-              <div class="sidebar-panel" id="admin-kpi-p1-card" style="text-align:center;">
-                <h4 style="font-size:0.8rem; color:var(--text-muted);">Módulos Fase 1 Superados</h4>
-                <p id="admin-p1-modules"
-                  style="font-size:1.8rem; font-weight:800; color:var(--accent-green); margin-top:0.3rem;">0</p>
-              </div>
-              <div class="sidebar-panel" style="text-align:center;">
-                <div class="sidebar-panel" id="admin-kpi-p2-card" style="text-align:center;">
-                  <h4 style="font-size:0.8rem; color:var(--text-muted);">Módulos Fase 2 Superados</h4>
-                  <p id="admin-p2-modules"
-                    style="font-size:1.8rem; font-weight:800; color:var(--accent-purple); margin-top:0.3rem;">0</p>
-                </div>
-                <div class="sidebar-panel" style="text-align:center;">
-                  <h4 style="font-size:0.8rem; color:var(--text-muted);">Total Módulos Completados</h4>
-                  <p id="admin-total-modules"
-                    style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:0.3rem;">0</p>
-                </div>
-                <div class="sidebar-panel" style="text-align:center;">
-                  <h4 style="font-size:0.8rem; color:var(--text-muted);">Precisión Global</h4>
-                  <p id="admin-success-rate"
-                    style="font-size:1.8rem; font-weight:800; color:var(--primary-light); margin-top:0.3rem;">0%</p>
-                </div>
-              </div>
+      <!-- MÉTRICAS GENERALES (DINÁMICAS SEGÚN FASE ACTIVA) -->
+      <div class="admin-section-block">
+        <div class="admin-section-head">
+          <h3 class="modules-title" id="admin-metrics-heading" style="margin:0;">📊 Métricas de Auditoría — Fase 2</h3>
+          <span id="admin-metrics-scope-badge" class="phase-pill phase-pill-cyan">Vista filtrada: Solo Fase 2</span>
+        </div>
 
-              <!-- Verificador de Certificados y Avance por Departamento -->
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
-                <div class="sidebar-panel">
-                  <h3>🔍 Verificador Oficial de Certificados (Auditoría)</h3>
-                  <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.8rem;">Ingresa el código impreso
-                    en
-                    el diploma (ej. <code>S7B-F1-001-XXXXXX</code>) para validar su autenticidad.</p>
-                  <div style="display:flex; gap:0.5rem;">
-                    <input type="text" id="admin-verify-cert-input" class="text-input" placeholder="Código S7B-..."
-                      style="font-family:var(--font-mono); font-size:0.85rem;">
-                    <button class="btn btn-primary" onclick="app.verifyCertificateFromAdmin()"
-                      style="white-space:nowrap;">Verificar</button>
-                  </div>
-                  <div id="admin-verify-cert-result" style="margin-top:0.8rem; font-size:0.82rem;"></div>
-                </div>
-
-                <div class="sidebar-panel">
-                  <h3>📊 Cumplimiento y Puntuación por Departamento</h3>
-                  <div id="admin-dept-breakdown"
-                    style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:0.45rem;">
-                    <!-- Se llena dinámicamente -->
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem; flex-wrap:wrap; gap:0.8rem;">
-                <div>
-                  <h3 class="modules-title" style="margin-bottom:0;">Auditoría Detallada de Colaboradores</h3>
-                  <span id="admin-user-count" style="color:var(--text-muted); font-size:0.8rem;">0 usuarios
-                    registrados</span>
-                </div>
-                <div>
-                  <button class="btn btn-secondary" onclick="app.exportTableToCSV()"
-                    style="margin-right: 0.5rem; font-size: 0.85rem; padding: 0.5rem 1rem;">⬇ Excel / CSV</button>
-                  <button class="btn btn-primary" onclick="app.exportTableToPDF()"
-                    style="font-size: 0.85rem; padding: 0.5rem 1rem;">📄 Reporte Ejecutivo PDF</button>
-                </div>
-              </div>
-
-              <div style="margin-bottom:1rem;">
-                <label for="admin-user-filter"
-                  style="display:block; margin-bottom:0.4rem; color:var(--text-muted); font-size:0.8rem;">Buscar
-                  colaborador
-                  o gerencia/departamento</label>
-                <input id="admin-user-filter" class="text-input" type="search"
-                  placeholder="Ej. dirección tecnología, finanzas o nombre del colaborador"
-                  oninput="app.filterAdminUsers(this.value)">
-              </div>
-
-              <div style="overflow-x:auto;">
-                <table style="width:100%; text-align:left; border-collapse:collapse;">
-                  <thead>
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                      <th style="padding:0.85rem;">Nombre</th>
-                      <th style="padding:0.85rem;">Departamento</th>
-                      <th style="padding:0.85rem;">Puntuación</th>
-                      <th style="padding:0.85rem;">Fase 1 (Básico)</th>
-                      <th style="padding:0.85rem;">Fase 2 (Avanzado)</th>
-                      <th id="admin-th-p1" style="padding:0.85rem;">Fase 1 (Básico)</th>
-                      <th id="admin-th-p2" style="padding:0.85rem;">Fase 2 (Juegos 3D)</th>
-                      <th style="padding:0.85rem;">Total Módulos</th>
-                      <th style="padding:0.85rem;">Última Actividad</th>
-                      <th style="padding:0.85rem;">Detalle</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-users-table">
-                    <!-- Se llenará dinámicamente -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card kpi-gold">
+            <span class="admin-kpi-label" id="admin-score-label">Puntaje Acumulado (Fase 2)</span>
+            <p id="admin-total-score" class="admin-kpi-val" style="color:var(--accent-cyan);">0 PTS</p>
           </div>
+          <div class="admin-kpi-card kpi-green" id="admin-kpi-p1-card">
+            <span class="admin-kpi-label">Módulos Fase 1 Superados</span>
+            <p id="admin-p1-modules" class="admin-kpi-val" style="color:#4ade80;">0</p>
+          </div>
+          <div class="admin-kpi-card kpi-magenta" id="admin-kpi-p2-card">
+            <span class="admin-kpi-label">Módulos Fase 2 Superados</span>
+            <p id="admin-p2-modules" class="admin-kpi-val" style="color:#e879f9;">0</p>
+          </div>
+          <div class="admin-kpi-card kpi-blue" id="admin-kpi-total-card">
+            <span class="admin-kpi-label">Total Módulos Completados</span>
+            <p id="admin-total-modules" class="admin-kpi-val" style="color:var(--text-main);">0</p>
+          </div>
+          <div class="admin-kpi-card kpi-cyan">
+            <span class="admin-kpi-label" id="admin-certs-label">Certificados Emitidos</span>
+            <p id="admin-certs-count" class="admin-kpi-val" style="color:#38bdf8;">0</p>
+          </div>
+          <div class="admin-kpi-card kpi-indigo">
+            <span class="admin-kpi-label">Precisión Global</span>
+            <p id="admin-success-rate" class="admin-kpi-val" style="color:#60a5fa;">0%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HERRAMIENTAS DE AUDITORÍA: VERIFICADOR + DEPARTAMENTOS -->
+      <div class="admin-tools-grid">
+        <div class="sidebar-panel admin-tool-card">
+          <h3>🔍 Verificador Oficial de Certificados (Auditoría)</h3>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.85rem;">Ingresa el código impreso en el
+            diploma (ej. <code>S7B-F2-001-XXXXXX</code>) para validar su autenticidad.</p>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="admin-verify-cert-input" class="text-input" placeholder="Código S7B-..."
+              style="font-family:var(--font-mono); font-size:0.85rem;">
+            <button class="btn btn-primary" onclick="app.verifyCertificateFromAdmin()"
+              style="white-space:nowrap;">Verificar</button>
+          </div>
+          <div id="admin-verify-cert-result" style="margin-top:0.8rem; font-size:0.82rem;"></div>
+        </div>
+
+        <div class="sidebar-panel admin-tool-card">
+          <h3 id="admin-dept-heading">📊 Cumplimiento y Puntuación por Departamento (Fase 2)</h3>
+          <div id="admin-dept-breakdown"
+            style="max-height:190px; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem;">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA DE AUDITORÍA DETALLADA DE COLABORADORES -->
+      <div class="sidebar-panel admin-table-card">
+        <div class="admin-table-header">
+          <div>
+            <h3 class="modules-title" id="admin-table-heading" style="margin-bottom:0.15rem;">Auditoría Detallada de
+              Colaboradores — Fase 2</h3>
+            <span id="admin-user-count" style="color:var(--text-muted); font-size:0.8rem;">0 colaboradores
+              registrados</span>
+          </div>
+          <div class="admin-export-btns">
+            <button class="btn btn-secondary" onclick="app.exportTableToCSV()"
+              style="font-size:0.84rem; padding:0.5rem 1rem;">⬇ Excel / CSV</button>
+            <button class="btn btn-primary" onclick="app.exportTableToPDF()"
+              style="font-size:0.84rem; padding:0.5rem 1rem;">📄 Reporte Ejecutivo PDF</button>
+          </div>
+        </div>
+
+        <div class="admin-search-bar">
+          <label for="admin-user-filter"
+            style="display:block; margin-bottom:0.35rem; color:var(--text-muted); font-size:0.78rem;">Buscar colaborador
+            o gerencia/departamento</label>
+          <input id="admin-user-filter" class="text-input" type="search"
+            placeholder="Ej. dirección tecnología, finanzas o nombre del colaborador"
+            oninput="app.filterAdminUsers(this.value)">
+        </div>
+
+        <div class="admin-table-scroll">
+          <table class="admin-audit-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th id="admin-th-score">Puntuación (Fase 2)</th>
+                <th id="admin-th-p1">Fase 1 (Básico)</th>
+                <th id="admin-th-p2">Fase 2 (Juegos 3D)</th>
+                <th id="admin-th-total">Total Módulos</th>
+                <th>Última Actividad</th>
+                <th style="text-align:center;">Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-table">
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -1912,7 +1906,7 @@
   <script src="arcade-ia.js?v=4.5"></script>
   <script src="customizer.js?v=4.0"></script>
   <script src="app.js?v=4.3"></script>
-  <script src="app.js?v=4.4"></script>
+  <script src="app.js?v=4.5"></script>
 </body>
 
 </html>
