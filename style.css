@@ -255,13 +255,13 @@ main {
 }
 
 .brand-logo-welcome {
-  width: 150px;
+  width: 96px;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-  border: 3px solid #ffffff;
-  background: #ffffff;
-  padding: 0.6rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  padding: 0;
   transition: var(--transition);
 }
 
@@ -3991,6 +3991,12 @@ main {
   grid-template-columns: 1.25fr 1fr;
   gap: 1.5rem;
   align-items: center;
+}
+
+.ia3d-intro h2 {
+  font-size: 1.48rem;
+  line-height: 1.28;
+  margin: 0 0 0.7rem 0;
 }
 
 .ia3d-how {

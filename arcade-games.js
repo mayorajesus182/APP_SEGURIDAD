@@ -38,7 +38,7 @@
     { type: 'safe', from: 'capital.humano@suiche7b.com.ve', subj: 'Simulacro anual de evacuación', prev: 'Registra tu asistencia en https://portal.suiche7b.com.ve/simulacro', clue: 'Dominio oficial y enlace seguro (https) a la intranet.' },
     { type: 'safe', from: 'finanzas@suiche7b.com.ve', subj: 'Cierre mensual: reporte en PDF', prev: 'Adjunto el reporte del mes para la reunión del lunes.', clue: 'Remitente interno, adjunto normal y sin pedir claves ni pagos.' },
     { type: 'safe', from: 'seguridad@suiche7b.com.ve', subj: 'Recordatorio: cursos de la Academia CiberSegura', prev: 'Quedan módulos pendientes en la Academia. Ingresa desde tu panel de siempre.', clue: 'Comunicado interno sin enlaces raros ni urgencias.' },
-    { type: 'safe', from: 'gerencia.operaciones@suiche7b.com.ve', subj: 'Agenda de la reunión del lunes 10:00', prev: 'Temas: indicadores del mes y plan de capacitación.', clue: 'Correo interno rutinario.' },
+    { type: 'safe', from: 'planificacion.estrategica@suiche7b.com.ve', subj: 'Agenda de la reunión del lunes 10:00', prev: 'Temas: indicadores del mes y plan de capacitación.', clue: 'Correo interno rutinario de Gerencia de Planificación Estratégica.' },
     { type: 'safe', from: 'soporte@suiche7b.com.ve', subj: 'Mantenimiento programado: viernes 6 PM', prev: 'Se reiniciarán los equipos. No se requiere ninguna acción ni clave.', clue: 'Informa sin pedir datos y viene del canal oficial.' },
     { type: 'safe', from: 'comunicaciones@suiche7b.com.ve', subj: 'Boletín interno de septiembre', prev: 'Resumen de logros del mes y cumpleaños del personal.', clue: 'Boletín interno habitual.' },
     { type: 'safe', from: 'operaciones@suiche7b.com.ve', subj: 'Agenda de la reunión del lunes 10:00', prev: 'Temas: indicadores de la red interbancaria y servicio al cliente.', clue: 'Correo interno rutinario.' },
@@ -270,7 +270,7 @@
       e: '🎭',
       t: 'Llega un correo desde "presidencia.suiche7b@gmail.com" diciendo: "Transfiere urgente este anticipo hoy y no se lo comentes a nadie".',
       cards: [
-        { e: '✍️', title: 'Confirmar y pedir doble firma', sub: 'Llamar a la extensión interna de Presidencia Ejecutiva y seguir las firmas.', ok: true, why: 'En Corporación Suiche 7B ningún pago sale sin verificación interna y firmas de autorización.' },
+        { e: '✍️', title: 'Confirmar y pedir doble firma', sub: 'Comunicarse con el área correspondiente y solicitar la aprobación y firmas.', ok: true, why: 'En Corporación Suiche 7B ningún pago sale sin verificación interna y firmas de autorización.' },
         { e: '⚡', title: 'Pagar rápido por respeto', sub: 'Hacer el pago sin preguntar para que Presidencia no se moleste.', ok: false, why: 'El apuro y el "secreto" son la trampa clásica del fraude del falso jefe.' },
         { e: '💬', title: 'Responder al @gmail', sub: 'Escribirle preguntando a nombre de quién va el pago.', ok: false, why: 'Presidencia Ejecutiva nunca usa correos @gmail.com para ordenar pagos.' },
         { e: '💵', title: 'Pagar solo la mitad hoy', sub: 'Transferir un adelanto pequeño y confirmar el lunes.', ok: false, why: 'Igual pierdes fondos de la empresa frente a una solicitud falsa.' }
@@ -309,7 +309,7 @@
       e: '📲',
       t: 'Un número desconocido escribe por WhatsApp diciendo ser de un banco aliado y pide un Excel con operaciones de Pago Móvil Interbancario de ayer.',
       cards: [
-        { e: '📋', title: 'Exigir el canal oficial validado', sub: 'Negarme por WhatsApp y canalizar vía Gerencia Operaciones y Servicio al Cliente.', ok: true, why: 'La información operativa de la red interbancaria solo se comparte con contactos validados por canales oficiales.' },
+        { e: '📋', title: 'Exigir el canal oficial validado', sub: 'Negarme por WhatsApp y canalizar vía Gerencia de Operaciones y Servicio al Cliente.', ok: true, why: 'La información operativa de la red interbancaria solo se comparte con contactos validados por canales oficiales.' },
         { e: '📤', title: 'Enviar el Excel por WhatsApp', sub: 'Pasarle el archivo rápido para brindar buena atención.', ok: false, why: 'Compartiste datos transaccionales confidenciales con alguien cuya identidad no fue verificada.' },
         { e: '📷', title: 'Mandar foto de mi pantalla', sub: 'Enviar solo una foto rápida de la tabla en vez del archivo.', ok: false, why: 'Una foto de pantalla igual filtra datos sensibles de operaciones de la red.' },
         { e: '📧', title: 'Enviarlo desde mi Gmail', sub: 'Mandárselo desde mi correo personal para no saturar el corporativo.', ok: false, why: 'Sacar archivos de Corporación Suiche 7B hacia correos personales está prohibido.' }
@@ -546,7 +546,6 @@
         <div class="arc-intro">
           <div class="arc-intro-text">
             <h2>Escapa abriendo la bóveda</h2>
-            <p>La bóveda de datos de Suiche 7B tiene <strong>5 candados</strong>. Cada uno esconde un acertijo de ciberseguridad.
             <p>La bóveda de datos de Corporación Suiche 7B tiene <strong>5 candados</strong>. Cada uno esconde un acertijo de ciberseguridad.
               Al resolverlo, el candado se enciende en verde en la bóveda 3D y te revela <strong>un dígito</strong>.
               Con los 5 dígitos abres la puerta.</p>
@@ -641,6 +640,10 @@
       this.solved = [false, false, false, false, false];
       this.timeLeft = 480; this.hints = 0; this.mistakes = 0; this.sel = 0;
       this.open = 0; this.opening = false; this.over = false; this.particles = [];
+      if (!this.vaultLogo) {
+        this.vaultLogo = new Image();
+        this.vaultLogo.src = 'img/logo-suiche7b.png';
+      }
       this.t = 0; this.playing = true; this.drag = 0;
       const root = window.arcade.root(this.key);
       root.innerHTML = `
@@ -715,6 +718,28 @@
       if (this.open > 0.3) {
         e.ctx.fillStyle = `rgba(253,224,71,${(this.open - 0.3) * 0.15})`;
         e.ctx.fillRect(0, 0, cv.width, cv.height);
+        if (this.vaultLogo && this.vaultLogo.complete && this.vaultLogo.naturalWidth > 0) {
+          const vp = e.project([0.1, 0.95, -0.35]);
+          const logoW = 108;
+          const logoH = Math.round(logoW * (this.vaultLogo.naturalHeight / this.vaultLogo.naturalWidth));
+          const padX = 10, padY = 6;
+          e.ctx.save();
+          e.ctx.globalAlpha = U.clamp((this.open - 0.3) / 0.45, 0, 1);
+          e.ctx.fillStyle = 'rgba(255,255,255,0.95)';
+          e.ctx.shadowColor = 'rgba(251,191,36,0.55)';
+          e.ctx.shadowBlur = 14;
+          const bx = vp.x - (logoW / 2) - padX;
+          const by = vp.y - (logoH / 2) - padY;
+          const bw = logoW + padX * 2;
+          const bh = logoH + padY * 2;
+          e.ctx.beginPath();
+          if (e.ctx.roundRect) e.ctx.roundRect(bx, by, bw, bh, 8);
+          else e.ctx.rect(bx, by, bw, bh);
+          e.ctx.fill();
+          e.ctx.shadowBlur = 0;
+          e.ctx.drawImage(this.vaultLogo, vp.x - logoW / 2, vp.y - logoH / 2, logoW, logoH);
+          e.ctx.restore();
+        }
       }
       this.particles.forEach((p) => {
         e.ctx.fillStyle = p.c; e.ctx.globalAlpha = Math.min(1, p.life);

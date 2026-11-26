@@ -595,6 +595,7 @@ class AppController {
       if (res.ok && data.success) {
         this.academyConfig = { ...this.academyConfig, ...data.data };
         this.updateAdminPhaseButtonsUI();
+        this.applyAdminPhaseLayout();
         this.updateUI();
         if (showNotification) {
           const modeNames = {
@@ -691,6 +692,40 @@ class AppController {
   }
 
   // --- CARGA DEL DASHBOARD ADMIN ---
+  applyAdminPhaseLayout() {
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const showP1 = mode === 'phase1' || mode === 'both';
+    const showP2 = mode === 'phase2' || mode === 'both';
+
+    const kpiP1 = document.getElementById('admin-kpi-p1-card');
+    const kpiP2 = document.getElementById('admin-kpi-p2-card');
+    if (kpiP1) kpiP1.style.display = showP1 ? '' : 'none';
+    if (kpiP2) kpiP2.style.display = showP2 ? '' : 'none';
+
+    const thP1 = document.getElementById('admin-th-p1');
+    const thP2 = document.getElementById('admin-th-p2');
+    if (thP1) thP1.style.display = showP1 ? '' : 'none';
+    if (thP2) thP2.style.display = showP2 ? '' : 'none';
+
+    if (this.adminSummary) {
+      const p1Done = Number(this.adminSummary.phase1ModulesCompleted || 0);
+      const p2Done = Number(this.adminSummary.phase2ModulesCompleted || 0);
+      const activeTotalCompleted = mode === 'phase1' ? p1Done : mode === 'phase2' ? p2Done : (p1Done + p2Done);
+      const totalEl = document.getElementById('admin-total-modules');
+      if (totalEl) totalEl.innerText = activeTotalCompleted;
+    }
+
+    if (Array.isArray(this.adminUsers) && this.adminUsers.length > 0) {
+      const filterInput = document.getElementById('admin-user-filter');
+      if (filterInput && filterInput.value.trim()) {
+        this.filterAdminUsers(filterInput.value);
+      } else {
+        this.renderAdminUsers(this.adminUsers);
+      }
+      this.renderAdminDeptBreakdown(this.adminUsers);
+    }
+  }
+
   async loadAdminDashboard() {
     if (!this.state.user.isAdmin) return;
     this.updateAdminPhaseButtonsUI();
@@ -703,18 +738,19 @@ class AppController {
 
       if (summaryData.success && summaryData.data) {
         const d = summaryData.data;
+        this.adminSummary = d;
         if (d.academyConfig) {
           this.academyConfig = { ...this.academyConfig, ...d.academyConfig };
           this.updateAdminPhaseButtonsUI();
         }
         document.getElementById('admin-total-score').innerText = `${d.totalScore || 0} PTS`;
-        document.getElementById('admin-total-modules').innerText = d.totalModulesCompleted || 0;
         const p1El = document.getElementById('admin-p1-modules');
         const p2El = document.getElementById('admin-p2-modules');
         if (p1El) p1El.innerText = d.phase1ModulesCompleted || 0;
         if (p2El) p2El.innerText = d.phase2ModulesCompleted || 0;
         document.getElementById('admin-success-rate').innerText = `${d.successRate || 0}%`;
         document.getElementById('admin-user-count').innerText = `${d.totalUsers || 0} colaboradores registrados`;
+        this.applyAdminPhaseLayout();
       }
 
       const usersRes = await fetch(`${this.apiBaseUrl}/stats/users`, {
@@ -724,8 +760,7 @@ class AppController {
 
       if (usersData.success) {
         this.adminUsers = usersData.data;
-        this.renderAdminUsers(this.adminUsers);
-        this.renderAdminDeptBreakdown(this.adminUsers);
+        this.applyAdminPhaseLayout();
       }
     } catch (e) {
       console.error('Error al cargar panel de auditoría:', e);
@@ -736,15 +771,21 @@ class AppController {
     const container = document.getElementById('admin-dept-breakdown');
     if (!container) return;
 
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const targetPerUser = mode === 'phase1' ? PHASE1_KEYS.length : mode === 'phase2' ? PHASE2_KEYS.length : (PHASE1_KEYS.length + PHASE2_KEYS.length);
+
     const deptMap = {};
     users.forEach(u => {
       const dept = u.department || 'Área General';
       if (!deptMap[dept]) {
         deptMap[dept] = { count: 0, totalScore: 0, completedMods: 0 };
       }
+      const p1 = parseInt(u.phase1_completed || 0, 10);
+      const p2 = parseInt(u.phase2_completed || 0, 10);
+      const activeDone = mode === 'phase1' ? p1 : mode === 'phase2' ? p2 : (p1 + p2);
       deptMap[dept].count++;
       deptMap[dept].totalScore += parseInt(u.total_score || 0, 10);
-      deptMap[dept].completedMods += parseInt(u.modules_completed || 0, 10);
+      deptMap[dept].completedMods += activeDone;
     });
 
     const entries = Object.entries(deptMap).sort((a, b) => b[1].totalScore - a[1].totalScore);
@@ -754,8 +795,7 @@ class AppController {
     }
 
     container.innerHTML = entries.map(([dept, info]) => {
-      const targetPerUser = this.academyConfig.activePhaseMode === 'both' ? 10 : 5;
-      const pct = Math.min(100, Math.round((info.completedMods / (info.count * targetPerUser)) * 100));
+      const pct = Math.min(100, Math.round((info.completedMods / Math.max(1, info.count * targetPerUser)) * 100));
       return `
         <div style="font-size:0.78rem; background:rgba(255,255,255,0.02); padding:0.45rem 0.65rem; border-radius:6px; border:1px solid rgba(255,255,255,0.04);">
           <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
@@ -784,20 +824,35 @@ class AppController {
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const showP1 = mode === 'phase1' || mode === 'both';
+    const showP2 = mode === 'phase2' || mode === 'both';
+    const p1Total = PHASE1_KEYS.length;
+    const p2Total = PHASE2_KEYS.length;
+    const activeTotal = (showP1 ? p1Total : 0) + (showP2 ? p2Total : 0);
+
     users.forEach(u => {
       const row = document.createElement('tr');
       row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
       const lastActivityDate = new Date(u.last_activity || u.created_at).toLocaleString('es-VE');
-      const p1Count = u.phase1_completed !== undefined ? u.phase1_completed : u.modules_completed;
-      const p2Count = u.phase2_completed !== undefined ? u.phase2_completed : 0;
+      const p1Count = Number(u.phase1_completed !== undefined ? u.phase1_completed : 0);
+      const p2Count = Number(u.phase2_completed !== undefined ? u.phase2_completed : 0);
+      const activeDone = (showP1 ? p1Count : 0) + (showP2 ? p2Count : 0);
+
+      const p1Td = showP1
+        ? `<td style="padding:0.85rem;"><span class="game-status-badge ${p1Count >= p1Total ? 'status-completed' : 'status-pending'}">${p1Count} / ${p1Total}</span></td>`
+        : '';
+      const p2Td = showP2
+        ? `<td style="padding:0.85rem;"><span class="game-status-badge ${p2Count >= p2Total ? 'status-completed' : 'status-pending'}">${p2Count} / ${p2Total}</span></td>`
+        : '';
 
       row.innerHTML = `
         <td style="padding:0.85rem; font-weight:600;">${u.full_name}</td>
         <td style="padding:0.85rem; color:var(--text-muted);">${u.department || 'Área General'}</td>
         <td style="padding:0.85rem; color:var(--accent-cyan); font-weight:bold; font-family:var(--font-mono);">${u.total_score} PTS</td>
-        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p1Count) >= 5 ? 'status-completed' : 'status-pending'}">${p1Count} / 5</span></td>
-        <td style="padding:0.85rem;"><span class="game-status-badge ${Number(p2Count) >= 4 ? 'status-completed' : 'status-pending'}">${p2Count} / 4</span></td>
-        <td style="padding:0.85rem; font-weight:600;">${u.modules_completed} / 9</td>
+        ${p1Td}
+        ${p2Td}
+        <td style="padding:0.85rem; font-weight:600;">${activeDone} / ${activeTotal}</td>
         <td style="padding:0.85rem; font-size:0.78rem; color:var(--text-muted);">${lastActivityDate}</td>
         <td style="padding:0.85rem;">
           <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="app.showAdminUserDetail(${u.id})">
@@ -813,6 +868,10 @@ class AppController {
     const user = this.adminUsers.find(u => Number(u.id) === Number(userId));
     if (!user) return;
 
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const showP1 = mode === 'phase1' || mode === 'both';
+    const showP2 = mode === 'phase2' || mode === 'both';
+
     const completedSet = new Set(Array.isArray(user.completed_keys) ? user.completed_keys : []);
     const p1Html = PHASE1_KEYS.map(k => {
       const done = completedSet.has(k);
@@ -823,16 +882,21 @@ class AppController {
       return `<div style="margin-bottom:0.25rem;">${done ? '✅' : '⏳'} ${MODULE_LABELS[k]}</div>`;
     }).join('');
 
+    const p1Section = showP1 ? `
+      <strong style="color:var(--accent-green);">Fase 1: Nivel Básico (${user.phase1_completed || 0}/${PHASE1_KEYS.length})</strong>
+      <div style="margin:0.4rem 0 0.8rem;">${p1Html}</div>` : '';
+    const p2Section = showP2 ? `
+      <strong style="color:var(--accent-cyan);">Fase 2: Juegos 3D (${user.phase2_completed || 0}/${PHASE2_KEYS.length})</strong>
+      <div style="margin-top:0.4rem;">${p2Html}</div>` : '';
+
     this.showModalAlert({
       title: `👤 Expediente de Auditoría: ${user.full_name}`,
       message: `
         <div style="text-align:left; font-size:0.84rem; line-height:1.5;">
           <p><strong>Departamento:</strong> ${user.department || 'Área General'} | <strong>Puntaje:</strong> ${user.total_score} PTS</p>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:0.6rem 0;">
-          <strong style="color:var(--accent-green);">Fase 1: Nivel Básico (${user.phase1_completed || 0}/5)</strong>
-          <div style="margin:0.4rem 0 0.8rem;">${p1Html}</div>
-          <strong style="color:var(--accent-cyan);">Fase 2: Nivel Especialista (${user.phase2_completed || 0}/5)</strong>
-          <div style="margin-top:0.4rem;">${p2Html}</div>
+          ${p1Section}
+          ${p2Section}
         </div>
       `,
       type: 'info'
@@ -1885,7 +1949,7 @@ class AppController {
 
     rows.forEach(row => {
       const rowData = [];
-      const cols = row.querySelectorAll('th, td');
+      const cols = Array.from(row.querySelectorAll('th, td')).filter(c => c.style.display !== 'none');
       // Omitir la última columna de botón "Detalle"
       for (let i = 0; i < cols.length - 1; i++) {
         const text = cols[i].innerText.replace(/"/g, '""');
@@ -1922,6 +1986,17 @@ class AppController {
     const completedModules = document.getElementById('admin-total-modules')?.textContent || '0';
     const successRate = document.getElementById('admin-success-rate')?.textContent || '0%';
 
+    const mode = this.academyConfig.activePhaseMode || 'phase2';
+    const showP1 = mode === 'phase1' || mode === 'both';
+    const showP2 = mode === 'phase2' || mode === 'both';
+    const reportTitle = mode === 'phase1'
+      ? 'Reporte Ejecutivo de Auditoría — Fase 1'
+      : mode === 'phase2'
+        ? 'Reporte Ejecutivo de Auditoría — Fase 2 (Juegos 3D)'
+        : 'Reporte Ejecutivo de Auditoría — Fase 1 y Fase 2';
+    const p1CardHtml = showP1 ? `<div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #357e32; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 1</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p1Modules}</div></div>` : '';
+    const p2CardHtml = showP2 ? `<div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #b60e80; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 2</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p2Modules}</div></div>` : '';
+
     const element = document.createElement('div');
     element.style.cssText = 'width:100%; padding:24px 28px; color:#172033; background:#ffffff; font-family:Arial,sans-serif;';
     element.innerHTML = `
@@ -1929,7 +2004,7 @@ class AppController {
         <div style="display:flex; align-items:center; gap:14px;">
           <img src="img/logo-suiche7b.png" alt="Suiche 7B" style="height:38px; width:auto;">
           <div>
-            <div style="font-size:17px; font-weight:700; color:#005e9c;">Reporte Ejecutivo de Auditoría — Fase 1 y Fase 2</div>
+            <div style="font-size:17px; font-weight:700; color:#005e9c;">${reportTitle}</div>
             <div style="font-size:10px; color:#536175; margin-top:3px;">Academia CiberSegura - Corporación Suiche 7B (${this.academyConfig.campaignName})</div>
           </div>
         </div>
@@ -1937,15 +2012,18 @@ class AppController {
       </header>
       <section style="display:flex; gap:10px; margin:16px 0;">
         <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #fbba0a; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Puntaje total</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${totalScore}</div></div>
-        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #357e32; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 1</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p1Modules}</div></div>
-        <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #b60e80; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Módulos Fase 2</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${p2Modules}</div></div>
+        ${p1CardHtml}
+        ${p2CardHtml}
         <div style="flex:1; padding:8px 10px; border:1px solid #dbe3ee; border-left:4px solid #005e9c; background:#f8fafc;"><div style="font-size:8px; color:#536175; text-transform:uppercase;">Total / Precisión</div><div style="font-size:16px; font-weight:700; margin-top:2px;">${completedModules} (${successRate})</div></div>
       </section>
       <h2 style="margin:0 0 8px; font-size:13px;">Detalle de avance por colaborador</h2>
     `;
 
     const table = document.querySelector('#admin-dashboard-view table').cloneNode(true);
-    // Eliminar última columna de botón de acción en el clon para PDF limpio
+    // Eliminar columnas ocultas (fase inactiva) y última columna de botón de acción en el clon para PDF limpio
+    table.querySelectorAll('th, td').forEach(cell => {
+      if (cell.style && cell.style.display === 'none') cell.remove();
+    });
     table.querySelectorAll('tr').forEach(tr => {
       if (tr.lastElementChild) tr.removeChild(tr.lastElementChild);
     });

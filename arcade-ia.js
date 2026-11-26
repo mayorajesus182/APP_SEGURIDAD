@@ -181,8 +181,8 @@
         <div class="arc-intro ia3d-intro">
           <div class="arc-intro-grid">
             <div class="arc-intro-copy">
-              <span class="sim3d-badge" style="border-color:#a855f7; color:#c084fc;">FASE 2 · FILTRO DLP &amp; IA 3D</span>
-              <h2>Aprende a usar la IA sin filtrar datos de Corporación Suiche 7B</h2>
+              <span class="sim3d-badge" style="border-color:#a855f7; color:#c084fc; display:inline-block; margin-bottom:0.85rem;">FASE 2 · FILTRO DLP &amp; IA 3D</span>
+              <h2>Aprende a usar la IA sin filtrar datos de Corporación&nbsp;Suiche&nbsp;7B</h2>
               <p>Controla el <strong>Escáner DLP 3D</strong> entre tu estación corporativa y la Nube de IA. En cada misión deberás decidir si <strong>censurar datos sensibles antes de enviar</strong>, <strong>bloquear documentos confidenciales</strong> o <strong>detectar alucinaciones y deepfakes</strong>.</p>
               <div class="ia3d-how">
                 <div class="ia3d-step"><span>1</span><div><strong>Haz clic en los datos sensibles</strong> dentro del prompt para censurarlos en tiempo real.</div></div>

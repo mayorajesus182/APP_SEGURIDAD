@@ -24,7 +24,10 @@
     { e: '🤖', t: 'Sueldos en ChatGPT', why: 'Nunca pegues cédulas, sueldos ni datos privados en IA pública.' },
     { e: '💳', t: 'Foto Reverso CVV', why: 'Los 3 números del reverso (CVV) nunca se piden ni se guardan.' },
     { e: '🔗', t: 'suiche7b-ve.com', why: 'Dominio clonado: el oficial es @suiche7b.com.ve.' },
-    { e: '🦺', t: 'Visita Sin Carnet', why: 'Toda persona externa debe validarse antes de ingresar.' }
+    { e: '🦺', t: 'Visita Sin Carnet', why: 'Toda persona externa debe validarse antes de ingresar.' },
+    { e: '🎙️', t: 'Audio Clonado IA', why: 'Un deepfake de voz puede imitar a un directivo; confirma siempre por canal oficial.' },
+    { e: '📦', t: 'Factura .ZIP', why: 'Los archivos comprimidos sospechosos suelen ocultar malware.' },
+    { e: '💬', t: 'Clave por Chat', why: 'Nunca compartas contraseñas ni tokens por WhatsApp o mensajería.' }
   ];
 
   const LEGITS = [
@@ -76,7 +79,7 @@
             <p>Hacia el núcleo 3D viajan operaciones y amenazas. <strong>Sin esperas ni cuestionarios largos</strong>:
               demuestra tus reflejos y criterio en 3 oleadas rápidas.</p>
             <ul>
-              <li>🎯 <strong>Haz clic sobre las amenazas</strong> (rojas/sospechosas) para destruirlas con el láser antes de que toquen el núcleo.</li>
+              <li>🎯 <strong>Haz clic sobre las amenazas</strong> (sospechosas) para destruirlas con el láser antes de que toquen el núcleo.</li>
               <li>✅ <strong>Deja pasar las operaciones legítimas</strong> (Pago Móvil S7B, QR S7B, NFC S7B, correos oficiales) para sumar puntos y recargar escudo.</li>
               <li>⚡ <strong>Pulso de Seguridad:</strong> bloquea 5 amenazas seguidas para cargar un pulso que limpia la pantalla (clic o barra espaciadora).</li>
             </ul>
@@ -188,6 +191,10 @@
       this.waveIdx = 0;
       this.ended = false;
       this.dragYaw = 0;
+      this.threatBag = U.shuffle(THREATS);
+      this.legitBag = U.shuffle(LEGITS);
+      this.lastThreatLabel = '';
+      this.lastLegitLabel = '';
 
       const root = window.arcade.root(this.key);
       root.innerHTML = `
@@ -238,10 +245,26 @@
       this.raf = requestAnimationFrame(loop);
     }
 
+    _drawFromBag(isThreat) {
+      let bag = isThreat ? this.threatBag : this.legitBag;
+      const src = isThreat ? THREATS : LEGITS;
+      const last = isThreat ? this.lastThreatLabel : this.lastLegitLabel;
+      if (!bag || bag.length === 0) {
+        bag = U.shuffle(src);
+        if (bag.length > 1 && bag[bag.length - 1].t === last) {
+          [bag[0], bag[bag.length - 1]] = [bag[bag.length - 1], bag[0]];
+        }
+        if (isThreat) this.threatBag = bag; else this.legitBag = bag;
+      }
+      const item = bag.pop();
+      if (isThreat) this.lastThreatLabel = item.t; else this.lastLegitLabel = item.t;
+      return item;
+    }
+
     spawnPacket() {
       const w = WAVES[this.waveIdx] || WAVES[2];
       const isThreat = Math.random() < w.threatChance;
-      const item = U.pick(isThreat ? THREATS : LEGITS);
+      const item = this._drawFromBag(isThreat);
       // Elegir un ángulo que no se monte encima de otro paquete recién creado
       let angle = U.rnd(0, Math.PI * 2);
       for (let tries = 0; tries < 6; tries++) {
