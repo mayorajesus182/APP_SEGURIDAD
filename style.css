@@ -2655,15 +2655,32 @@ main {
   box-shadow: 0 0 14px rgba(251, 186, 10, 0.18);
 }
 
+.game-card-phase2 > div:first-child > div:first-child {
+  gap: 0.9rem;
+  margin-bottom: 1.2rem !important;
+}
+
+.game-card-phase2 .game-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.game-card-phase2 h3 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.65rem;
+  line-height: 1.32;
+}
+
 .sim3d-badge {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
+  padding: 0.24rem 0.58rem;
   border-radius: 6px;
   border: 1px solid rgba(251, 186, 10, 0.45);
   background: rgba(251, 186, 10, 0.1);
   color: var(--accent-cyan);
+  line-height: 1.3;
+  text-align: right;
   letter-spacing: 0.5px;
 }
 
