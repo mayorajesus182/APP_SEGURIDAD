@@ -598,13 +598,11 @@
       // Suelo y pared
       e.addBox(0, -0.6, 0, 12, 0.5, 8, '#1f2a44', null, { layer: -3 });
       e.addBox(0, -0.1, -2.4, 12, 8, 0.4, '#27334f', null, { layer: -2 });
-      // Marco e interior
+      // Marco e interior corporativo iluminado (sin lingotes de oro; alberga el emblema S7B)
       e.addExtrude(Mini3D.ngon(3.25, 12, Math.PI / 12), -0.9, -0.05, '#4b5563', null, { layer: -1 });
-      e.addExtrude(Mini3D.ngon(2.6, 12, Math.PI / 12), -0.9, -0.04, '#fcd34d', null, { layer: -0.5, back: false });
-      // Tesoro (datos protegidos)
-      e.addBox(-0.9, -0.3, -0.5, 0.9, 0.5, 0.7, '#f59e0b', null, { layer: -0.4, emissive: 0.25 });
-      e.addBox(0.3, -0.3, -0.4, 1.1, 0.8, 0.7, '#fbbf24', null, { layer: -0.4, emissive: 0.25 });
-      e.addBox(1.3, -0.3, -0.5, 0.8, 0.4, 0.7, '#f59e0b', null, { layer: -0.4, emissive: 0.25 });
+      e.addExtrude(Mini3D.ngon(2.6, 12, Math.PI / 12), -0.9, -0.04, '#0b1f3f', null, { layer: -0.5, back: false, emissive: 0.15 });
+      // Pedestal luminoso para el núcleo S7B
+      e.addBox(0, -1.65, -0.5, 2.2, 0.25, 0.9, '#005e9c', null, { layer: -0.4, emissive: 0.35 });
       // Puerta (con giro en la bisagra)
       const O = { xf, nf };
       e.addExtrude(Mini3D.ngon(2.8, 12, Math.PI / 12), 0, 0.5, '#9ca3af', 'door', Object.assign({ layer: 1 }, O));
@@ -642,7 +640,7 @@
       this.open = 0; this.opening = false; this.over = false; this.particles = [];
       if (!this.vaultLogo) {
         this.vaultLogo = new Image();
-        this.vaultLogo.src = 'img/logo-suiche7b.png';
+        this.vaultLogo.src = 'img/logo-s7b-icon.png?v=4.6';
       }
       this.t = 0; this.playing = true; this.drag = 0;
       const root = window.arcade.root(this.key);
@@ -701,7 +699,7 @@
       }
       if (this.opening) {
         this.open = Math.min(1, this.open + dt * 0.5);
-        if (this.open >= 1 && !this.over) { this.over = true; setTimeout(() => this.finish(true), 1400); }
+        if (this.open >= 1 && !this.over) { this.over = true; setTimeout(() => this.finish(true), 2000); }
       }
       this.particles.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 220 * dt; p.life -= dt; });
       this.particles = this.particles.filter((p) => p.life > 0);
@@ -715,120 +713,120 @@
       e.ctx.clearRect(0, 0, cv.width, cv.height);
       this._bg(e.ctx, cv);
       e.render();
-      if (this.open > 0.3) {
-        e.ctx.fillStyle = `rgba(253,224,71,${(this.open - 0.3) * 0.15})`;
-        e.ctx.fillRect(0, 0, cv.width, cv.height);
-        if (this.vaultLogo && this.vaultLogo.complete && this.vaultLogo.naturalWidth > 0) {
-          const vp = e.project([0.1, 0.95, -0.35]);
-          const logoW = 108;
-          const logoH = Math.round(logoW * (this.vaultLogo.naturalHeight / this.vaultLogo.naturalWidth));
-          const padX = 10, padY = 6;
+        if (this.open > 0.18) {
+          const alpha = U.clamp((this.open - 0.18) / 0.45, 0, 1);
+          const vp = e.project([0, 0.1, -0.45]);
+          const bobY = Math.sin(this.t * 3.2) * 4;
+          // Resplandor corporativo dentro de la bóveda abierta
           e.ctx.save();
-          e.ctx.globalAlpha = U.clamp((this.open - 0.3) / 0.45, 0, 1);
-          e.ctx.fillStyle = 'rgba(255,255,255,0.95)';
-          e.ctx.shadowColor = 'rgba(251,191,36,0.55)';
-          e.ctx.shadowBlur = 14;
-          const bx = vp.x - (logoW / 2) - padX;
-          const by = vp.y - (logoH / 2) - padY;
-          const bw = logoW + padX * 2;
-          const bh = logoH + padY * 2;
+          const glow = e.ctx.createRadialGradient(vp.x, vp.y + bobY, 12, vp.x, vp.y + bobY, 130);
+          glow.addColorStop(0, `rgba(56,189,248,${alpha * 0.42})`);
+          glow.addColorStop(0.55, `rgba(0,94,156,${alpha * 0.22})`);
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          e.ctx.fillStyle = glow;
           e.ctx.beginPath();
-          if (e.ctx.roundRect) e.ctx.roundRect(bx, by, bw, bh, 8);
-          else e.ctx.rect(bx, by, bw, bh);
+          e.ctx.arc(vp.x, vp.y + bobY, 130, 0, Math.PI * 2);
           e.ctx.fill();
-          e.ctx.shadowBlur = 0;
-          e.ctx.drawImage(this.vaultLogo, vp.x - logoW / 2, vp.y - logoH / 2, logoW, logoH);
+
+          if (this.vaultLogo && this.vaultLogo.complete && this.vaultLogo.naturalWidth > 0) {
+            const scale = 0.72 + 0.28 * alpha;
+            const logoW = Math.round(145 * scale);
+            const logoH = Math.round(logoW * (this.vaultLogo.naturalHeight / this.vaultLogo.naturalWidth));
+            e.ctx.globalAlpha = alpha;
+            e.ctx.shadowColor = 'rgba(56,189,248,0.65)';
+            e.ctx.shadowBlur = 18;
+            e.ctx.drawImage(this.vaultLogo, vp.x - logoW / 2, vp.y + bobY - logoH / 2, logoW, logoH);
+          }
           e.ctx.restore();
         }
+        this.particles.forEach((p) => {
+          e.ctx.fillStyle = p.c; e.ctx.globalAlpha = Math.min(1, p.life);
+          e.ctx.fillRect(p.x, p.y, 6, 6);
+        });
+        e.ctx.globalAlpha = 1;
+        const m = Math.floor(this.timeLeft / 60), s = Math.floor(this.timeLeft % 60);
+        const t = U.$('bov-time');
+        if (t) { t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; t.style.color = this.timeLeft < 60 ? '#ef4444' : ''; }
       }
-      this.particles.forEach((p) => {
-        e.ctx.fillStyle = p.c; e.ctx.globalAlpha = Math.min(1, p.life);
-        e.ctx.fillRect(p.x, p.y, 6, 6);
-      });
-      e.ctx.globalAlpha = 1;
-      const m = Math.floor(this.timeLeft / 60), s = Math.floor(this.timeLeft % 60);
-      const t = U.$('bov-time');
-      if (t) { t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; t.style.color = this.timeLeft < 60 ? '#ef4444' : ''; }
-    }
 
-    burst() {
-      const cv = this.eng.canvas;
-      for (let i = 0; i < 90; i++) {
-        this.particles.push({ x: cv.width / 2, y: cv.height / 2, vx: U.rnd(-260, 260), vy: U.rnd(-420, -80), life: U.rnd(1, 2.4), c: U.pick(['#fde047', '#22c55e', '#38bdf8', '#f472b6', '#fff']) });
+      burst() {
+        const cv = this.eng.canvas;
+        for (let i = 0; i < 90; i++) {
+          this.particles.push({ x: cv.width / 2, y: cv.height / 2, vx: U.rnd(-260, 260), vy: U.rnd(-420, -80), life: U.rnd(1, 2.4), c: U.pick(['#fde047', '#22c55e', '#38bdf8', '#f472b6', '#fff']) });
+        }
       }
-    }
 
-    penalize(sec, msg) {
-      this.timeLeft = Math.max(1, this.timeLeft - sec);
-      this.mistakes++;
-      U.snd('incorrect');
-      this.say(`⏱️ −${sec} s · ${msg}`, 'bad');
-    }
-
-    say(msg, kind) {
-      const el = U.$('bov-msg');
-      if (el) { el.className = `bov-msg ${kind || ''}`; el.textContent = msg; }
-    }
-
-    renderTabs() {
-      const el = U.$('bov-tabs');
-      if (el) {
-        el.innerHTML = LOCKS.map((l, i) => `<button class="bov-tab ${this.solved[i] ? 'done' : ''} ${this.sel === i ? 'sel' : ''}" data-i="${i}">${this.solved[i] ? '✅' : l.icon}<small>${i + 1}</small></button>`).join('');
-        el.querySelectorAll('.bov-tab').forEach((b) => b.addEventListener('click', () => this.select(parseInt(b.getAttribute('data-i'), 10))));
+      penalize(sec, msg) {
+        this.timeLeft = Math.max(1, this.timeLeft - sec);
+        this.mistakes++;
+        U.snd('incorrect');
+        this.say(`⏱️ −${sec} s · ${msg}`, 'bad');
       }
-      const code = U.$('bov-code');
-      if (code) code.textContent = this.code.map((d, i) => (this.solved[i] ? d : '_')).join(' ');
-    }
 
-    select(i) {
-      if (this.over || this.opening) return;
-      this.sel = i;
-      U.snd('click');
-      this.renderTabs();
-      const p = U.$('bov-panel');
-      if (!p) return;
-      if (this.solved.every(Boolean)) { this.renderFinal(); return; }
-      if (this.solved[i]) {
-        p.innerHTML = `<h3>${LOCKS[i].icon} Candado ${i + 1}: ${LOCKS[i].n} ✅</h3><p>¡Resuelto! Dígito ${i + 1} del código: <b class="bov-digit">${this.code[i]}</b></p><p class="arc-hint-s">Elige otro candado pendiente.</p>`;
-        return;
+      say(msg, kind) {
+        const el = U.$('bov-msg');
+        if (el) { el.className = `bov-msg ${kind || ''}`; el.textContent = msg; }
       }
-      const builders = [this.p1, this.p2, this.p3, this.p4, this.p5];
-      p.innerHTML = `<div class="jor-ev-tag">🔒 Candado ${i + 1} de 5 · ${LOCKS[i].n}</div><div id="bov-puz"></div><div id="bov-msg" class="bov-msg"></div>
+
+      renderTabs() {
+        const el = U.$('bov-tabs');
+        if (el) {
+          el.innerHTML = LOCKS.map((l, i) => `<button class="bov-tab ${this.solved[i] ? 'done' : ''} ${this.sel === i ? 'sel' : ''}" data-i="${i}">${this.solved[i] ? '✅' : l.icon}<small>${i + 1}</small></button>`).join('');
+          el.querySelectorAll('.bov-tab').forEach((b) => b.addEventListener('click', () => this.select(parseInt(b.getAttribute('data-i'), 10))));
+        }
+        const code = U.$('bov-code');
+        if (code) code.textContent = this.code.map((d, i) => (this.solved[i] ? d : '_')).join(' ');
+      }
+
+      select(i) {
+        if (this.over || this.opening) return;
+        this.sel = i;
+        U.snd('click');
+        this.renderTabs();
+        const p = U.$('bov-panel');
+        if (!p) return;
+        if (this.solved.every(Boolean)) { this.renderFinal(); return; }
+        if (this.solved[i]) {
+          p.innerHTML = `<h3>${LOCKS[i].icon} Candado ${i + 1}: ${LOCKS[i].n} ✅</h3><p>¡Resuelto! Dígito ${i + 1} del código: <b class="bov-digit">${this.code[i]}</b></p><p class="arc-hint-s">Elige otro candado pendiente.</p>`;
+          return;
+        }
+        const builders = [this.p1, this.p2, this.p3, this.p4, this.p5];
+        p.innerHTML = `<div class="jor-ev-tag">🔒 Candado ${i + 1} de 5 · ${LOCKS[i].n}</div><div id="bov-puz"></div><div id="bov-msg" class="bov-msg"></div>
         <button class="btn btn-secondary" id="bov-hint" style="margin-top:0.6rem; font-size:0.8rem;">💡 Pista (−30 s)</button>`;
-      U.$('bov-hint').addEventListener('click', () => { this.hints++; this.timeLeft = Math.max(1, this.timeLeft - 30); this.say(`💡 ${LOCKS[i].hint}`, 'hint'); });
-      builders[i].call(this, U.$('bov-puz'));
-    }
+        U.$('bov-hint').addEventListener('click', () => { this.hints++; this.timeLeft = Math.max(1, this.timeLeft - 30); this.say(`💡 ${LOCKS[i].hint}`, 'hint'); });
+        builders[i].call(this, U.$('bov-puz'));
+      }
 
-    solve(i) {
-      this.solved[i] = true;
-      U.snd('correct');
-      this.burst();
-      this.renderTabs();
-      const p = U.$('bov-panel');
-      if (this.solved.every(Boolean)) { setTimeout(() => this.renderFinal(), 700); }
-      p.innerHTML = `<h3>${LOCKS[i].icon} ¡Candado ${i + 1} abierto! ✅</h3><p>Dígito ${i + 1} del código: <b class="bov-digit">${this.code[i]}</b></p>
+      solve(i) {
+        this.solved[i] = true;
+        U.snd('correct');
+        this.burst();
+        this.renderTabs();
+        const p = U.$('bov-panel');
+        if (this.solved.every(Boolean)) { setTimeout(() => this.renderFinal(), 700); }
+        p.innerHTML = `<h3>${LOCKS[i].icon} ¡Candado ${i + 1} abierto! ✅</h3><p>Dígito ${i + 1} del código: <b class="bov-digit">${this.code[i]}</b></p>
         <p class="arc-hint-s">${this.solved.every(Boolean) ? 'Todos los candados abiertos…' : 'Elige otro candado pendiente.'}</p>`;
-    }
+      }
 
-    // --- Candado 1: claves ---
-    p1(box) {
-      const opts = U.shuffle([
-        { t: 'Suiche2026', ok: false, why: 'Usa el nombre de la empresa y el año: es de las primeras que prueban.' },
-        { t: 'Mi*Perro-Come3Galletas!', ok: true },
-        { t: '12345678', ok: false, why: 'Es la clave más usada del mundo; se adivina en segundos.' },
-        { t: 'Maria1985', ok: false, why: 'Nombre y año de nacimiento: datos fáciles de averiguar.' }
-      ]);
-      box.innerHTML = `<h3>🔑 ¿Cuál es la clave más segura?</h3><p>Elige la mejor clave para tu cuenta del trabajo:</p>
+      // --- Candado 1: claves ---
+      p1(box) {
+        const opts = U.shuffle([
+          { t: 'Suiche2026', ok: false, why: 'Usa el nombre de la empresa y el año: es de las primeras que prueban.' },
+          { t: 'Mi*Perro-Come3Galletas!', ok: true },
+          { t: '12345678', ok: false, why: 'Es la clave más usada del mundo; se adivina en segundos.' },
+          { t: 'Maria1985', ok: false, why: 'Nombre y año de nacimiento: datos fáciles de averiguar.' }
+        ]);
+        box.innerHTML = `<h3>🔑 ¿Cuál es la clave más segura?</h3><p>Elige la mejor clave para tu cuenta del trabajo:</p>
         <div class="jor-opts">${opts.map((o, i) => `<button class="jor-opt" data-i="${i}"><span class="jor-opt-l">${U.LETTERS[i]}</span><span class="mono">${U.esc(o.t)}</span></button>`).join('')}</div>`;
-      box.querySelectorAll('.jor-opt').forEach((b) => b.addEventListener('click', () => {
-        const o = opts[parseInt(b.getAttribute('data-i'), 10)];
-        if (o.ok) this.solve(0); else this.penalize(15, o.why);
-      }));
-    }
+        box.querySelectorAll('.jor-opt').forEach((b) => b.addEventListener('click', () => {
+          const o = opts[parseInt(b.getAttribute('data-i'), 10)];
+          if (o.ok) this.solve(0); else this.penalize(15, o.why);
+        }));
+      }
 
-    // --- Candado 2: correo falso ---
-    p2(box) {
-      box.innerHTML = `<h3>📧 Encuentra las 3 señales de fraude</h3><p>Toca las partes sospechosas del correo:</p>
+      // --- Candado 2: correo falso ---
+      p2(box) {
+        box.innerHTML = `<h3>📧 Encuentra las 3 señales de fraude</h3><p>Toca las partes sospechosas del correo:</p>
         <div class="bov-mail">
           <div><span class="m-l">De:</span> <span class="flag" data-f="1" data-w="El dominio 'suiche7b-ve.com' imita al oficial.">soporte@suiche7b-ve.com</span></div>
           <div><span class="m-l">Asunto:</span> <span class="flag" data-f="1" data-w="Meter prisa y amenazar es un truco típico.">URGENTE: responda en 2 horas o se cerrará su cuenta</span></div>
@@ -836,137 +834,137 @@
             <span class="flag" data-f="1" data-w="Enlace externo y sin candado (http).">http://actualiza-clave.link/entrar</span><br>
             <span class="flag" data-f="0">Atentamente, Soporte Técnico</span></div>
         </div><div class="bov-count" id="bov-cnt">Señales encontradas: 0 / 3</div>`;
-      let found = 0;
-      box.querySelectorAll('.flag').forEach((el) => el.addEventListener('click', () => {
-        if (el.classList.contains('found')) return;
-        if (el.getAttribute('data-f') === '1') {
-          el.classList.add('found'); found++; U.snd('click');
-          this.say(`✔ ${el.getAttribute('data-w')}`, 'ok');
-          U.$('bov-cnt').textContent = `Señales encontradas: ${found} / 3`;
-          if (found >= 3) setTimeout(() => this.solve(1), 500);
-        } else {
-          this.penalize(6, 'Eso por sí solo no es sospechoso.');
-        }
-      }));
-    }
+        let found = 0;
+        box.querySelectorAll('.flag').forEach((el) => el.addEventListener('click', () => {
+          if (el.classList.contains('found')) return;
+          if (el.getAttribute('data-f') === '1') {
+            el.classList.add('found'); found++; U.snd('click');
+            this.say(`✔ ${el.getAttribute('data-w')}`, 'ok');
+            U.$('bov-cnt').textContent = `Señales encontradas: ${found} / 3`;
+            if (found >= 3) setTimeout(() => this.solve(1), 500);
+          } else {
+            this.penalize(6, 'Eso por sí solo no es sospechoso.');
+          }
+        }));
+      }
 
-    // --- Candado 3: escritorio ---
-    p3(box) {
-      const items = U.shuffle([
-        { e: '📝', n: 'Nota adhesiva con una clave', risk: true },
-        { e: '🖥️', n: 'Pantalla abierta sin nadie', risk: true },
-        { e: '🔌', n: 'USB desconocida conectada', risk: true },
-        { e: '📄', n: 'Papeles con cédulas a la vista', risk: true },
-        { e: '🗄️', n: 'Gaveta con llave cerrada', risk: false },
-        { e: '🪴', n: 'Una planta', risk: false },
-        { e: '☕', n: 'Una taza de café', risk: false },
-        { e: '🗑️', n: 'Triturador de papel', risk: false }
-      ]);
-      box.innerHTML = `<h3>🖥️ Arregla el escritorio inseguro</h3><p>Toca los <b>4 riesgos</b> para corregirlos:</p>
+      // --- Candado 3: escritorio ---
+      p3(box) {
+        const items = U.shuffle([
+          { e: '📝', n: 'Nota adhesiva con una clave', risk: true },
+          { e: '🖥️', n: 'Pantalla abierta sin nadie', risk: true },
+          { e: '🔌', n: 'USB desconocida conectada', risk: true },
+          { e: '📄', n: 'Papeles con cédulas a la vista', risk: true },
+          { e: '🗄️', n: 'Gaveta con llave cerrada', risk: false },
+          { e: '🪴', n: 'Una planta', risk: false },
+          { e: '☕', n: 'Una taza de café', risk: false },
+          { e: '🗑️', n: 'Triturador de papel', risk: false }
+        ]);
+        box.innerHTML = `<h3>🖥️ Arregla el escritorio inseguro</h3><p>Toca los <b>4 riesgos</b> para corregirlos:</p>
         <div class="bov-desk">${items.map((it, i) => `<button class="bov-item" data-i="${i}"><span>${it.e}</span><small>${U.esc(it.n)}</small></button>`).join('')}</div>
         <div class="bov-count" id="bov-cnt">Riesgos corregidos: 0 / 4</div>`;
-      let fixed = 0;
-      box.querySelectorAll('.bov-item').forEach((b) => b.addEventListener('click', () => {
-        const it = items[parseInt(b.getAttribute('data-i'), 10)];
-        if (b.classList.contains('fixed')) return;
-        if (it.risk) {
-          b.classList.add('fixed'); fixed++; U.snd('click');
-          U.$('bov-cnt').textContent = `Riesgos corregidos: ${fixed} / 4`;
-          this.say(`✔ ${it.n}: corregido.`, 'ok');
-          if (fixed >= 4) setTimeout(() => this.solve(2), 500);
-        } else {
-          this.penalize(6, `"${it.n}" no es un riesgo.`);
-        }
-      }));
-    }
+        let fixed = 0;
+        box.querySelectorAll('.bov-item').forEach((b) => b.addEventListener('click', () => {
+          const it = items[parseInt(b.getAttribute('data-i'), 10)];
+          if (b.classList.contains('fixed')) return;
+          if (it.risk) {
+            b.classList.add('fixed'); fixed++; U.snd('click');
+            U.$('bov-cnt').textContent = `Riesgos corregidos: ${fixed} / 4`;
+            this.say(`✔ ${it.n}: corregido.`, 'ok');
+            if (fixed >= 4) setTimeout(() => this.solve(2), 500);
+          } else {
+            this.penalize(6, `"${it.n}" no es un riesgo.`);
+          }
+        }));
+      }
 
-    // --- Candado 4: orden de pasos ---
-    p4(box) {
-      const steps = ['Mantener la calma y no dar ningún dato', 'Colgar la llamada', 'Anotar número, hora y lo que pidieron', 'Reportar a Seguridad de la Información'];
-      const shuffled = U.shuffle(steps.map((s, i) => ({ s, i })));
-      box.innerHTML = `<h3>☎️ Llamada sospechosa: ¿en qué orden actúas?</h3><p>Una voz dice ser de "Soporte" y pide tu clave. Toca los pasos <b>en el orden correcto</b>:</p>
+      // --- Candado 4: orden de pasos ---
+      p4(box) {
+        const steps = ['Mantener la calma y no dar ningún dato', 'Colgar la llamada', 'Anotar número, hora y lo que pidieron', 'Reportar a Seguridad de la Información'];
+        const shuffled = U.shuffle(steps.map((s, i) => ({ s, i })));
+        box.innerHTML = `<h3>☎️ Llamada sospechosa: ¿en qué orden actúas?</h3><p>Una voz dice ser de "Soporte" y pide tu clave. Toca los pasos <b>en el orden correcto</b>:</p>
         <div class="bov-steps">${shuffled.map((o, k) => `<button class="bov-step" data-k="${k}"><span class="bov-step-n"></span>${U.esc(o.s)}</button>`).join('')}</div>`;
-      let next = 0;
-      const btns = [...box.querySelectorAll('.bov-step')];
-      btns.forEach((b) => b.addEventListener('click', () => {
-        const o = shuffled[parseInt(b.getAttribute('data-k'), 10)];
-        if (b.classList.contains('chosen')) return;
-        if (o.i === next) {
-          b.classList.add('chosen'); b.querySelector('.bov-step-n').textContent = next + 1; next++; U.snd('click');
-          if (next >= 4) setTimeout(() => this.solve(3), 500);
-        } else {
-          this.penalize(8, 'Ese no es el paso que sigue. Se reinicia el orden.');
-          btns.forEach((x) => { x.classList.remove('chosen'); x.querySelector('.bov-step-n').textContent = ''; });
-          next = 0;
-        }
-      }));
-    }
+        let next = 0;
+        const btns = [...box.querySelectorAll('.bov-step')];
+        btns.forEach((b) => b.addEventListener('click', () => {
+          const o = shuffled[parseInt(b.getAttribute('data-k'), 10)];
+          if (b.classList.contains('chosen')) return;
+          if (o.i === next) {
+            b.classList.add('chosen'); b.querySelector('.bov-step-n').textContent = next + 1; next++; U.snd('click');
+            if (next >= 4) setTimeout(() => this.solve(3), 500);
+          } else {
+            this.penalize(8, 'Ese no es el paso que sigue. Se reinicia el orden.');
+            btns.forEach((x) => { x.classList.remove('chosen'); x.querySelector('.bov-step-n').textContent = ''; });
+            next = 0;
+          }
+        }));
+      }
 
-    // --- Candado 5: pago urgente ---
-    p5(box) {
-      const opts = U.shuffle([
-        { t: 'Llamar al teléfono que ya teníamos guardado', ok: true },
-        { t: 'Pedir la doble firma de otra persona autorizada', ok: true },
-        { t: 'Responder al correo preguntando si es cierto', ok: false },
-        { t: 'Transferir primero y confirmar después', ok: false },
-        { t: 'Confiar porque la voz suena como la del jefe', ok: false }
-      ]);
-      box.innerHTML = `<h3>💸 Pago urgente "del jefe"</h3><p>Te piden una transferencia urgente y secreta. Marca las <b>2 acciones correctas</b> y confirma:</p>
+      // --- Candado 5: pago urgente ---
+      p5(box) {
+        const opts = U.shuffle([
+          { t: 'Llamar al teléfono que ya teníamos guardado', ok: true },
+          { t: 'Pedir la doble firma de otra persona autorizada', ok: true },
+          { t: 'Responder al correo preguntando si es cierto', ok: false },
+          { t: 'Transferir primero y confirmar después', ok: false },
+          { t: 'Confiar porque la voz suena como la del jefe', ok: false }
+        ]);
+        box.innerHTML = `<h3>💸 Pago urgente "del jefe"</h3><p>Te piden una transferencia urgente y secreta. Marca las <b>2 acciones correctas</b> y confirma:</p>
         <div class="bov-checks">${opts.map((o, i) => `<button class="bov-check" data-i="${i}"><span class="bov-box"></span>${U.esc(o.t)}</button>`).join('')}</div>
         <button class="btn btn-primary" id="bov-confirm" style="margin-top:0.6rem;">Confirmar</button>`;
-      const sel = new Set();
-      box.querySelectorAll('.bov-check').forEach((b) => b.addEventListener('click', () => {
-        const i = parseInt(b.getAttribute('data-i'), 10);
-        if (sel.has(i)) { sel.delete(i); b.classList.remove('on'); } else { sel.add(i); b.classList.add('on'); }
-        U.snd('click');
-      }));
-      U.$('bov-confirm').addEventListener('click', () => {
-        const chosen = [...sel];
-        if (chosen.length === 2 && chosen.every((i) => opts[i].ok)) this.solve(4);
-        else {
-          this.penalize(15, 'Esa combinación no verifica el pedido por otro canal. Intenta de nuevo.');
-          sel.clear(); box.querySelectorAll('.bov-check').forEach((b) => b.classList.remove('on'));
-        }
-      });
-    }
+        const sel = new Set();
+        box.querySelectorAll('.bov-check').forEach((b) => b.addEventListener('click', () => {
+          const i = parseInt(b.getAttribute('data-i'), 10);
+          if (sel.has(i)) { sel.delete(i); b.classList.remove('on'); } else { sel.add(i); b.classList.add('on'); }
+          U.snd('click');
+        }));
+        U.$('bov-confirm').addEventListener('click', () => {
+          const chosen = [...sel];
+          if (chosen.length === 2 && chosen.every((i) => opts[i].ok)) this.solve(4);
+          else {
+            this.penalize(15, 'Esa combinación no verifica el pedido por otro canal. Intenta de nuevo.');
+            sel.clear(); box.querySelectorAll('.bov-check').forEach((b) => b.classList.remove('on'));
+          }
+        });
+      }
 
-    renderFinal() {
-      const p = U.$('bov-panel');
-      if (!p || this.over) return;
-      p.innerHTML = `<h3>🔓 ¡Todos los candados abiertos!</h3>
+      renderFinal() {
+        const p = U.$('bov-panel');
+        if (!p || this.over) return;
+        p.innerHTML = `<h3>🔓 ¡Todos los candados abiertos!</h3>
         <p>Escribe el código de 5 dígitos que descubriste (míralo arriba) para abrir la puerta:</p>
         <div class="bov-keypad"><input id="bov-input" maxlength="5" inputmode="numeric" autocomplete="off" placeholder="_____"><button class="btn btn-primary" id="bov-open">🔓 Abrir bóveda</button></div>
         <div id="bov-msg" class="bov-msg"></div>`;
-      U.$('bov-open').addEventListener('click', () => {
-        const v = (U.$('bov-input').value || '').trim();
-        if (v === this.code.join('')) { this.opening = true; U.snd('complete'); this.burst(); p.innerHTML = '<h3>🔓 ¡La bóveda se abre!</h3><p>Mira cómo gira la puerta…</p>'; }
-        else this.penalize(10, 'Código incorrecto. Revisa los dígitos reunidos.');
-      });
-    }
+        U.$('bov-open').addEventListener('click', () => {
+          const v = (U.$('bov-input').value || '').trim();
+          if (v === this.code.join('')) { this.opening = true; U.snd('complete'); this.burst(); p.innerHTML = '<h3>🔓 ¡La bóveda se abre!</h3><p>Mira cómo gira la puerta…</p>'; }
+          else this.penalize(10, 'Código incorrecto. Revisa los dígitos reunidos.');
+        });
+      }
 
     async finish(win) {
-      if (this.finished) return;
-      this.finished = true;
-      this.playing = false;
-      if (this.raf) cancelAnimationFrame(this.raf);
-      const left = Math.round(this.timeLeft);
-      const solvedCount = this.solved.filter(Boolean).length;
-      const raw = win ? 120 + Math.round(left * 0.3) + (this.hints === 0 ? 20 : 0) : solvedCount * 20;
-      const awarded = await window.arcade.award(this.key, raw);
-      U.snd(win ? 'complete' : 'incorrect');
-      const mm = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
-      const root = window.arcade.root(this.key);
-      root.innerHTML = window.arcade.headerHTML('🔐 La Bóveda Digital — Resultado') + window.arcade.resultHTML({
-        emoji: win ? '🏆' : '⏰',
-        title: win ? '¡Bóveda abierta!' : 'Se acabó el tiempo',
-        subtitle: win ? 'Protegiste los datos de Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
-        subtitle: win ? 'Protegiste los datos de Corporación Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
-        stats: [['Tiempo restante', mm], ['Errores', this.mistakes], ['Pistas usadas', this.hints], ['Candados', `${this.solved.filter(Boolean).length}/5`]],
-        lessons: ['Usa claves largas y únicas con palabras, números y símbolos.', 'Revisa remitente, enlace y prisa antes de confiar en un correo.', 'Mantén el escritorio limpio y la pantalla bloqueada.', 'Ante una llamada sospechosa: no des datos, cuelga, anota y reporta.', 'Los pagos urgentes se verifican por otro canal y con doble firma.'],
-        awarded, win, retryJs: 'arcade.games.arcade_boveda.open()'
-      });
+        if (this.finished) return;
+        this.finished = true;
+        this.playing = false;
+        if (this.raf) cancelAnimationFrame(this.raf);
+        const left = Math.round(this.timeLeft);
+        const solvedCount = this.solved.filter(Boolean).length;
+        const raw = win ? 120 + Math.round(left * 0.3) + (this.hints === 0 ? 20 : 0) : solvedCount * 20;
+        const awarded = await window.arcade.award(this.key, raw);
+        U.snd(win ? 'complete' : 'incorrect');
+        const mm = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+        const root = window.arcade.root(this.key);
+        root.innerHTML = window.arcade.headerHTML('🔐 La Bóveda Digital — Resultado') + window.arcade.resultHTML({
+          emoji: win ? '🏆' : '⏰',
+          title: win ? '¡Bóveda abierta!' : 'Se acabó el tiempo',
+          subtitle: win ? 'Protegiste los datos de Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
+          subtitle: win ? 'Protegiste los datos de Corporación Suiche 7B resolviendo los 5 candados.' : 'La bóveda sigue cerrada. ¡Inténtalo de nuevo!',
+          stats: [['Tiempo restante', mm], ['Errores', this.mistakes], ['Pistas usadas', this.hints], ['Candados', `${this.solved.filter(Boolean).length}/5`]],
+          lessons: ['Usa claves largas y únicas con palabras, números y símbolos.', 'Revisa remitente, enlace y prisa antes de confiar en un correo.', 'Mantén el escritorio limpio y la pantalla bloqueada.', 'Ante una llamada sospechosa: no des datos, cuelga, anota y reporta.', 'Los pagos urgentes se verifican por otro canal y con doble firma.'],
+          awarded, win, retryJs: 'arcade.games.arcade_boveda.open()'
+        });
+      }
     }
-  }
 
   window.arcade.register('arcade_bandeja', new BandejaGame());
   window.arcade.register('arcade_cartas', new CartasGame());
