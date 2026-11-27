@@ -19,6 +19,9 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 # 4. Copiar código fuente de la aplicación con propietario no-root directamente
 COPY --chown=node:node . .
 
+# 5. Eliminar gestores de paquetes (npm/yarn/corepack) no necesarios en runtime (0 CVEs)
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /opt/yarn* /usr/local/lib/node_modules/corepack
+
 # 6. Ejecutar bajo usuario sin privilegios (Principio de Mínimo Privilegio - CIS Docker Benchmark)
 USER node
 
